@@ -3,9 +3,9 @@
 #include <sstream>
 #include <iostream>
 
-Client::Client(asio::io_context &io_context, const boost::asio::ip::address address, uint16_t port)
-    : io_context_ptr_(&io_context),
-      connection_(io_context),
+Client::Client(std::shared_ptr<asio::io_context> io_context_ptr, boost::asio::ip::address address, uint16_t port)
+    : io_context_ptr_(io_context_ptr),
+      connection_(io_context_ptr_),
       endpoint_(address, port),
       is_connected_(false)
 {
@@ -57,9 +57,11 @@ std::string Client::create_login_request() {
 void Client::on_async_connect(boost::system::error_code error) {
     if (error) {
         // handle error
+        std::cerr << "Failed to connect: " << error.value() << ' ' << error.message() << '\n';
         is_connected_ = false;
     } else {
         // successful connecting
+        std::cerr << "Successfull connection\n";
         is_connected_ = true;
     }
 }

@@ -8,13 +8,15 @@
 
 #include "IStreamConnection.h"
 
+#define LOCAL_ADDRESS "127.0.0.1"
+
 namespace asio = boost::asio;
 using tcp = asio::ip::tcp;
 
 class Client final : public std::enable_shared_from_this<Client>
 {
 public:
-    Client(asio::io_context &io_context, const boost::asio::ip::address address, uint16_t port);
+    Client(std::shared_ptr<asio::io_context> io_context_ptr, boost::asio::ip::address address, uint16_t port);
 
     /**
      * <p> Подключает клиента к серверу. </p>

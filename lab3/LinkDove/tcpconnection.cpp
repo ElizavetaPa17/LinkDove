@@ -1,5 +1,5 @@
 #include "tcpconnection.h"
 
-TCPConnection::TCPConnection(boost::asio::io_context &io_context)
-    : IStreamConnection(io_context)
+TCPConnection::TCPConnection(std::shared_ptr<boost::asio::io_context> io_context_ptr)
+    : IStreamConnection(io_context_ptr)
 {}

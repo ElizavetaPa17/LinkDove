@@ -3,6 +3,7 @@
 
 #include <boost/asio.hpp>
 #include <iostream>
+#include <memory>
 
 template <typename T>
 struct IStreamConnection {
@@ -14,8 +15,8 @@ public:
     std::ostream out_stream_;
     std::istream in_stream_;
 
-    IStreamConnection(boost::asio::io_context &io_context)
-        : socket_(io_context),
+    IStreamConnection(std::shared_ptr<boost::asio::io_context> io_context_ptr)
+        : socket_(*io_context_ptr),
           out_stream_(&buffer_),
           in_stream_(&buffer_)
     {}

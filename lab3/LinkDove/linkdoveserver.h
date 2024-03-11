@@ -25,7 +25,7 @@ public:
     void listen(uint16_t port);
 
 private:
-    asio::io_context io_context_;
+    std::shared_ptr<asio::io_context> io_context_ptr_;
     tcp::acceptor acceptor_;
     std::list<TCPConnection> connections_;
     using ConnectionIterator = std::list<TCPConnection>::iterator;
@@ -39,7 +39,7 @@ private:
     /**
      * <p> Обработчик нового соединения </p>
      * @brief handle_accept
-     * @param socket - Сокет, который пытается установить соединение.
+     * @param iterator - Итератор на сокет, который пытается установить соединение.
      * @param error - Параметр, содержащий ошибку в случае неудачной попытки соединения.
      */
     void handle_accept(ConnectionIterator iterator, boost::system::error_code error);
