@@ -15,7 +15,7 @@ Client::Client(std::shared_ptr<asio::io_context> io_context_ptr, boost::asio::ip
 // лучше io_context в отдельный класс вынести и там запустить его работу в отдельном потоке
 void Client::async_connect() {
     connection_.socket_.async_connect(endpoint_,
-                                      boost::bind(&Client::on_async_connect,
+                                      boost::bind(&Client::handle_async_connect,
                                                   shared_from_this(),
                                                   asio::placeholders::error));
 
@@ -23,16 +23,13 @@ void Client::async_connect() {
 }
 
 void Client::async_login() {
-    if (!is_connected_) {
-        return;
-    }
-
    connection_.out_stream_ << create_login_request();
-   /*asio::async_write(connection_.socket_, boost::asio::buffer(connection_.buffer_),
-                     boost::bind(&Client::on_async_connect,
+   std::cerr << connection_.buffer_.size();
+   asio::async_write(connection_.socket_, connection_.buffer_,
+                     boost::bind(&Client::handle_async_login,
                                  shared_from_this(),
                                  asio::placeholders::error,
-                                 asio::placeholders::bytes_transferred));*/
+                                 asio::placeholders::bytes_transferred));
 
    run_context();
 }
@@ -49,29 +46,30 @@ std::string Client::create_login_request() {
     str_stream << "LOGIN\n";
     str_stream << "Username: " << username_ << '\n'
                << "Email: "    << email_    << '\n'
-               << "Password: " << password_;
+               << "Password: " << password_ << END_OF_REQUEST;
 
     return str_stream.str();
 }
 
-void Client::on_async_connect(boost::system::error_code error) {
+void Client::handle_async_connect(boost::system::error_code error) {
     if (error) {
-        // handle error
         std::cerr << "Failed to connect: " << error.value() << ' ' << error.message() << '\n';
-        is_connected_ = false;
+        throw std::runtime_error("Cannot connect to the server");
     } else {
-        // successful connecting
-        std::cerr << "Successfull connection\n";
-        is_connected_ = true;
+        std::cout << "Successfull connection to the server.\n";
+        async_login();
     }
 }
 
-void Client::on_async_login(boost::system::error_code error, size_t bytes_transferred) {
+void Client::handle_async_login(boost::system::error_code error, size_t bytes_transferred) {
     if (error) {
-        // handle error
+        std::cerr << "Failed to send login request: " << error.value() << ' ' << error.message() << '\n';
+        throw std::runtime_error("Failed to send login request");
     }
 
-    std::cerr << "success" << std::endl;
+    if (bytes_transferred > 0) {
+        std::cout << "Send login request to the server. Transfer " << bytes_transferred << " bytes.\n";
+    }
 }
 
 void Client::run_context() {

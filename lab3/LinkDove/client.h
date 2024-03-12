@@ -9,6 +9,7 @@
 #include "IStreamConnection.h"
 
 #define LOCAL_ADDRESS "127.0.0.1"
+#define END_OF_REQUEST "\r\r\r\r\n"
 
 namespace asio = boost::asio;
 using tcp = asio::ip::tcp;
@@ -19,16 +20,10 @@ public:
     Client(std::shared_ptr<asio::io_context> io_context_ptr, boost::asio::ip::address address, uint16_t port);
 
     /**
-     * <p> Подключает клиента к серверу. </p>
+     * <p> Подключает клиента к серверу. Отправляет данные для авторизации. </p>
      * @brief connect
      */
     void async_connect();
-
-    /**
-     * <p> Осуществляет попытку авторизации пользователя. </p>
-     * @brief async_login
-     */
-    void async_login();
 
     /**
      * <p> Устанавливает данные о пользователе, которые отправляются при авторизации. </p>
@@ -53,6 +48,12 @@ private:
     void CreateAccount() {}
 
     /**
+     * <p> Осуществляет попытку авторизации пользователя. </p>
+     * @brief async_login
+     */
+    void async_login();
+
+    /**
      * Формирует запрос авторизации.
      * @brief create_login_request
      * @return - Строка запроса.
@@ -61,14 +62,14 @@ private:
 
     /**
      * <p> Обрабатывает попытку асинхронного подключения к серверу. </p>
-     * @brief on_async_connect
+     * @brief handle_async_connect
      */
-    void on_async_connect(boost::system::error_code error);
+    void handle_async_connect(boost::system::error_code error);
     /**
      * <p> Обрабатывает попытку авторизации. </p>
-     * @brief on_async_login
+     * @brief handle_async_login
      */
-    void on_async_login(boost::system::error_code error, size_t bytes_transferred);
+    void handle_async_login(boost::system::error_code error, size_t bytes_transferred);
 
     /** <p> Запускает в отдельном потоке контекст для обработки асинхронных функций. </p>
      * @brief run_context
