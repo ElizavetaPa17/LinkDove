@@ -5,13 +5,21 @@
 #include <iostream>
 #include <boost/asio/ip/tcp.hpp>
 
+#include <QSqlError>
+#include <QDebug>
+
 std::mutex emplace_mutex;
 
 LinkDoveServer::LinkDoveServer()
     : io_context_ptr_(std::make_shared<asio::io_context>())
     , acceptor_(*io_context_ptr_)
+    , data_base_("LinkDoveConnection")
 {
 
+}
+
+LinkDoveServer::~LinkDoveServer() {
+    acceptor_.close();
 }
 
 void LinkDoveServer::listen(uint16_t port) {

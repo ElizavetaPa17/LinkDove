@@ -1,11 +1,18 @@
+//#include "mainwindow.h"
+
+#include <QApplication>
+
+#include "linkdoveserver.h"
 #include <memory>
 #include <thread>
-#include "linkdoveserver.h"
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
+    QApplication a(argc, argv);
+
     std::shared_ptr<LinkDoveServer> server_ptr = std::make_shared<LinkDoveServer>();
-    server_ptr->listen(8000);
 
+    server_ptr->listen(8000);
     while(true) {
         std::this_thread::yield();
     }

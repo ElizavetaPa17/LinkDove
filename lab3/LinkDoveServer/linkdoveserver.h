@@ -6,9 +6,8 @@
 #include <boost/asio.hpp>
 #include <boost/bind/bind.hpp>
 
-#include <QtSql/QSqlDatabase>
-
 #include "tcpconnection.h"
+#include "linkdovesqldatabase.h"
 
 #define END_OF_REQUEST "\r\r\r\r\n"
 
@@ -19,6 +18,7 @@ class LinkDoveServer final : public std::enable_shared_from_this<LinkDoveServer>
 {
 public:
     LinkDoveServer();
+    ~LinkDoveServer();
 
     /**
      * <p> Подключает сервер к порту для прослушивания.</p>
@@ -34,8 +34,8 @@ private:
     std::shared_ptr<asio::io_context> io_context_ptr_;
     tcp::acceptor acceptor_;
     std::list<TCPConnection> connections_;
+    LinkDoveSQLDataBase data_base_;
 
-    QSqlDatabase data_base_;
     /**
      * <p> Начинает принимать соединения к порту, указанному при вызове функции listen. </p>
      * @brief start_async_accept
