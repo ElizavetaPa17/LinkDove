@@ -10,7 +10,7 @@ struct StatusInfo final {
     std::string email_;
     QDate       birthday_;
     std::string text_status_;
-    std::vector image_bytes_;
+    std::vector<char> image_bytes_;
 
     /**
      * <p> Сериализует текущее состояние объекта. </p>
@@ -19,6 +19,14 @@ struct StatusInfo final {
      * @return - Размер сериализованных данных объекта.
      */
     size_t serialize(std::ostream& os);
-}
+
+    /**
+     * <p> Десериализует объект из потока ввода. </p>
+     * @brief deserialize
+     * @param is - Поток ввода, из которого десериализуется объект.
+     * @return - Размер десериализованных данных объекта.
+     */
+    size_t deserialize(std::istream& is);
+};
 
 #endif // STATUSINFO_H

@@ -2,7 +2,7 @@
 #define LINKDOVESQLDATABASE_H
 
 #include <QtSql/QSqlDatabase>
-#include "StatusInfo.h"
+#include "UserInfo.h"
 
 class LinkDoveSQLDataBase
 {

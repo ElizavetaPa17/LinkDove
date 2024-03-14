@@ -2,6 +2,8 @@
 #define UTILITY_H
 
 #include <ostream>
+#include <vector>
+#include <utility>
 
 class Utility final
 {
@@ -18,6 +20,14 @@ public:
     static size_t serialize(std::ostream& os, const std::string& value);
 
     /**
+     * <p> Десериализует строку из потока. </p>
+     * @brief deserialize
+     * @param is - Поток, из которого осуществляется десериализация.
+     * @return - Пара - <размер десериализованных данных, десериализованная строка>.
+     */
+    static std::pair<size_t, std::string> deserialize_string(std::istream& is);
+
+    /**
      * <p> Сериализует вектор символов в поток. </p>
      * @brief serialize
      * @param os - Поток, в который осуществляется сериализация.
@@ -25,6 +35,14 @@ public:
      * @return - Размер сериализованных данных.
      */
     static size_t serialize(std::ostream &os, const std::vector<char>& value);
+
+    /**
+     * <p> Десериализует вектор символов из потока. </p>
+     * @brief deserialize
+     * @param is - Поток, из которого осуществляется десериализация.
+     * @return - Пара - <размер десериализованных данных, десериализованный вектор символов>.
+     */
+    static std::pair<size_t, std::vector<char>> deserialize_char_vec(std::istream& is);
 };
 
 #endif // UTILITY_H

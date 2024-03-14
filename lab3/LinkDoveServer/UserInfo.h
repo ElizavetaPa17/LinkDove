@@ -14,6 +14,14 @@ struct UserInfo final {
      * @return - Размер сериализованных данных объекта.
      */
     size_t serialize(std::ostream& os);
+
+    /**
+     * <p> Десериализует объект из потока ввода. </p>
+     * @brief deserialize
+     * @param is - Поток ввода, из которого десериализуется объект.
+     * @return - Размер десериализованных данных объекта.
+     */
+    size_t deserialize(std::istream& is);
 };
 
 #endif // USERINFO_H
