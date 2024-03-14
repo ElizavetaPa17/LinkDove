@@ -28,13 +28,17 @@ void LinkDoveSQLDataBase::setup() {
         exit(EXIT_FAILURE);
     }
 
-    setup_tables();
+    if (!setup_tables()) {
+        std::cerr << "An error occur while setting up the database.\n";
+        exit(EXIT_FAILURE);
+    }
 }
 
 bool LinkDoveSQLDataBase::setup_tables() {
     QSqlQuery query;
     bool is_ok = query.exec("CREATE TABLE IF NOT EXISTS USERS "
                             "( ID MEDIUMINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
+                            "  username VARCHAR(40 UNIQUE, "
                             "  email VARCHAR(256) UNIQUE, "
                             "  birthday DATE NOT NULL, "
                             "  text_status VARCHAR(256), "

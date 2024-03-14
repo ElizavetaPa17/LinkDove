@@ -2,6 +2,7 @@
 #define LINKDOVESQLDATABASE_H
 
 #include <QtSql/QSqlDatabase>
+#include "StatusInfo.h"
 
 class LinkDoveSQLDataBase
 {
@@ -17,6 +18,8 @@ private:
      * @brief setup
      */
     void setup();
+
+    void register_user(UserInfo info);
 
     /**
      * <p> Настраивает таблицы в БД. </p>
