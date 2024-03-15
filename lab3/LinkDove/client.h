@@ -35,6 +35,18 @@ public:
      */
     void setInfo(const std::string& username, const std::string& email_, const std::string& password);
 
+    /**
+     * <p> Осуществляет попытку авторизации пользователя. </p>
+     * @brief async_login
+     */
+    void async_login();
+
+    /**
+     * <p> Осуществляет попытку регистрации пользователя. </p>
+     * @brief async_register
+     */
+    void async_register();
+
 private:
     std::shared_ptr<asio::io_context> io_context_ptr_;
     IStreamConnection<tcp> connection_;
@@ -48,28 +60,36 @@ private:
     void CreateAccount() {}
 
     /**
-     * <p> Осуществляет попытку авторизации пользователя. </p>
-     * @brief async_login
-     */
-    void async_login();
-
-    /**
-     * Формирует запрос авторизации.
+     * <p> Формирует запрос авторизации. </p>
      * @brief create_login_request
      * @return - Строка запроса.
      */
     std::string create_login_request();
 
     /**
+     * <p> Формирует запрос регистрации. </p>
+     * @brief create_register_request
+     * @return - Строка запроса.
+     */
+    std::string create_register_request();
+
+    /**
      * <p> Обрабатывает попытку асинхронного подключения к серверу. </p>
      * @brief handle_async_connect
      */
     void handle_async_connect(boost::system::error_code error);
+
     /**
      * <p> Обрабатывает попытку авторизации. </p>
      * @brief handle_async_login
      */
     void handle_async_login(boost::system::error_code error, size_t bytes_transferred);
+
+    /**
+     * <p> Обрабатывает попытку регистрации. </p>
+     * @brief handle_async_login
+     */
+    void handle_async_register(boost::system::error_code error, size_t bytes_transferred);
 
     /** <p> Запускает в отдельном потоке контекст для обработки асинхронных функций. </p>
      * @brief run_context

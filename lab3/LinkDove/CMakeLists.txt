@@ -18,15 +18,19 @@ set(PROJECT_SOURCES
         mainwindow.cpp
         mainwindow.h
         mainwindow.ui
+        client.h client.cpp
 )
+
+set(COMMON_SOURCE_PATH ${CMAKE_SOURCE_DIR}/../common_source)
+
+include_directories(${COMMON_SOURCE_PATH})
+link_directories(${COMMON_SOURCE_PATH})
+add_subdirectory(${COMMON_SOURCE_PATH} build)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(LinkDove
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        IStreamConnection.h
-        tcpconnection.h tcpconnection.cpp
-        client.h client.cpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET LinkDove APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -47,7 +51,8 @@ else()
 endif()
 
 target_link_libraries(LinkDove PRIVATE Qt6::Sql)
-target_link_libraries(LinkDove PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(LinkDove PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
+                               common_library)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an

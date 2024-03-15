@@ -14,21 +14,20 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Sql Widgets)
 
 set(PROJECT_SOURCES
     main.cpp
-    linkdoveserver.h
-    linkdoveserver.cpp
-    IStreamConnection.h
-    tcpconnection.h
-    tcpconnection.cpp
+    linkdoveserver.h      linkdoveserver.cpp
+    linkdovesqldatabase.h linkdovesqldatabase.cpp
 )
+
+set(COMMON_SOURCE_PATH ${CMAKE_SOURCE_DIR}/../common_source)
+
+include_directories(${COMMON_SOURCE_PATH})
+link_directories(${COMMON_SOURCE_PATH})
+add_subdirectory(${COMMON_SOURCE_PATH} build)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(LinkDoveServer
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        linkdovesqldatabase.h linkdovesqldatabase.cpp
-        StatusInfo.h          StatusInfo.cpp
-        UserInfo.h            UserInfo.cpp
-        utility.h             utility.cpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET LinkDoveServer APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -48,7 +47,8 @@ else()
     endif()
 endif()
 
-target_link_libraries(LinkDoveServer PRIVATE Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(LinkDoveServer PRIVATE Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Widgets
+                                     common_library)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an

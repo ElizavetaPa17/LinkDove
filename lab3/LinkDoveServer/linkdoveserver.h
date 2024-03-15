@@ -61,7 +61,7 @@ private:
      * <p> Обработчик чтения из сокета клиента. </p>
      * @brief handle_async_read
      * @param iterator - Итератор на сокет, из которого производится чтение.
-     * @param error - Парааметр, содержащий ошибку в случае неудачного чтения из сокета.
+     * @param error - Параметр, содержащий ошибку в случае неудачного чтения из сокета.
      * @param bytes_transfered - Количество переданных байтов.
      */
     void handle_async_read(ConnectionIterator iterator, boost::system::error_code error, size_t bytes_transfered);
@@ -71,6 +71,26 @@ private:
      */
     void run_context();
 
+    /**
+     * <p> Обрабатывает запрос клиента. Выводит тип запроса и вызывает специализированный обработчик. </p>
+     * @brief handle_request
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_type_request(ConnectionIterator iterator);
+
+    /**
+     * <p> Обрабатывает запрос клиента на авторизацию. </p>
+     * @brief handle_login_request
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_login_request(ConnectionIterator iterator);
+
+    /**
+     * <p> Обрабатывает запрос клиента на регистрацию. </p>
+     * @brief handle_register_request
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_register_request(ConnectionIterator iterator);
 };
 
 #endif // LINKDOVESERVER_H

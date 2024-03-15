@@ -8,12 +8,16 @@
 #include <QSqlError>
 #include <QDebug>
 
+#include "UserInfo.h"
+
 std::mutex emplace_mutex;
+
+#define DATABASE_CONNECTION_NAME "LinkDoveConnection"
 
 LinkDoveServer::LinkDoveServer()
     : io_context_ptr_(std::make_shared<asio::io_context>())
     , acceptor_(*io_context_ptr_)
-    , data_base_("LinkDoveConnection")
+    , data_base_(DATABASE_CONNECTION_NAME)
 {
 
 }
@@ -77,11 +81,7 @@ void LinkDoveServer::handle_async_read(ConnectionIterator iterator, boost::syste
     }
 
     if (bytes_transfered > 0) {
-        std::string str;
-
-        while (std::getline(iterator->in_stream_, str)) {
-            std::cout << "Receive input from the client: " << str << '\n';
-        }
+        handle_type_request(iterator);
     }
 }
 
@@ -91,4 +91,31 @@ void LinkDoveServer::run_context() {
     });
 
     t.detach();
+}
+
+void LinkDoveServer::handle_type_request(ConnectionIterator iterator) {
+    std::string request_type;
+    iterator->in_stream_ >> request_type;
+
+    if (request_type == "LOGIN") {
+        handle_login_request(iterator);
+    } else if (request_type == "REGISTER") {
+        handle_register_request(iterator);
+    }
+}
+
+void LinkDoveServer::handle_login_request(ConnectionIterator iterator) {
+    UserInfo user_info;
+    user_info.deserialize(iterator->in_stream_);
+}
+
+void LinkDoveServer::handle_register_request(ConnectionIterator iterator) {
+    UserInfo user_info;
+    user_info.deserialize(iterator->in_stream_);
+
+    if (data_base_.register_user(user_info)) {
+        std::cerr << "Success user registration!\n";
+    } else {
+        std::cerr << "Failed to register the user\n";
+    }
 }
