@@ -44,7 +44,7 @@ bool LinkDoveSQLDataBase::setup_tables() {
                             "  birthday DATE NOT NULL, "
                             "  text_status VARCHAR(256), "
                             "  image MEDIUMBLOB, "
-                            "  is_banned TINYINT DEFAULT 0) ");
+                            "  is_banned TINYINT DEFAULT 0); ");
 
     if (!is_ok) {
         std::cerr << "Failed to setup USERS table: " << query.lastError().text().toStdString() << '\n';
@@ -57,7 +57,10 @@ bool LinkDoveSQLDataBase::setup_tables() {
 bool LinkDoveSQLDataBase::register_user(UserInfo info) {
     QSqlQuery query(data_base_);
     query.prepare("INSERT INTO USERS (username, email, birthday, text_status, image, is_banned) "
-                  "VALUES (:username, :email, :birthday, :text_status, :image, :is_banned)");
+                  "VALUES (:username, :email, :birthday, :text_status, :image, :is_banned); "
+                  // Выполняем данную инструкцию, чтобы определить, успешна ли вставка строки:
+                  // Если возвращаемое значение -1, то произошла ошибка вставки, если больше нуля - все успешно.
+                  "SELECT ROW_COUT(); ");
 
     query.bindValue(":username",    info.status_info_.username_.c_str());
     query.bindValue(":email",       info.status_info_.email_.c_str());
@@ -65,13 +68,16 @@ bool LinkDoveSQLDataBase::register_user(UserInfo info) {
     query.bindValue(":text_status", info.status_info_.text_status_.c_str());
     query.bindValue(":is_banned",   0); // при создании пользователя его аккаунт не блокируется
 
-    std::cerr << '\n' << info.status_info_.birthday_.isValid() << std::endl;
-
     if (query.exec()) {
         std::cerr << query.lastError().text().toStdString();
         return false;
     } else {
-        std::cerr << query.lastError().text().toStdString();
-        return true;
+        if (query.next()) {
+            if (query.value("ROW_COUNT").toInt() < 0) {
+                return false;
+            } else {
+                return true;
+            }
+        }
     }
 }
