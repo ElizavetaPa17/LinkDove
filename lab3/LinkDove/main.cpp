@@ -3,6 +3,8 @@
 //#include <QApplication>
 
 #include "client.h"
+#include "UserInfo.h"
+
 #include <memory>
 #include <boost/asio.hpp>
 

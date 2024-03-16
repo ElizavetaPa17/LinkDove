@@ -60,6 +60,7 @@ void LinkDoveServer::async_read(ConnectionIterator iterator) {
                                        iterator,
                                        asio::placeholders::error(),
                                        asio::placeholders::bytes_transferred()));
+    run_context();
 }
 
 void LinkDoveServer::handle_async_accept(ConnectionIterator iterator, boost::system::error_code error) {
@@ -95,7 +96,7 @@ void LinkDoveServer::run_context() {
 
 void LinkDoveServer::handle_type_request(ConnectionIterator iterator) {
     std::string request_type;
-    iterator->in_stream_ >> request_type;
+    std::getline(iterator->in_stream_, request_type);
 
     if (request_type == "LOGIN") {
         handle_login_request(iterator);

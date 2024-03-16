@@ -2,8 +2,9 @@
 
 #include "utility.h"
 #include <QString>
+#include <iostream>
 
-#define BIRTHAY_FORMAT "d:M:yyyy"
+#define BIRTHAY_FORMAT "yyyy-MM-dd"
 
 size_t StatusInfo::serialize(std::ostream &os) {
     size_t size = 0;
@@ -31,7 +32,7 @@ size_t StatusInfo::deserialize(std::istream &is) {
 
     temp_str_pair = Utility::deserialize_string(is);
     size += temp_str_pair.first;
-    birthday_.fromString(QString(temp_str_pair.second.c_str()), BIRTHAY_FORMAT);
+    birthday_ = QDate::fromString(QString(temp_str_pair.second.c_str()), BIRTHAY_FORMAT);
 
     temp_str_pair = Utility::deserialize_string(is);
     size += temp_str_pair.first;

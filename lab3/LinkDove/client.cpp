@@ -68,7 +68,7 @@ std::string Client::create_register_request() {
     UserInfo user_info;
     user_info.status_info_.username_ = "John";
     user_info.status_info_.email_ = "john@gmail.com";
-    user_info.status_info_.birthday_ = QDate(2012, 10, 01);
+    user_info.status_info_.birthday_ = QDate(2012, 10, 1);
     user_info.status_info_.image_bytes_ = std::vector<char>(100, '2');
     user_info.password_ = "oqd";
 

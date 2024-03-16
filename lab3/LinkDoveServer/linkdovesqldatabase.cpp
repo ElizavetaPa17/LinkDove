@@ -61,17 +61,17 @@ bool LinkDoveSQLDataBase::register_user(UserInfo info) {
 
     query.bindValue(":username",    info.status_info_.username_.c_str());
     query.bindValue(":email",       info.status_info_.email_.c_str());
-    query.bindValue(":birthday",    info.status_info_.birthday_.toString("d:M:yyyy"));
+    query.bindValue(":birthday",    info.status_info_.birthday_.toString("yyyy-MM-dd"));
     query.bindValue(":text_status", info.status_info_.text_status_.c_str());
     query.bindValue(":is_banned",   0); // при создании пользователя его аккаунт не блокируется
 
     std::cerr << '\n' << info.status_info_.birthday_.isValid() << std::endl;
 
     if (query.exec()) {
-        //std::cerr << query.lastError().text().toStdString();
+        std::cerr << query.lastError().text().toStdString();
         return false;
     } else {
-        //std::cerr << query.lastError().text().toStdString();
+        std::cerr << query.lastError().text().toStdString();
         return true;
     }
 }

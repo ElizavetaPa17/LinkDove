@@ -13,7 +13,7 @@ size_t Utility::serialize(std::ostream& os, const std::string& value) {
 
     // Приводим к типу uint32_t, т.к. на разных машинах размер машинного слова отличается,
     // что может привести к проблемам.
-    const auto len = static_cast<uint32_t>(value.size());
+    const uint32_t len = static_cast<uint32_t>(value.size());
 
     // Сериализуем сначала размер строки, а потом саму строку.
     os.write(reinterpret_cast<const char*>(&len), sizeof(len));
@@ -29,6 +29,7 @@ std::pair<size_t, std::string> Utility::deserialize_string(std::istream& is) {
     uint32_t len = 0; // Размер сериализованной строки был записан в формате uint32_t
 
     is.read(reinterpret_cast<char*>(&len), sizeof(len));
+
     if (len > 0) {
         str.resize(len);
         is.read(str.data(), len);
