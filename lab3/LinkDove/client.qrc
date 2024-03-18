@@ -1,0 +1,6 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource prefix="/resources">
+    <file alias="welcome_background.png">../resources/background.png</file>
+    <file alias="welcome_label.png">../resources/label_with_text.png</file>
+</qresource>
+</RCC>

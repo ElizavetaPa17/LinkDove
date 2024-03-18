@@ -5,6 +5,7 @@
 #include <QDate>
 
 #include "UserInfo.h"
+#include "logininfo.h"
 
 Client::Client(std::shared_ptr<asio::io_context> io_context_ptr, boost::asio::ip::address address, uint16_t port)
     : io_context_ptr_(io_context_ptr),
@@ -55,20 +56,27 @@ void Client::setInfo(const std::string &username, const std::string &email, cons
 
 std::string Client::create_login_request() {
     std::stringstream str_stream;
+    str_stream << "LOGIN\n";
 
+    LoginInfo login_info;
+    login_info.username_ = "Johnik";
+    login_info.email_    = "john@gmail.com";
+    login_info.password_ = "oqd";
+
+    login_info.serialize(str_stream);
+    str_stream << END_OF_REQUEST;
 
     return str_stream.str();
 }
 
 std::string Client::create_register_request() {
     std::stringstream str_stream;
-
     str_stream << "REGISTER\n";
 
     UserInfo user_info;
-    user_info.status_info_.username_ = "John";
-    user_info.status_info_.email_ = "john@gmail.com";
-    user_info.status_info_.birthday_ = QDate(2012, 10, 1);
+    user_info.status_info_.username_    = "John";
+    user_info.status_info_.email_       = "john@gmail.com";
+    user_info.status_info_.birthday_    = QDate(2012, 10, 1);
     user_info.status_info_.image_bytes_ = std::vector<char>(100, '2');
     user_info.password_ = "oqd";
 

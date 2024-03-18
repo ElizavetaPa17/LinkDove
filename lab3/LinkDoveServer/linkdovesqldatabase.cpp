@@ -39,8 +39,9 @@ bool LinkDoveSQLDataBase::setup_tables() {
     QSqlQuery query(data_base_);
     bool is_ok = query.exec("CREATE TABLE IF NOT EXISTS USERS "
                             "( ID MEDIUMINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
-                            "  username VARCHAR(40) UNIQUE, "
-                            "  email VARCHAR(256) UNIQUE, "
+                            "  username VARCHAR(40) UNIQUE NOT NULL, "
+                            "  email VARCHAR(256) UNIQUE NOT NULL, "
+                            "  password VARCHAR(40) NOT NULL, "
                             "  birthday DATE NOT NULL, "
                             "  text_status VARCHAR(256), "
                             "  image MEDIUMBLOB, "
@@ -56,14 +57,15 @@ bool LinkDoveSQLDataBase::setup_tables() {
 
 bool LinkDoveSQLDataBase::register_user(UserInfo info) {
     QSqlQuery query(data_base_);
-    query.prepare("INSERT INTO USERS (username, email, birthday, text_status, image, is_banned) "
-                  "VALUES (:username, :email, :birthday, :text_status, :image, :is_banned); "
+    query.prepare("INSERT INTO USERS (username, email, password, birthday, text_status, image, is_banned) "
+                  "VALUES (:username, :email, :password, :birthday, :text_status, :image, :is_banned); "
                   // Выполняем данную инструкцию, чтобы определить, успешна ли вставка строки:
                   // Если возвращаемое значение -1, то произошла ошибка вставки, если больше нуля - все успешно.
-                  "SELECT ROW_COUT(); ");
+                  "SELECT ROW_COUT()");
 
     query.bindValue(":username",    info.status_info_.username_.c_str());
     query.bindValue(":email",       info.status_info_.email_.c_str());
+    query.bindValue(":password",    info.password_.c_str());
     query.bindValue(":birthday",    info.status_info_.birthday_.toString("yyyy-MM-dd"));
     query.bindValue(":text_status", info.status_info_.text_status_.c_str());
     query.bindValue(":is_banned",   0); // при создании пользователя его аккаунт не блокируется
@@ -78,6 +80,29 @@ bool LinkDoveSQLDataBase::register_user(UserInfo info) {
             } else {
                 return true;
             }
+        }
+    }
+}
+
+bool LinkDoveSQLDataBase::login_user(LoginInfo info) {
+    QSqlQuery query(data_base_);
+    query.prepare("SELECT * FROM USERS "
+                  "WHERE "
+                 "username = :username AND email = :email AND password = :password");
+
+    query.bindValue(":username", info.username_.c_str());
+    query.bindValue(":email",    info.email_.c_str());
+    query.bindValue(":password", info.password_.c_str());
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString();
+        return false;
+    } else {
+        std::cerr << query.isValid() << '\n';
+        if (query.next()) {
+            return true;
+        } else {
+            return false;
         }
     }
 }

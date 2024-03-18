@@ -106,8 +106,14 @@ void LinkDoveServer::handle_type_request(ConnectionIterator iterator) {
 }
 
 void LinkDoveServer::handle_login_request(ConnectionIterator iterator) {
-    UserInfo user_info;
-    user_info.deserialize(iterator->in_stream_);
+    LoginInfo login_info;
+    login_info.deserialize(iterator->in_stream_);
+
+    if (data_base_.login_user(login_info)) {
+        std::cerr << "User exists\n";
+    } else {
+        std::cerr << "User does not exist\n";
+    }
 }
 
 void LinkDoveServer::handle_register_request(ConnectionIterator iterator) {

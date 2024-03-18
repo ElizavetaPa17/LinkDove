@@ -14,14 +14,11 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Sql Widgets)
 
 set(LIB_FILES
     IStreamConnection.h
-    StatusInfo.cpp
-    StatusInfo.h
-    tcpconnection.cpp
-    tcpconnection.h
-    UserInfo.cpp
-    UserInfo.h
-    utility.cpp
-    utility.h)
+    StatusInfo.h    StatusInfo.cpp
+    tcpconnection.h tcpconnection.cpp
+    UserInfo.h      UserInfo.cpp
+    utility.h       utility.cpp
+    logininfo.h     logininfo.cpp)
 
 add_library(common_library ${LIB_FILES})
 target_link_libraries(common_library PRIVATE Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Widgets)

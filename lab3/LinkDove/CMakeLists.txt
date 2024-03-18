@@ -18,12 +18,16 @@ set(PROJECT_SOURCES
         mainwindow.cpp
         mainwindow.h
         mainwindow.ui
-        client.h client.cpp
+        client.h client.cpp client.qrc
+        welcomewidget.h welcomewidget.cpp
+        transparentlabel.h transparentlabel.cpp
 )
 
 set(COMMON_SOURCE_PATH ${CMAKE_SOURCE_DIR}/../common_source)
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${COMMON_SOURCE_PATH})
+
 link_directories(${COMMON_SOURCE_PATH})
 add_subdirectory(${COMMON_SOURCE_PATH} build)
 
