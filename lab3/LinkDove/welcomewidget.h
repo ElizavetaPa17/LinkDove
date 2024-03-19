@@ -22,14 +22,17 @@ public slots:
     void slotEnableMousePress();
 
 signals:
-    void passWelcomePage();
+    /**
+     * <p> Отправляет сигнал после того, как пользователь нажмет на экран после отработки анимации. </p>
+     * @brief passWelcomePage
+     * @param page_index - Индекс страницы, на которую переключается приложение
+     */
+    void passWelcomePage(int page_index);
 
 protected:
     // Перегрузка функции для добавления возможности блокировки обработки
     // события нажатия кнопки мыши на экран, пока анимация не закончится.
     void mousePressEvent(QMouseEvent *event) override;
-
-    void paintEvent(QPaintEvent *event) override;
 
 private:
     TransparentLabel *welcomeLabel_ = nullptr;

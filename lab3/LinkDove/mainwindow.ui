@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>915</width>
-    <height>448</height>
+    <width>660</width>
+    <height>397</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,8 +17,13 @@
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
      <widget class="QStackedWidget" name="mainStackedWidget">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
       <widget class="WelcomeWidget" name="pageWelcome"/>
-      <widget class="QWidget" name="page_2"/>
+      <widget class="LoginWidget" name="pageLogin"/>
+      <widget class="QWidget" name="pageRegister"/>
+      <widget class="QWidget" name="pageMain"/>
      </widget>
     </item>
    </layout>
@@ -28,7 +33,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>915</width>
+     <width>660</width>
      <height>26</height>
     </rect>
    </property>
@@ -40,6 +45,12 @@
    <class>WelcomeWidget</class>
    <extends>QWidget</extends>
    <header>welcomewidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>LoginWidget</class>
+   <extends>QWidget</extends>
+   <header>loginwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -13,6 +13,7 @@ find_package(QT NAMES Qt6 Qt REQUIRED COMPONENTS Sql Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Sql Widgets)
 
 set(LIB_FILES
+    constants.h
     IStreamConnection.h
     StatusInfo.h    StatusInfo.cpp
     tcpconnection.h tcpconnection.cpp

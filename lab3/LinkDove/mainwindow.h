@@ -15,7 +15,17 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+public slots:
+    void slotSwitchToPage(int index_page);
+
 private:
     Ui::MainWindow *ui;
+
+    /**
+     * <p> Настраивает соединения с главным виджетом. </p>
+     * @brief setupConnection
+     */
+    void setupConnection();
+
 };
 #endif // MAINWINDOW_H

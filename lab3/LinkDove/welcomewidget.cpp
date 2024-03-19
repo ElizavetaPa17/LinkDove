@@ -8,11 +8,11 @@
 
 #include <iostream>
 
+#include "constants.h"
+
 WelcomeWidget::WelcomeWidget(QWidget *parent, Qt::WindowFlags flags)
     : QWidget(parent, flags)
 {
-    setStyleSheet("background-image: url(:/resources/welcome_background.png);");
-
     QPixmap labelPixmap;
     labelPixmap.fill(Qt::transparent);
     labelPixmap.load(":/resources/welcome_label.png");
@@ -29,7 +29,7 @@ WelcomeWidget::WelcomeWidget(QWidget *parent, Qt::WindowFlags flags)
     QPropertyAnimation *animation = new QPropertyAnimation(welcomeLabel_, "p_opacity_", welcomeLabel_);
 
     connect(animation, &QPropertyAnimation::finished, this, &WelcomeWidget::slotEnableMousePress);
-    animation->setDuration(3000);
+    animation->setDuration(10/*3000*/);
     animation->setStartValue(0);
     animation->setEndValue(1);
     animation->start();
@@ -38,15 +38,8 @@ WelcomeWidget::WelcomeWidget(QWidget *parent, Qt::WindowFlags flags)
 void WelcomeWidget::mousePressEvent(QMouseEvent *event) {
     if (!is_press_blocked_) {
         QWidget::mousePressEvent(event);
-        emit passWelcomePage();
+        emit passWelcomePage(LOGIN_PAGE);
     }
-}
-
-void WelcomeWidget::paintEvent(QPaintEvent *event) {
-    QStyleOption opt;
-    opt.initFrom(this);
-    QPainter p(this);
-    style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 }
 
 void WelcomeWidget::slotEnableMousePress() {

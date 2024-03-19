@@ -1,0 +1,17 @@
+#include "clickablelabel.h"
+
+ClickableLabel::ClickableLabel(QWidget *parent, Qt::WindowFlags flags)
+    : QLabel(parent, flags)
+{
+
+}
+
+ClickableLabel::ClickableLabel(const QString& text, QWidget *parent, Qt::WindowFlags flags)
+    : QLabel(parent, flags)
+{
+
+}
+
+void ClickableLabel::mousePressEvent(QMouseEvent *ev) {
+    emit clicked();
+}
