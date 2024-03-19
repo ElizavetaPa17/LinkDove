@@ -23,6 +23,7 @@ set(PROJECT_SOURCES
         transparentlabel.h transparentlabel.cpp
         loginwidget.h loginwidget.cpp loginwidget.ui
         clickablelabel.h clickablelabel.cpp
+        registrationwidget.h registrationwidget.cpp registrationwidget.ui
 )
 
 set(COMMON_SOURCE_PATH ${CMAKE_SOURCE_DIR}/../common_source)

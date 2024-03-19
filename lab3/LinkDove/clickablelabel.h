@@ -21,7 +21,7 @@ signals:
 
 protected:
     // Перегрузка функции с целью генерации сигнала clicked.
-    void mousePressEvent(QMouseEvent *ev) override;
+    void mousePressEvent(QMouseEvent *event) override;
 };
 
 #endif // CLICKABLELABEL_H

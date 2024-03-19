@@ -18,11 +18,11 @@
     <item row="0" column="0">
      <widget class="QStackedWidget" name="mainStackedWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="WelcomeWidget" name="pageWelcome"/>
       <widget class="LoginWidget" name="pageLogin"/>
-      <widget class="QWidget" name="pageRegister"/>
+      <widget class="RegistrationWidget" name="pageRegister"/>
       <widget class="QWidget" name="pageMain"/>
      </widget>
     </item>
@@ -51,6 +51,12 @@
    <class>LoginWidget</class>
    <extends>QWidget</extends>
    <header>loginwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>RegistrationWidget</class>
+   <extends>QWidget</extends>
+   <header>registrationwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

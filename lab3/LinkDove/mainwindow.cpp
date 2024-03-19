@@ -25,6 +25,7 @@ void MainWindow::slotSwitchToPage(int index_page) {
 }
 
 void MainWindow::setupConnection() {
-    connect(ui->pageWelcome, &WelcomeWidget::passWelcomePage, this, &MainWindow::slotSwitchToPage);
-    connect(ui->pageLogin,   &LoginWidget::passLoginWidget,   this, &MainWindow::slotSwitchToPage);
+    connect(ui->pageWelcome,  &WelcomeWidget::passWelcomePage, this, &MainWindow::slotSwitchToPage);
+    connect(ui->pageLogin,    &LoginWidget::passLoginWidget,   this, &MainWindow::slotSwitchToPage);
+    connect(ui->pageRegister, &RegistrationWidget::passRegistrationWidget, this, &MainWindow::slotSwitchToPage);
 }

@@ -22,7 +22,7 @@ signals:
     /**
      * <p> Отправляет сигнал после того, как пользователь пройдет авторизацию (логин-форму).
      * Может переключаться либо на главную страницу MAIN_PAGE, либо на страницу регистрации. </p>
-     * @brief passLoginPage
+     * @brief passLoginWidget
      * @param page_index - Индекс страницы, на которую переключается приложение
      */
     void passLoginWidget(int page_index);

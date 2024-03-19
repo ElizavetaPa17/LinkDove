@@ -3,6 +3,7 @@
 
 #include <QMessageBox>
 
+#include "clickablelabel.h"
 #include "constants.h"
 
 LoginWidget::LoginWidget(QWidget *parent) :
@@ -36,5 +37,5 @@ void LoginWidget::slotSwitchToRegister() {
 
 void LoginWidget::setupConnection() {
     connect(ui->loginButton,   &QPushButton::clicked,    this, &LoginWidget::slotCheckInput);
-    connect(ui->registerLabel, &ClickableLabel::clicked, this, &LoginWidget::slotSwitchToRegister);
+    connect(ui->registerLabel, &ClickableLabel::clicked,    this, &LoginWidget::slotSwitchToRegister);
 }
