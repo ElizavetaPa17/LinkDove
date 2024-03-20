@@ -54,6 +54,10 @@ void Client::setInfo(const std::string &username, const std::string &email, cons
     password_ = password;
 }
 
+bool Client::isConnected() {
+    return is_connected_;
+}
+
 std::string Client::create_login_request() {
     std::stringstream str_stream;
     str_stream << "LOGIN\n";
@@ -91,9 +95,12 @@ std::string Client::create_register_request() {
 void Client::handle_async_connect(boost::system::error_code error) {
     if (error) {
         std::cerr << "Failed to connect: " << error.value() << ' ' << error.message() << '\n';
+
+        is_connected_ = false;
         throw std::runtime_error("Cannot connect to the server");
     } else {
-        std::cerr << "Successfull connection to the server.\n";
+        is_connected_ = true;
+        std::cout << "Successfull connection to the server.\n";
     }
 }
 

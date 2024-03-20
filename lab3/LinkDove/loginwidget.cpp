@@ -20,6 +20,15 @@ LoginWidget::~LoginWidget()
     delete ui;
 }
 
+std::vector<std::string> LoginWidget::getLoginRequest() {
+    std::vector<std::string> login_form_values(3);
+    login_form_values[0] = ui->usernameEdit->text().toStdString();
+    login_form_values[1] = ui->emailEdit->text().toStdString();
+    login_form_values[2] = ui->passwordEdit->text().toStdString();
+
+    return login_form_values;
+}
+
 void LoginWidget::slotCheckInput() {
     if (ui->usernameEdit->text().isEmpty() ||
         ui->emailEdit->text().isEmpty()    ||

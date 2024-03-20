@@ -3,8 +3,6 @@
 
 #include <iostream>
 
-#include "constants.h"
-
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -14,6 +12,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     setupConnection();
     setStyleSheet(" QMainWindow { background-image: url(:/resources/welcome_background.png); }");
+
+    client_ptr->async_connect();
 }
 
 MainWindow::~MainWindow() {

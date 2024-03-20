@@ -50,6 +50,20 @@ private:
     void async_read(ConnectionIterator iterator);
 
     /**
+     * <p> Асинхронно отправляет ответы клиентам. </p>
+     * @brief async_write
+     * @param iterator - Итератор на сокет, которому отправляется ответ.
+     */
+    void async_write(ConnectionIterator iterator);
+
+    /**
+     * <p> Асинхронно отправляет ответ закрытия соединения клиенту. </p>
+     * @brief async_close_write
+     * @param iterator - Итератор на сокет, которому отправляется ответ.
+     */
+    void async_close_write(ConnectionIterator iterator);
+
+    /**
      * <p> Обработчик нового соединения. </p>
      * @brief handle_async_accept
      * @param iterator - Итератор на сокет, который пытается установить соединение.
@@ -62,14 +76,27 @@ private:
      * @brief handle_async_read
      * @param iterator - Итератор на сокет, из которого производится чтение.
      * @param error - Параметр, содержащий ошибку в случае неудачного чтения из сокета.
-     * @param bytes_transfered - Количество переданных байтов.
+     * @param bytes_transfered - Количество прочитанных байтов.
      */
     void handle_async_read(ConnectionIterator iterator, boost::system::error_code error, size_t bytes_transfered);
 
-    /** <p> Запускает в отдельном потоке контекст для обработки асинхронных функций. </p>
-     * @brief run_context
+    /**
+     * <p> Обработчик записи в сокет клиента. </p>
+     * @brief handle_async_write
+     * @param iterator - Итератор на сокет, к который производится запись.
+     * @param error - Параметр, содержащий ошибку в случае неудачной записи в сокет.
+     * @param bytes_transfered - Количество записанных байтов.
      */
-    void run_context();
+    void handle_async_write(ConnectionIterator iterator, boost::system::error_code error, size_t bytes_transfered);
+
+    /**
+     * <p> Обработчик отправки в сокет клиента запроса на закрытие соединения. </p>
+     * @brief handle_async_write
+     * @param iterator - Итератор на сокет, в который отправлялся запрос.
+     * @param error - Параметр, содержащий ошибку в случае неудачной записи в сокет.
+     * @param bytes_transfered - Количество записанных байтов.
+     */
+    void handle_async_close_write(ConnectionIterator iterator, boost::system::error_code error, size_t bytes_transfered);
 
     /**
      * <p> Обрабатывает запрос клиента. Выводит тип запроса и вызывает специализированный обработчик. </p>
@@ -91,6 +118,11 @@ private:
      * @param iterator - Итератор на сокет, запрос которого обрабатывается.
      */
     void handle_register_request(ConnectionIterator iterator);
+
+    /** <p> Запускает в отдельном потоке контекст для обработки асинхронных функций. </p>
+     * @brief run_context
+     */
+    void run_context();
 };
 
 #endif // LINKDOVESERVER_H

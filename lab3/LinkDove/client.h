@@ -26,16 +26,6 @@ public:
     void async_connect();
 
     /**
-     * <p> Устанавливает данные о пользователе, которые отправляются при авторизации. </p>
-     * Функция должна вызываться до функции login.
-     * @brief setInfo
-     * @param username - Имя пользователя.
-     * @param email_ - Электронная почта пользователя.
-     * @param password - Пароль пользователя.
-     */
-    void setInfo(const std::string& username, const std::string& email_, const std::string& password);
-
-    /**
      * <p> Осуществляет попытку авторизации пользователя. </p>
      * @brief async_login
      */
@@ -46,6 +36,23 @@ public:
      * @brief async_register
      */
     void async_register();
+
+    /**
+     * <p> Устанавливает данные о пользователе, которые отправляются при авторизации. </p>
+     * Функция должна вызываться до функции login.
+     * @brief setInfo
+     * @param username - Имя пользователя.
+     * @param email_ - Электронная почта пользователя.
+     * @param password - Пароль пользователя.
+     */
+    void setInfo(const std::string& username, const std::string& email_, const std::string& password);
+
+    /**
+     * <p> Определяет, установил ли клиент соединение с сервером. </p>
+     * @brief isConnected
+     * @return - Возвращает true, если клиент установил соединение с сервером, иначе - false.
+     */
+    bool isConnected();
 
 private:
     std::shared_ptr<asio::io_context> io_context_ptr_;

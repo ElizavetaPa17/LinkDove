@@ -2,6 +2,10 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <utility>
+
+#include "client.h"
+#include "constants.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -20,6 +24,10 @@ public slots:
 
 private:
     Ui::MainWindow *ui;
+
+    std::shared_ptr<Client> client_ptr = std::make_shared<Client>(std::make_shared<boost::asio::io_context>(),
+                                                                      boost::asio::ip::make_address(LOCAL_ADDRESS),
+                                                                      8000);
 
     /**
      * <p> Настраивает соединения с главным виджетом. </p>

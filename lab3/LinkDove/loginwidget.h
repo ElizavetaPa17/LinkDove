@@ -2,6 +2,8 @@
 #define LOGINWIDGET_H
 
 #include <QWidget>
+#include <vector>
+#include <string>
 
 namespace Ui {
 class LoginWidget;
@@ -17,6 +19,13 @@ class LoginWidget : public QWidget
 public:
     explicit LoginWidget(QWidget *parent = nullptr);
     ~LoginWidget();
+
+    /**
+     * <p> Возвращает информацию, которая необходима для авторизации. </p>
+     * @brief getLoginRequest
+     * @return - Вектор строк, которые содержат значения полей логин-формы.
+     */
+    std::vector<std::string> getLoginRequest();
 
 signals:
     /**
