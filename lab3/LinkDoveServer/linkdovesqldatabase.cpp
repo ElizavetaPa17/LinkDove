@@ -58,10 +58,7 @@ bool LinkDoveSQLDataBase::setup_tables() {
 bool LinkDoveSQLDataBase::register_user(UserInfo info) {
     QSqlQuery query(data_base_);
     query.prepare("INSERT INTO USERS (username, email, password, birthday, text_status, image, is_banned) "
-                  "VALUES (:username, :email, :password, :birthday, :text_status, :image, :is_banned); "
-                  // Выполняем данную инструкцию, чтобы определить, успешна ли вставка строки:
-                  // Если возвращаемое значение -1, то произошла ошибка вставки, если больше нуля - все успешно.
-                  "SELECT ROW_COUT()");
+                  "VALUES (:username, :email, :password, :birthday, :text_status, :image, :is_banned); ");
 
     query.bindValue(":username",    info.status_info_.username_.c_str());
     query.bindValue(":email",       info.status_info_.email_.c_str());
@@ -70,17 +67,12 @@ bool LinkDoveSQLDataBase::register_user(UserInfo info) {
     query.bindValue(":text_status", info.status_info_.text_status_.c_str());
     query.bindValue(":is_banned",   0); // при создании пользователя его аккаунт не блокируется
 
-    if (query.exec()) {
+    if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString();
         return false;
     } else {
-        if (query.next()) {
-            if (query.value("ROW_COUNT").toInt() < 0) {
-                return false;
-            } else {
-                return true;
-            }
-        }
+        // если вставка была успешна, то row affected > 0, иначе row affected == 0 (false).
+        return query.numRowsAffected();
     }
 }
 
@@ -88,7 +80,7 @@ bool LinkDoveSQLDataBase::login_user(LoginInfo info) {
     QSqlQuery query(data_base_);
     query.prepare("SELECT * FROM USERS "
                   "WHERE "
-                 "username = :username AND email = :email AND password = :password");
+                  "username = :username AND email = :email AND password = :password");
 
     query.bindValue(":username", info.username_.c_str());
     query.bindValue(":email",    info.email_.c_str());

@@ -38,7 +38,7 @@ WelcomeWidget::WelcomeWidget(QWidget *parent, Qt::WindowFlags flags)
 void WelcomeWidget::mousePressEvent(QMouseEvent *event) {
     if (!is_press_blocked_) {
         QWidget::mousePressEvent(event);
-        emit passWelcomePage(LOGIN_PAGE);
+        emit passWelcomePage(this, LOGIN_PAGE);
     }
 }
 

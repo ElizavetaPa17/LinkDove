@@ -2,6 +2,7 @@
 #define REGISTRATIONWIDGET_H
 
 #include <QWidget>
+#include "UserInfo.h"
 
 namespace Ui {
 class RegistrationWidget;
@@ -18,14 +19,22 @@ public:
     explicit RegistrationWidget(QWidget *parent = nullptr);
     ~RegistrationWidget();
 
+    /**
+     * <p> Возвращает информацию, которая необходима для регистрации. </p>
+     * @brief getRegistrationRequest
+     * @return - Вектор строк, которые содержат значения полей формы регистрации.
+     */
+    UserInfo getRegistrationRequest();
+
 signals:
     /**
      * <p> Отправляет сигнал после того, как пользователь пройдет авторизацию (форму регистрации).
      * Может переключаться либо на главную страницу MAIN_PAGE, либо на страницу логин-формы. </p>
      * @brief passRegistrationWidget
+     * @param sender - Указатель на объект, который отправил сигнал.
      * @param page_index - Индекс страницы, на которую переключается приложение
      */
-    void passRegistrationWidget(int page_index);
+    void passRegistrationWidget(QWidget *sender, int page_index);
 
 public slots:
     /**

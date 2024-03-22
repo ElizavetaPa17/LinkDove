@@ -26,8 +26,9 @@ void Client::async_connect() {
     run_context();
 }
 
-void Client::async_login() {
-   connection_.out_stream_ << create_login_request();
+void Client::async_login(LoginInfo login_info) {
+   connection_.out_stream_ << create_login_request(login_info);
+
    asio::async_write(connection_.socket_, connection_.buffer_,
                      boost::bind(&Client::handle_async_login,
                                  shared_from_this(),
@@ -37,59 +38,52 @@ void Client::async_login() {
    run_context();
 }
 
-void Client::async_register() {
-    connection_.out_stream_ << create_register_request();
+void Client::async_register(UserInfo user_info) {
+    connection_.out_stream_ << create_register_request(user_info);
     asio::async_write(connection_.socket_, connection_.buffer_,
                       boost::bind(&Client::handle_async_register,
                                   shared_from_this(),
                                   asio::placeholders::error,
                                   asio::placeholders::bytes_transferred));
-
     run_context();
-}
-
-void Client::setInfo(const std::string &username, const std::string &email, const std::string &password) {
-    username_ = username;
-    email_ = email;
-    password_ = password;
 }
 
 bool Client::isConnected() {
     return is_connected_;
 }
 
-std::string Client::create_login_request() {
+std::string Client::create_login_request(LoginInfo login_info) {
     std::stringstream str_stream;
-    str_stream << "LOGIN\n";
+    str_stream << LOGIN_REQUEST << "\n";
 
-    LoginInfo login_info;
-    login_info.username_ = "Johnik";
-    login_info.email_    = "john@gmail.com";
-    login_info.password_ = "oqd";
-
-    login_info.serialize(str_stream);
+    login_info.serialize(str_stream) << '\n';
     str_stream << END_OF_REQUEST;
 
+    std::cerr << str_stream.str() << "\n";
     return str_stream.str();
 }
 
-std::string Client::create_register_request() {
+std::string Client::create_register_request(UserInfo user_info) {
     std::stringstream str_stream;
-    str_stream << "REGISTER\n";
-
-    UserInfo user_info;
-    user_info.status_info_.username_    = "John";
-    user_info.status_info_.email_       = "john@gmail.com";
-    user_info.status_info_.birthday_    = QDate(2012, 10, 1);
-    user_info.status_info_.image_bytes_ = std::vector<char>(100, '2');
-    user_info.password_ = "oqd";
+    str_stream << REGISTER_REQUEST << '\n';
 
     user_info.serialize(str_stream);
     str_stream << END_OF_REQUEST;
 
-    std::cerr << str_stream.str();
-
+    std::cerr << str_stream.str() << "\n";
     return str_stream.str();
+}
+
+void Client::async_read() {
+    asio::async_read_until(connection_.socket_,
+                           connection_.buffer_,
+                           END_OF_REQUEST,
+                           boost::bind(&Client::handle_async_read,
+                                 shared_from_this(),
+                                 asio::placeholders::error(),
+                                 asio::placeholders::bytes_transferred()));
+
+    run_context();
 }
 
 void Client::handle_async_connect(boost::system::error_code error) {
@@ -100,7 +94,7 @@ void Client::handle_async_connect(boost::system::error_code error) {
         throw std::runtime_error("Cannot connect to the server");
     } else {
         is_connected_ = true;
-        std::cout << "Successfull connection to the server.\n";
+        std::cerr << "Successfull connection to the server.\n";
     }
 }
 
@@ -111,7 +105,8 @@ void Client::handle_async_login(boost::system::error_code error, size_t bytes_tr
     }
 
     if (bytes_transferred > 0) {
-        std::cout << "Send login request to the server. Transfer " << bytes_transferred << " bytes.\n";
+        std::cerr << "Send login request to the server. Transfer " << bytes_transferred << " bytes.\n";
+        async_read();
     }
 }
 
@@ -121,15 +116,51 @@ void Client::handle_async_register(boost::system::error_code error, size_t bytes
         throw std::runtime_error("Failed to send register request");
     }
 
+
     if (bytes_transferred > 0) {
-        std::cout << "Send register request to the server. Transfer " << bytes_transferred << " bytes.\n";
+        std::cerr << "Send register request to the server. Transfer " << bytes_transferred << " bytes.\n";
+        async_read();
+    }
+}
+
+void Client::handle_async_read(boost::system::error_code error, size_t bytes_transferred) {
+    if (error) {
+        std::cerr << "Failed to send register request: " << error.value() << ' ' << error.message() << '\n';
+        // ЗАКРЫВАТЬ СОЕДИНЕНИЕ?
+    }
+
+    if (bytes_transferred > 0) {
+        std::string answer_type;
+        std::getline(connection_.in_stream_, answer_type);
+
+        if (answer_type == LOGIN_SUCCESS) {
+            std::cerr << "Login success\n";
+        } else if (answer_type == LOGIN_FAILED) {
+            std::cerr << "Login failed\n";
+        } else if (answer_type == REGISTER_SUCCESS) {
+            std::cerr << "register success\n";
+        } else if (answer_type == REGISTER_FAILED) {
+            std::cerr << "register failed\n";
+        } else {
+            std::cerr << "что-то невнятное\n";
+        }
+
+        remove_delimeter();
     }
 }
 
 void Client::run_context() {
     std::thread t([&]() {
+        if (io_context_ptr_->stopped()) {
+            io_context_ptr_->restart();
+        }
+
         io_context_ptr_->run();
     });
 
     t.detach();
+}
+
+void Client::remove_delimeter() {
+    connection_.buffer_.consume(sizeof(END_OF_REQUEST));
 }

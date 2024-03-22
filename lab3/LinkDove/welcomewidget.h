@@ -25,9 +25,10 @@ signals:
     /**
      * <p> Отправляет сигнал после того, как пользователь нажмет на экран после отработки анимации. </p>
      * @brief passWelcomePage
+     * @param sender - Указатель на объект, который отправил сигнал.
      * @param page_index - Индекс страницы, на которую переключается приложение
      */
-    void passWelcomePage(int page_index);
+    void passWelcomePage(QWidget *sender, int page_index);
 
 protected:
     // Перегрузка функции для добавления возможности блокировки обработки

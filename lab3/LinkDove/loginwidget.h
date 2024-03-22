@@ -2,8 +2,7 @@
 #define LOGINWIDGET_H
 
 #include <QWidget>
-#include <vector>
-#include <string>
+#include "logininfo.h"
 
 namespace Ui {
 class LoginWidget;
@@ -25,16 +24,17 @@ public:
      * @brief getLoginRequest
      * @return - Вектор строк, которые содержат значения полей логин-формы.
      */
-    std::vector<std::string> getLoginRequest();
+    LoginInfo getLoginRequest();
 
 signals:
     /**
      * <p> Отправляет сигнал после того, как пользователь пройдет авторизацию (логин-форму).
      * Может переключаться либо на главную страницу MAIN_PAGE, либо на страницу регистрации. </p>
      * @brief passLoginWidget
+     * @param sender - Указатель на объект, который отправил сигнал.
      * @param page_index - Индекс страницы, на которую переключается приложение
      */
-    void passLoginWidget(int page_index);
+    void passLoginWidget(QWidget *sender, int page_index);
 
 public slots:
     /**

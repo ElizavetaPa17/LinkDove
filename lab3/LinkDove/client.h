@@ -7,9 +7,9 @@
 #include <boost/bind/bind.hpp>
 
 #include "IStreamConnection.h"
-
-#define LOCAL_ADDRESS "127.0.0.1"
-#define END_OF_REQUEST "\r\r\r\r\n"
+#include "logininfo.h"
+#include "UserInfo.h"
+#include "constants.h"
 
 namespace asio = boost::asio;
 using tcp = asio::ip::tcp;
@@ -27,25 +27,17 @@ public:
 
     /**
      * <p> Осуществляет попытку авторизации пользователя. </p>
+     * @param login_info - Структура, содержащая информацию для прохождения авторизации.
      * @brief async_login
      */
-    void async_login();
+    void async_login(LoginInfo login_info);
 
     /**
      * <p> Осуществляет попытку регистрации пользователя. </p>
+     * @param register_info - Структура, содержащая информацию для прохождения регистрации.
      * @brief async_register
      */
-    void async_register();
-
-    /**
-     * <p> Устанавливает данные о пользователе, которые отправляются при авторизации. </p>
-     * Функция должна вызываться до функции login.
-     * @brief setInfo
-     * @param username - Имя пользователя.
-     * @param email_ - Электронная почта пользователя.
-     * @param password - Пароль пользователя.
-     */
-    void setInfo(const std::string& username, const std::string& email_, const std::string& password);
+    void async_register(UserInfo user_info);
 
     /**
      * <p> Определяет, установил ли клиент соединение с сервером. </p>
@@ -69,16 +61,23 @@ private:
     /**
      * <p> Формирует запрос авторизации. </p>
      * @brief create_login_request
+     * @param login_info - Структура, содержащая информацию для прохождения авторизации.
      * @return - Строка запроса.
      */
-    std::string create_login_request();
+    std::string create_login_request(LoginInfo login_info);
 
     /**
      * <p> Формирует запрос регистрации. </p>
      * @brief create_register_request
      * @return - Строка запроса.
      */
-    std::string create_register_request();
+    std::string create_register_request(UserInfo user_info);
+
+    /**
+     * <p> Асинхронно читает ответ от сервера. </p>
+     * @brief async_read
+     */
+    void async_read();
 
     /**
      * <p> Обрабатывает попытку асинхронного подключения к серверу. </p>
@@ -89,19 +88,37 @@ private:
     /**
      * <p> Обрабатывает попытку авторизации. </p>
      * @brief handle_async_login
+     * @param error - Параметр, содержащий ошибку в случае неудачной записи в сокет.
+     * @param bytes_transfered - Количество записанных байтов.
      */
     void handle_async_login(boost::system::error_code error, size_t bytes_transferred);
 
     /**
      * <p> Обрабатывает попытку регистрации. </p>
      * @brief handle_async_login
+     * @param error - Параметр, содержащий ошибку в случае неудачной записи в сокет.
+     * @param bytes_transfered - Количество записанных байтов.
      */
     void handle_async_register(boost::system::error_code error, size_t bytes_transferred);
+
+    /**
+     * <p> Обрабатывает попытку чтения ответа от сервера. </p>
+     * @brief handle_async_write
+     * @param error - Параметр, содержащий ошибку в случае неудачного чтения из сокета.
+     * @param bytes_transfered - Количество прочитанных байтов.
+     */
+    void handle_async_read(boost::system::error_code error, size_t bytes_transferred);
 
     /** <p> Запускает в отдельном потоке контекст для обработки асинхронных функций. </p>
      * @brief run_context
      */
     void run_context();
+
+    /**
+     * <p> Удаляет разделитель END_OF_REQUEST из буфера сокета. </p>
+     * @brief remove_delimeter
+     */
+    void remove_delimeter();
 };
 
 #endif // CLIENT_H

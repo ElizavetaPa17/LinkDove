@@ -8,8 +8,7 @@
 
 #include "tcpconnection.h"
 #include "linkdovesqldatabase.h"
-
-#define END_OF_REQUEST "\r\r\r\r\n"
+#include "constants.h"
 
 namespace asio = boost::asio;
 using tcp  = asio::ip::tcp;
@@ -123,6 +122,13 @@ private:
      * @brief run_context
      */
     void run_context();
+
+    /**
+     * <p> Удаляет разделитель END_OF_REQUEST из буфера сокета. </p>
+     * @brief remove_delimeter
+     * @param iterator - Итератор на сокет, из буфера которого мы удаляем разделитель.
+     */
+    void remove_delimeter(ConnectionIterator iterator);
 };
 
 #endif // LINKDOVESERVER_H

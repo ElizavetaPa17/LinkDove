@@ -24,6 +24,17 @@ RegistrationWidget::~RegistrationWidget()
     delete ui;
 }
 
+UserInfo RegistrationWidget::getRegistrationRequest() {
+    UserInfo user_info;
+
+    user_info.status_info_.username_ = ui->usernameEdit->text().toStdString();
+    user_info.status_info_.email_    = ui->emailEdit->text().toStdString();
+    user_info.status_info_.birthday_ = ui->birthdayDateEdit->date();
+    user_info.password_ = ui->passwordEdit->text().toStdString();
+
+    return user_info;
+}
+
 void RegistrationWidget::slotCheckInput() {
     if (ui->usernameEdit->text().isEmpty() ||
         ui->emailEdit->text().isEmpty()    ||
@@ -35,13 +46,13 @@ void RegistrationWidget::slotCheckInput() {
         if (ui->passwordEdit->text() != ui->repeatPasswordEdit->text()) {
             QMessageBox::information(nullptr, "Некорректный ввод", "Значения полей пароля должны совпадать!", QMessageBox::Ok);
         } else {
-            emit passRegistrationWidget(MAIN_PAGE);
+            emit passRegistrationWidget(this, MAIN_PAGE);
         }
     }
 }
 
 void RegistrationWidget::slotSwitchToLogin() {
-    emit passRegistrationWidget(LOGIN_PAGE);
+    emit passRegistrationWidget(this, LOGIN_PAGE);
 }
 
 void RegistrationWidget::setupConnection() {

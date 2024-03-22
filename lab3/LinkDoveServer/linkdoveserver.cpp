@@ -47,7 +47,7 @@ void LinkDoveServer::start_async_accept() {
                             boost::bind(&LinkDoveServer::handle_async_accept,
                                         shared_from_this(),
                                         iterator,
-                                        boost::asio::placeholders::error()));
+                                        boost::asio::placeholders::error));
     run_context();
 }
 
@@ -58,39 +58,37 @@ void LinkDoveServer::async_read(ConnectionIterator iterator) {
                            boost::bind(&LinkDoveServer::handle_async_read,
                                        shared_from_this(),
                                        iterator,
-                                       asio::placeholders::error(),
-                                       asio::placeholders::bytes_transferred()));
+                                       asio::placeholders::error,
+                                       asio::placeholders::bytes_transferred));
     run_context();
 }
 
 void LinkDoveServer::async_write(ConnectionIterator iterator) {
-    asio::async_write(iterator->socket_,
-                      iterator->buffer_,
+    asio::async_write(iterator->socket_, iterator->buffer_,
                       boost::bind(&LinkDoveServer::handle_async_write,
                                   shared_from_this(),
                                   iterator,
-                                  asio::placeholders::error(),
-                                  asio::placeholders::bytes_transferred()));
+                                  asio::placeholders::error,
+                                  asio::placeholders::bytes_transferred));
 
     run_context();
 }
 
 void LinkDoveServer::async_close_write(ConnectionIterator iterator) {
-    iterator->out_stream_ << "CLOSE\n";
-    asio::async_write(iterator->socket_,
-                      iterator->buffer_,
+    //iterator->out_stream_ << "CLOSE\n";
+    asio::async_write(iterator->socket_, iterator->buffer_,
                       boost::bind(&LinkDoveServer::handle_async_write,
                                   shared_from_this(),
                                   iterator,
-                                  asio::placeholders::error(),
-                                  asio::placeholders::bytes_transferred()));
+                                  asio::placeholders::error,
+                                  asio::placeholders::bytes_transferred));
 
     run_context();
 }
 
 void LinkDoveServer::handle_async_accept(ConnectionIterator iterator, boost::system::error_code error) {
     if (error) {
-        std::cerr << "Failed to accept new connection: " << error.message();
+        std::cerr << "Failed to accept new connection: " << error.message() << '\n';
         async_close_write(iterator);
     } else {
         std::cout << "Connection from: " << iterator->socket_.remote_endpoint().address() << "\n";
@@ -102,7 +100,7 @@ void LinkDoveServer::handle_async_accept(ConnectionIterator iterator, boost::sys
 
 void LinkDoveServer::handle_async_read(ConnectionIterator iterator, boost::system::error_code error, size_t bytes_transfered) {
     if (error) {
-        std::cerr << "Failed to read from socket: " << error.value() << ' ' << error.message();
+        std::cerr << "Failed to read from socket: " << error.value() << ' ' << error.message() << '\n';
         async_close_write(iterator);
     }
 
@@ -113,9 +111,11 @@ void LinkDoveServer::handle_async_read(ConnectionIterator iterator, boost::syste
 
 void LinkDoveServer::handle_async_write(ConnectionIterator iterator, boost::system::error_code error, size_t bytes_transfered) {
     if (error) {
-        std::cerr << "Failed to write to socket: " << error.value() << ' ' << error.message();
+        std::cerr << "Failed to write to socket: " << error.value() << ' ' << error.message() << '\n';
         async_close_write(iterator);
     }
+
+    async_read(iterator);
 }
 
 void LinkDoveServer::handle_async_close_write(ConnectionIterator iterator, boost::system::error_code error, size_t bytes_transfered) {
@@ -130,9 +130,9 @@ void LinkDoveServer::handle_type_request(ConnectionIterator iterator) {
     std::string request_type;
     std::getline(iterator->in_stream_, request_type);
 
-    if (request_type == "LOGIN") {
+    if (request_type == LOGIN_REQUEST) {
         handle_login_request(iterator);
-    } else if (request_type == "REGISTER") {
+    } else if (request_type == REGISTER_REQUEST) {
         handle_register_request(iterator);
     }
 }
@@ -141,11 +141,13 @@ void LinkDoveServer::handle_login_request(ConnectionIterator iterator) {
     LoginInfo login_info;
     login_info.deserialize(iterator->in_stream_);
 
+    remove_delimeter(iterator);
+
     if (data_base_.login_user(login_info)) {
-        iterator->out_stream_ << "EXISTS\n";
+        iterator->out_stream_ << LOGIN_SUCCESS << "\n" << END_OF_REQUEST;
         async_write(iterator);
     } else {
-        iterator->out_stream_ << "NOT EXISTS\n";
+        iterator->out_stream_ << LOGIN_FAILED << "\n" << END_OF_REQUEST;
         async_write(iterator);
     }
 }
@@ -154,19 +156,31 @@ void LinkDoveServer::handle_register_request(ConnectionIterator iterator) {
     UserInfo user_info;
     user_info.deserialize(iterator->in_stream_);
 
+    remove_delimeter(iterator);
+
+    std::string answer;
     if (data_base_.register_user(user_info)) {
-        iterator->out_stream_ << "REGISTERED\n";
-        async_write(iterator);
+        answer = std::string(REGISTER_SUCCESS) + "\n" + END_OF_REQUEST;
     } else {
-        iterator->out_stream_ << "NOT REGISTERED\n";
-        async_write(iterator);
+        answer = std::string(REGISTER_FAILED) + "\n" + END_OF_REQUEST;
     }
+
+    iterator->out_stream_ << answer;
+    async_write(iterator);
 }
 
 void LinkDoveServer::run_context() {
     std::thread t([&]() {
+        if (io_context_ptr_->stopped()) {
+            io_context_ptr_->restart();
+        }
+
         io_context_ptr_->run();
     });
 
     t.detach();
+}
+
+void LinkDoveServer::remove_delimeter(ConnectionIterator iterator) {
+    iterator->buffer_.consume(sizeof(END_OF_REQUEST));
 }

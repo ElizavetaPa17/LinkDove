@@ -21,5 +21,6 @@ set(LIB_FILES
     utility.h       utility.cpp
     logininfo.h     logininfo.cpp)
 
-add_library(common_library ${LIB_FILES})
+add_library(common_library ${LIB_FILES}
+    constants.cpp)
 target_link_libraries(common_library PRIVATE Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Widgets)

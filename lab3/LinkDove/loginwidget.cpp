@@ -20,13 +20,13 @@ LoginWidget::~LoginWidget()
     delete ui;
 }
 
-std::vector<std::string> LoginWidget::getLoginRequest() {
-    std::vector<std::string> login_form_values(3);
-    login_form_values[0] = ui->usernameEdit->text().toStdString();
-    login_form_values[1] = ui->emailEdit->text().toStdString();
-    login_form_values[2] = ui->passwordEdit->text().toStdString();
+LoginInfo LoginWidget::getLoginRequest() {
+    LoginInfo login_info;
+    login_info.username_ = ui->usernameEdit->text().toStdString();
+    login_info.email_    = ui->emailEdit->text().toStdString();
+    login_info.password_ = ui->passwordEdit->text().toStdString();
 
-    return login_form_values;
+    return login_info;
 }
 
 void LoginWidget::slotCheckInput() {
@@ -36,12 +36,12 @@ void LoginWidget::slotCheckInput() {
     {
         QMessageBox::information(nullptr, "Некорректный ввод", "Заполните все поля!", QMessageBox::Ok);
     } else {
-        emit passLoginWidget(MAIN_PAGE);
+        emit passLoginWidget(this, MAIN_PAGE);
     }
 }
 
 void LoginWidget::slotSwitchToRegister() {
-    emit passLoginWidget(REGISTER_PAGE);
+    emit passLoginWidget(this, REGISTER_PAGE);
 }
 
 void LoginWidget::setupConnection() {
