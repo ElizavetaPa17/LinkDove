@@ -28,6 +28,13 @@ public slots:
      */
     void slotSwitchToPage(QWidget *sender, int index_page);
 
+    /**
+     * <p> Слот, принимающий от клиента результат авторизации и реагирующий соответсвующим образом.</p>
+     * @brief slotPassAuthorization
+     * @param authorization_result - Результат авторизации.
+     */
+    void slotPassAuthorization(int authorization_result);
+
 private:
     Ui::MainWindow *ui;
 

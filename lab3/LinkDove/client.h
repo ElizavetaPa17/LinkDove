@@ -1,6 +1,7 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
+#include <QObject>
 #include <string>
 #include <memory>
 #include <boost/asio.hpp>
@@ -14,8 +15,9 @@
 namespace asio = boost::asio;
 using tcp = asio::ip::tcp;
 
-class Client final : public std::enable_shared_from_this<Client>
+class Client final : public QObject, public std::enable_shared_from_this<Client>
 {
+    Q_OBJECT
 public:
     Client(std::shared_ptr<asio::io_context> io_context_ptr, boost::asio::ip::address address, uint16_t port);
 
@@ -44,7 +46,10 @@ public:
      * @brief isConnected
      * @return - Возвращает true, если клиент установил соединение с сервером, иначе - false.
      */
-    bool isConnected();
+    bool is_connected() noexcept;
+
+signals:
+    void authorization_result(int result);
 
 private:
     std::shared_ptr<asio::io_context> io_context_ptr_;
@@ -56,7 +61,7 @@ private:
     std::string email_;
     std::string password_;
 
-    void CreateAccount() {}
+    void create_account() {}
 
     /**
      * <p> Формирует запрос авторизации. </p>

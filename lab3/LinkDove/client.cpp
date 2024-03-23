@@ -48,7 +48,7 @@ void Client::async_register(UserInfo user_info) {
     run_context();
 }
 
-bool Client::isConnected() {
+bool Client::is_connected() noexcept {
     return is_connected_;
 }
 
@@ -134,13 +134,13 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
         std::getline(connection_.in_stream_, answer_type);
 
         if (answer_type == LOGIN_SUCCESS) {
-            std::cerr << "Login success\n";
+            emit authorization_result(LOGIN_SUCCESS_ANSWER);
         } else if (answer_type == LOGIN_FAILED) {
-            std::cerr << "Login failed\n";
+            emit authorization_result(LOGIN_FAILED_ANSWER);
         } else if (answer_type == REGISTER_SUCCESS) {
-            std::cerr << "register success\n";
+            emit authorization_result(REGISTRATION_SUCCESS_ANSWER);
         } else if (answer_type == REGISTER_FAILED) {
-            std::cerr << "register failed\n";
+            emit authorization_result(REGISTRATION_FAILED_ANSWER);
         } else {
             std::cerr << "что-то невнятное\n";
         }

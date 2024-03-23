@@ -7,6 +7,13 @@ enum Page {
     MAIN_PAGE
 };
 
+enum AutorizationAnswer {
+    REGISTRATION_FAILED_ANSWER,
+    REGISTRATION_SUCCESS_ANSWER,
+    LOGIN_FAILED_ANSWER,
+    LOGIN_SUCCESS_ANSWER
+};
+
 // Минимальный возраст пользователя, разрешенный для создания аккаунта
 const int MINIMUM_ALLOWED_AGE = 14;
 
