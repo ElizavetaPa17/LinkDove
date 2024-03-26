@@ -26,6 +26,12 @@ public:
      */
     LoginInfo getLoginRequest();
 
+    /**
+     * <p> Очищает поля логин-формы. </p>
+     * @brief clearLoginInfo
+     */
+    void clearLoginInfo();
+
 signals:
     /**
      * <p> Отправляет сигнал после того, как пользователь пройдет авторизацию (логин-форму).

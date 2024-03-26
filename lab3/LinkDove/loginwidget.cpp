@@ -29,6 +29,12 @@ LoginInfo LoginWidget::getLoginRequest() {
     return login_info;
 }
 
+void LoginWidget::clearLoginInfo() {
+    ui->usernameEdit->setText("");
+    ui->emailEdit->setText("");
+    ui->passwordEdit->setText("");
+}
+
 void LoginWidget::slotCheckInput() {
     if (ui->usernameEdit->text().isEmpty() ||
         ui->emailEdit->text().isEmpty()    ||

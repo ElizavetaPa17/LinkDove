@@ -37,6 +37,9 @@ void MainWindow::slotPassAuthorization(int authorization_result) {
         case REGISTRATION_SUCCESS_ANSWER:
             ui->mainStackedWidget->setCurrentIndex(MAIN_PAGE);
             ui->pageMain->setStatusInfo(client_ptr->get_status_info());
+
+            ui->pageLogin->clearLoginInfo();
+            ui->pageRegister->clearRegistrationInfo();
             break;
         case LOGIN_FAILED_ANSWER: {
             std::cerr << "login failed\n";
@@ -60,6 +63,7 @@ void MainWindow::setupConnection() {
 
 void MainWindow::tryLoginAttempt() {
     LoginInfo login_info = ui->pageLogin->getLoginRequest();
+    std::cerr << login_info.username_ << '\t' << login_info.email_ << '\t' << login_info.password_ << '\n';
     client_ptr->async_login(login_info);
 }
 

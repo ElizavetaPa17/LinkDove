@@ -37,8 +37,17 @@ void MainWidget::slotRedirectClick(QWidget *sender) {
     }
 }
 
+void MainWidget::slotQuit() {
+    // clear status info value
+    //memset(&status_info_, 0, sizeof(status_info_));
+
+    ui->tabWidget->setCurrentIndex(EMPTY_PAGE);
+    emit switchToPage(this, LOGIN_PAGE);
+}
+
 void MainWidget::setupConnection() {
     connect(ui->profileLabel, &ClickableLabel::clicked, this, &MainWidget::slotRedirectClick);
     connect(ui->chatLabel,    &ClickableLabel::clicked, this, &MainWidget::slotRedirectClick);
     connect(ui->settingLabel, &ClickableLabel::clicked, this, &MainWidget::slotRedirectClick);
+    connect(ui->quitButton,   &QPushButton::clicked,    this, &MainWidget::slotQuit);
 }

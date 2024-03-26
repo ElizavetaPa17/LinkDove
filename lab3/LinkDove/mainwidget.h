@@ -39,6 +39,12 @@ private slots:
      */
     void slotRedirectClick(QWidget *sender);
 
+    /**
+     * <p> Принимает сигналы выхода из аккаунта. </p>
+     * @brief slotQuit
+     */
+    void slotQuit();
+
 private:
     Ui::MainWidget *ui;
     StatusInfo status_info_;

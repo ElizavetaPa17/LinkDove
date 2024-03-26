@@ -35,6 +35,13 @@ UserInfo RegistrationWidget::getRegistrationRequest() {
     return user_info;
 }
 
+void RegistrationWidget::clearRegistrationInfo() {
+    ui->usernameEdit->setText("");
+    ui->emailEdit->setText("");
+    ui->passwordEdit->setText("");
+    ui->repeatPasswordEdit->setText("");
+}
+
 void RegistrationWidget::slotCheckInput() {
     if (ui->usernameEdit->text().isEmpty() ||
         ui->emailEdit->text().isEmpty()    ||

@@ -26,6 +26,12 @@ public:
      */
     UserInfo getRegistrationRequest();
 
+    /**
+     * <p> Очищает поля формы регистрации. </p>
+     * @brief clearRegistrationInfo
+     */
+    void clearRegistrationInfo();
+
 signals:
     /**
      * <p> Отправляет сигнал после того, как пользователь пройдет авторизацию (форму регистрации).
