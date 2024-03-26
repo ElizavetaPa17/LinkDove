@@ -42,11 +42,11 @@ void MainWindow::slotPassAuthorization(int authorization_result) {
             ui->pageRegister->clearRegistrationInfo();
             break;
         case LOGIN_FAILED_ANSWER: {
-            std::cerr << "login failed\n";
+            ui->pageLogin->displayFailedInfo("Ошибка. Проверьте ввод и повторите авторизацию снова.");
             break;
         }
         case REGISTRATION_FAILED_ANSWER: {
-            std::cerr << "registration failed\n";
+            ui->pageRegister->displayFailedInfo("Ошибка. Проверьте ввод и повторите регистрацию снова.");
             break;
         }
     }
@@ -63,7 +63,6 @@ void MainWindow::setupConnection() {
 
 void MainWindow::tryLoginAttempt() {
     LoginInfo login_info = ui->pageLogin->getLoginRequest();
-    std::cerr << login_info.username_ << '\t' << login_info.email_ << '\t' << login_info.password_ << '\n';
     client_ptr->async_login(login_info);
 }
 

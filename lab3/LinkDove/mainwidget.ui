@@ -694,6 +694,42 @@ QTabBar::tab:selected {
            <number>20</number>
           </property>
           <item>
+           <widget class="QPushButton" name="banButton">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>70</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>17</pointsize>
+              <italic>true</italic>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="cursor">
+             <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QPushButton {
+	background-color: rgb(245, 245, 245);
+	color: rgb(60, 45, 50);
+	border: 5px solid rgb(60, 45, 50);
+	border-radius: 20;
+}
+
+QPushButton:hover {
+	background-color: rgb(60, 45, 50);
+	color: rgb(245, 245, 245);
+}</string>
+            </property>
+            <property name="text">
+             <string>Блокировка</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="privateButton">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">

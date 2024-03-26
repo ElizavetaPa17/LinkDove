@@ -1,8 +1,6 @@
 #include "mainwidget.h"
 #include "ui_mainwidget.h"
 
-#include "constants.h"
-
 MainWidget::MainWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MainWidget)
@@ -25,6 +23,12 @@ void MainWidget::setStatusInfo(const StatusInfo& status_info) {
     ui->emailLabel->setText(QString::fromUtf8(status_info.email_));
     ui->birthdayLabel->setText(status_info.birthday_.toString(BIRTHAY_FORMAT));
     ui->textStatusLabel->setText(QString::fromUtf8(status_info.text_status_));
+
+    if (strcmp(status_info.username_.c_str(), ADMIN_USERNAME) == 0) {
+        setPrivilegedMode();
+    } else {
+        setSimpleMode();
+    }
 }
 
 void MainWidget::slotRedirectClick(QWidget *sender) {
@@ -43,6 +47,22 @@ void MainWidget::slotQuit() {
 
     ui->tabWidget->setCurrentIndex(EMPTY_PAGE);
     emit switchToPage(this, LOGIN_PAGE);
+}
+
+void MainWidget::setPrivilegedMode() {
+    ui->complaintButton->setText("Жалобы");
+    ui->editIconLabel->setDisabled(true);
+
+    ui->privateButton->hide();
+    ui->banButton->show();
+}
+
+void MainWidget::setSimpleMode() {
+    ui->complaintButton->setText("Жалоба");
+    ui->editIconLabel->setDisabled(false);
+
+    ui->privateButton->show();
+    ui->banButton->hide();
 }
 
 void MainWidget::setupConnection() {

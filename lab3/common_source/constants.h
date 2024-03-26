@@ -21,6 +21,11 @@ enum AutorizationAnswer {
     LOGIN_SUCCESS_ANSWER
 };
 
+enum ApplicationMode {
+    PRIVILEGED_MODE, // режим работы админа
+    SIMPLE_MODE      // режим работы простого пользователя
+};
+
 // Минимальный возраст пользователя, разрешенный для создания аккаунта
 const int MINIMUM_ALLOWED_AGE = 14;
 
@@ -32,6 +37,12 @@ const int MINIMUM_ALLOWED_AGE = 14;
 
 // Формат строковой даты
 #define BIRTHAY_FORMAT "yyyy-MM-dd"
+
+// Никнейм админа
+extern const char *ADMIN_USERNAME;
+
+// Информация о приложении LinkDove
+extern const char *APPLICATION_DESCRIPTION;
 
 /*
  * Типы запросов

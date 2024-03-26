@@ -32,6 +32,12 @@ public:
      */
     void clearRegistrationInfo();
 
+    /**
+     *  При неудачной попытке регистрации отображает соответствующую информацию.
+     * @brief displayFailedInfo
+     */
+    void displayFailedInfo(const QString& info);
+
 signals:
     /**
      * <p> Отправляет сигнал после того, как пользователь пройдет авторизацию (форму регистрации).
@@ -54,6 +60,13 @@ public slots:
      * @brief slotSwitchToLogin
      */
     void slotSwitchToLogin();
+
+private slots:
+    /**
+     * <p> Восстанавливает состояние ссылки на страницу логин-формы после неудачной попытки прохождения регистрации. </p>
+     * @brief slotRestoreLoginLabel
+     */
+    void slotRestoreLoginLabel();
 
 private:
     Ui::RegistrationWidget *ui;

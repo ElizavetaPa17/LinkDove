@@ -2,7 +2,7 @@
 #include "ui_registrationwidget.h"
 
 #include <QDate>
-#include <QMessageBox>
+#include <QTimer>
 
 #include "constants.h"
 
@@ -42,16 +42,25 @@ void RegistrationWidget::clearRegistrationInfo() {
     ui->repeatPasswordEdit->setText("");
 }
 
+void RegistrationWidget::displayFailedInfo(const QString& info) {
+    ui->loginLabel->setText(info);
+
+    QPalette palette;
+    palette.setColor(QPalette::WindowText, Qt::red);
+    ui->loginLabel->setPalette(palette);
+    QTimer::singleShot(3000, this, &RegistrationWidget::slotRestoreLoginLabel);
+}
+
 void RegistrationWidget::slotCheckInput() {
     if (ui->usernameEdit->text().isEmpty() ||
         ui->emailEdit->text().isEmpty()    ||
         ui->passwordEdit->text().isEmpty() ||
         ui->repeatPasswordEdit->text().isEmpty())
     {
-        QMessageBox::information(nullptr, "Некорректный ввод", "Заполните все поля!", QMessageBox::Ok);
+        displayFailedInfo("Заполните все поля!");
     } else {
         if (ui->passwordEdit->text() != ui->repeatPasswordEdit->text()) {
-            QMessageBox::information(nullptr, "Некорректный ввод", "Значения полей пароля должны совпадать!", QMessageBox::Ok);
+            displayFailedInfo("Значения полей пароля должны совпадать!");
         } else {
             emit passRegistrationWidget(this, MAIN_PAGE);
         }
@@ -60,6 +69,14 @@ void RegistrationWidget::slotCheckInput() {
 
 void RegistrationWidget::slotSwitchToLogin() {
     emit passRegistrationWidget(this, LOGIN_PAGE);
+}
+
+void RegistrationWidget::slotRestoreLoginLabel() {
+    ui->loginLabel->setText("Уже есть аккаунт");
+
+    QPalette palette;
+    palette.setColor(QPalette::Window, Qt::white);
+    ui->loginLabel->setPalette(palette);
 }
 
 void RegistrationWidget::setupConnection() {
