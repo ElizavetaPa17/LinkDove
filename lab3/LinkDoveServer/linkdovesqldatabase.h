@@ -28,6 +28,14 @@ public:
      */
     bool login_user(LoginInfo info);
 
+    /**
+     * <p> Возвращает информацию о пользователе, который соответсвует заданным критериям. </p>
+     * @brief get_user
+     * @param info - Структура, содержащая заданные критерии
+     * @return - Структура, содержащая информацию о пользователе
+     */
+    StatusInfo get_status(LoginInfo info);
+
 private:
     QSqlDatabase data_base_;
     std::string connection_name_;

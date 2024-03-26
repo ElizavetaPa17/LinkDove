@@ -11,6 +11,7 @@ struct StatusInfo final {
     QDate       birthday_;
     std::string text_status_;
     std::vector<char> image_bytes_;
+    bool is_banned_ = false;
 
     /**
      * <p> Сериализует текущее состояние объекта. </p>

@@ -4,7 +4,14 @@ enum Page {
     WELCOME_PAGE,
     LOGIN_PAGE,
     REGISTER_PAGE,
-    MAIN_PAGE
+    MAIN_PAGE,
+};
+
+enum InnerMainPage{
+    EMPTY_PAGE,
+    PROFILE_PAGE,
+    CHAT_PAGE,
+    SETTING_PAGE
 };
 
 enum AutorizationAnswer {
@@ -22,6 +29,9 @@ const int MINIMUM_ALLOWED_AGE = 14;
 
 // Идентификатор конца запросов в операциях чтения-записи.
 #define END_OF_REQUEST "f8377569513448db7baf7caa601d58730eeaf9af"
+
+// Формат строковой даты
+#define BIRTHAY_FORMAT "yyyy-MM-dd"
 
 /*
  * Типы запросов

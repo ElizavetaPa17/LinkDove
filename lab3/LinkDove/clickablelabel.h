@@ -17,7 +17,7 @@ public:
     ClickableLabel(const QString &text, QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::WindowFlags());
 
 signals:
-    void clicked();
+    void clicked(QWidget *sender);
 
 protected:
     // Перегрузка функции с целью генерации сигнала clicked.

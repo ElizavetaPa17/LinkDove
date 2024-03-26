@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>540</width>
+    <width>645</width>
     <height>615</height>
    </rect>
   </property>
@@ -37,6 +37,9 @@
 	font-style: italic;
 }</string>
        </property>
+       <property name="maxLength">
+        <number>40</number>
+       </property>
        <property name="placeholderText">
         <string>Никнейм</string>
        </property>
@@ -63,6 +66,9 @@
 	font-size: 20px;
 	font-style: italic;
 }</string>
+       </property>
+       <property name="maxLength">
+        <number>40</number>
        </property>
        <property name="placeholderText">
         <string>Почта</string>
@@ -207,6 +213,9 @@
        <property name="text">
         <string/>
        </property>
+       <property name="maxLength">
+        <number>40</number>
+       </property>
        <property name="echoMode">
         <enum>QLineEdit::Password</enum>
        </property>
@@ -235,6 +244,9 @@
 	font-size: 20px;
 	font-style: italic;
 }</string>
+       </property>
+       <property name="maxLength">
+        <number>40</number>
        </property>
        <property name="echoMode">
         <enum>QLineEdit::Password</enum>

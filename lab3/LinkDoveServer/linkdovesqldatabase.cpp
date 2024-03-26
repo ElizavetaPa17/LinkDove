@@ -4,6 +4,8 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
+#include "constants.h"
+
 LinkDoveSQLDataBase::LinkDoveSQLDataBase(const std::string &connection_name)
     : connection_name_(connection_name)
 {
@@ -40,7 +42,7 @@ bool LinkDoveSQLDataBase::setup_tables() {
     bool is_ok = query.exec("CREATE TABLE IF NOT EXISTS USERS "
                             "( ID MEDIUMINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
                             "  username VARCHAR(40) UNIQUE NOT NULL, "
-                            "  email VARCHAR(256) UNIQUE NOT NULL, "
+                            "  email VARCHAR(40) UNIQUE NOT NULL, "
                             "  password VARCHAR(40) NOT NULL, "
                             "  birthday DATE NOT NULL, "
                             "  text_status VARCHAR(256), "
@@ -90,11 +92,40 @@ bool LinkDoveSQLDataBase::login_user(LoginInfo info) {
         std::cerr << query.lastError().text().toStdString();
         return false;
     } else {
-        std::cerr << query.isValid() << '\n';
         if (query.next()) {
             return true;
         } else {
             return false;
+        }
+    }
+}
+
+StatusInfo LinkDoveSQLDataBase::get_status(LoginInfo info) {
+    QSqlQuery query(data_base_);
+    query.prepare("SELECT * FROM USERS "
+                  "WHERE "
+                  "username = :username AND email = :email AND password = :password");
+
+    query.bindValue(":username", info.username_.c_str());
+    query.bindValue(":email",    info.email_.c_str());
+    query.bindValue(":password", info.password_.c_str());
+
+    if (!query.exec()) {
+        throw std::runtime_error(query.lastError().text().toStdString());
+    } else {
+        if (!query.next()) {
+            throw std::runtime_error("No such object in DataBase");
+        } else {
+            StatusInfo status_info;
+            status_info.username_    = query.value("username").toString().toStdString();
+            status_info.email_       = query.value("email").toString().toStdString();
+            status_info.birthday_    = QDate::fromString(query.value("birthday").toString(), QString(BIRTHAY_FORMAT));
+            status_info.text_status_ = query.value("text_status").toString().toStdString();
+
+            QByteArray image_bytes   = query.value("image").toByteArray();
+            status_info.image_bytes_ = std::vector(image_bytes.begin(), image_bytes.end());
+
+            return status_info;
         }
     }
 }

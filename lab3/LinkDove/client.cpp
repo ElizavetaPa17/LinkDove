@@ -40,12 +40,18 @@ void Client::async_login(LoginInfo login_info) {
 
 void Client::async_register(UserInfo user_info) {
     connection_.out_stream_ << create_register_request(user_info);
+    status_info_ = user_info.status_info_;
+
     asio::async_write(connection_.socket_, connection_.buffer_,
                       boost::bind(&Client::handle_async_register,
                                   shared_from_this(),
                                   asio::placeholders::error,
                                   asio::placeholders::bytes_transferred));
     run_context();
+}
+
+StatusInfo Client::get_status_info() {
+    return status_info_;
 }
 
 bool Client::is_connected() noexcept {
@@ -59,7 +65,6 @@ std::string Client::create_login_request(LoginInfo login_info) {
     login_info.serialize(str_stream) << '\n';
     str_stream << END_OF_REQUEST;
 
-    std::cerr << str_stream.str() << "\n";
     return str_stream.str();
 }
 
@@ -70,7 +75,6 @@ std::string Client::create_register_request(UserInfo user_info) {
     user_info.serialize(str_stream);
     str_stream << END_OF_REQUEST;
 
-    std::cerr << str_stream.str() << "\n";
     return str_stream.str();
 }
 
@@ -89,7 +93,6 @@ void Client::async_read() {
 void Client::handle_async_connect(boost::system::error_code error) {
     if (error) {
         std::cerr << "Failed to connect: " << error.value() << ' ' << error.message() << '\n';
-
         is_connected_ = false;
         throw std::runtime_error("Cannot connect to the server");
     } else {
@@ -134,6 +137,7 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
         std::getline(connection_.in_stream_, answer_type);
 
         if (answer_type == LOGIN_SUCCESS) {
+            status_info_.deserialize(connection_.in_stream_);
             emit authorization_result(LOGIN_SUCCESS_ANSWER);
         } else if (answer_type == LOGIN_FAILED) {
             emit authorization_result(LOGIN_FAILED_ANSWER);

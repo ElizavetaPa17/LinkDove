@@ -144,7 +144,12 @@ void LinkDoveServer::handle_login_request(ConnectionIterator iterator) {
     remove_delimeter(iterator);
 
     if (data_base_.login_user(login_info)) {
-        iterator->out_stream_ << LOGIN_SUCCESS << "\n" << END_OF_REQUEST;
+        iterator->out_stream_ << LOGIN_SUCCESS << "\n";
+
+        StatusInfo status_info = data_base_.get_status(login_info);
+        status_info.serialize(iterator->out_stream_);
+
+        iterator->out_stream_ << END_OF_REQUEST;
         async_write(iterator);
     } else {
         iterator->out_stream_ << LOGIN_FAILED << "\n" << END_OF_REQUEST;

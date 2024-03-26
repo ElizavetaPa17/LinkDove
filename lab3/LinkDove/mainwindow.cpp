@@ -21,6 +21,7 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::slotSwitchToPage(QWidget *sender, int index_page) {
+
     if (sender == ui->pageLogin && index_page == MAIN_PAGE) {
         tryLoginAttempt();
     } else if (sender == ui->pageRegister && index_page == MAIN_PAGE) {
@@ -35,6 +36,7 @@ void MainWindow::slotPassAuthorization(int authorization_result) {
         case LOGIN_SUCCESS_ANSWER:
         case REGISTRATION_SUCCESS_ANSWER:
             ui->mainStackedWidget->setCurrentIndex(MAIN_PAGE);
+            ui->pageMain->setStatusInfo(client_ptr->get_status_info());
             break;
         case LOGIN_FAILED_ANSWER: {
             std::cerr << "login failed\n";
@@ -51,6 +53,8 @@ void MainWindow::setupConnection() {
     connect(ui->pageWelcome,  &WelcomeWidget::passWelcomePage, this, &MainWindow::slotSwitchToPage);
     connect(ui->pageLogin,    &LoginWidget::passLoginWidget,   this, &MainWindow::slotSwitchToPage);
     connect(ui->pageRegister, &RegistrationWidget::passRegistrationWidget, this, &MainWindow::slotSwitchToPage);
+    connect(ui->pageMain,     &MainWidget::switchToPage,       this, &MainWindow::slotSwitchToPage);
+
     connect(client_ptr.get(), &Client::authorization_result,   this, &MainWindow::slotPassAuthorization);
 }
 

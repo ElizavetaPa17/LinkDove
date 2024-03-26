@@ -2,5 +2,15 @@
 <qresource prefix="/resources">
     <file alias="welcome_background.png">../resources/background.png</file>
     <file alias="welcome_label.png">../resources/label_with_text.png</file>
+    <file alias="main_profile_icon.png">../resources/main_profile_icon.png</file>
+    <file alias="main_chat_icon.png">../resources/main_chat_icon.png</file>
+    <file alias="main_setting_icon.png">../resources/main_setting_icon.png</file>
+    <file alias="profile_card_icon.png">../resources/profile_card_icon.png</file>
+    <file alias="profile_envelope_icon.png">../resources/profile_envelope_icon.png</file>
+    <file alias="profile_calendar_icon.png">../resources/profile_calendar_icon.png</file>
+    <file alias="profile_edit_icon.png">../resources/profile_edit_icon.png</file>
+    <file alias="chat_chat_icon.png">../resources/chat_chat_icon.png</file>
+    <file alias="chat_group_icon.png">../resources/chat_group_icon.png</file>
+    <file alias="chat_channel_icon.png">../resources/chat_channel_icon.png</file>
 </qresource>
 </RCC>

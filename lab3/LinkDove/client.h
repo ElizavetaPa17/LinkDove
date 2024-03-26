@@ -42,6 +42,13 @@ public:
     void async_register(UserInfo user_info);
 
     /**
+     * <p> Возвращает информацию о пользователе. </p>
+     * @brief get_status_info
+     * @return - Структура, содержащая информацию о пользователе
+     */
+    StatusInfo get_status_info();
+
+    /**
      * <p> Определяет, установил ли клиент соединение с сервером. </p>
      * @brief isConnected
      * @return - Возвращает true, если клиент установил соединение с сервером, иначе - false.
@@ -57,9 +64,7 @@ private:
     tcp::endpoint endpoint_;
     bool is_connected_;
 
-    std::string username_;
-    std::string email_;
-    std::string password_;
+    StatusInfo status_info_;
 
     void create_account() {}
 
