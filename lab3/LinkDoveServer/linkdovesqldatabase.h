@@ -16,7 +16,7 @@ public:
      * <p> Добавляет пользователя в БД. </p>
      * @brief register_user
      * @param info - Информация о пользователе, который добавляется в БД.
-     * @return - В случае успеха возвращает true, иначе - false.
+     * @return - В случае успеха возвращает true, иначе false
      */
     bool register_user(UserInfo info);
 
@@ -31,10 +31,10 @@ public:
     /**
      * <p> Возвращает информацию о пользователе, который соответсвует заданным критериям. </p>
      * @brief get_user
-     * @param info - Структура, содержащая заданные критерии
+     * @param username - Никнейм пользователя
      * @return - Структура, содержащая информацию о пользователе
      */
-    StatusInfo get_status(LoginInfo info);
+    StatusInfo get_status_info(const std::string &username);
 
 private:
     QSqlDatabase data_base_;

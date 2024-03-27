@@ -1,6 +1,5 @@
 #include "constants.h"
 
-const char *ADMIN_USERNAME = "admin";
 const char *APPLICATION_DESCRIPTION =
         "LinkDove - удобный и стильный мессенджер, позволяющий общаться людям"
         "со всех уголков планеты. Вы можете переписываться в чатах, группах и"

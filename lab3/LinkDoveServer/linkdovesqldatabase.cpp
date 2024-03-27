@@ -39,6 +39,7 @@ void LinkDoveSQLDataBase::setup() {
 
 bool LinkDoveSQLDataBase::setup_tables() {
     QSqlQuery query(data_base_);
+
     bool is_ok = query.exec("CREATE TABLE IF NOT EXISTS USERS "
                             "( ID MEDIUMINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
                             "  username VARCHAR(40) UNIQUE NOT NULL, "
@@ -52,9 +53,20 @@ bool LinkDoveSQLDataBase::setup_tables() {
     if (!is_ok) {
         std::cerr << "Failed to setup USERS table: " << query.lastError().text().toStdString() << '\n';
         return false;
-    } else {
-        return true;
     }
+
+    is_ok = query.exec("CREATE TABLE IF NOT EXISTS COMPLAINTS "
+                       "( ID MEDIUMINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
+                       " sender_id MEDIUMINT NOT NULL, "
+                       " text TEXT NOT NULL,"
+                       " FOREIGN KEY(sender_id) REFERENCES USERS(ID) "
+                       " ON DELETE CASCADE)");
+    if (!is_ok) {
+        std::cerr << "Failed to setup COMPLAINTS table: " << query.lastError().text().toStdString() << '\n';
+        return false;
+    }
+
+    return true;
 }
 
 bool LinkDoveSQLDataBase::register_user(UserInfo info) {
@@ -100,15 +112,13 @@ bool LinkDoveSQLDataBase::login_user(LoginInfo info) {
     }
 }
 
-StatusInfo LinkDoveSQLDataBase::get_status(LoginInfo info) {
+StatusInfo LinkDoveSQLDataBase::get_status_info(const std::string &username) {
     QSqlQuery query(data_base_);
     query.prepare("SELECT * FROM USERS "
                   "WHERE "
-                  "username = :username AND email = :email AND password = :password");
+                  "username = :username;");
 
-    query.bindValue(":username", info.username_.c_str());
-    query.bindValue(":email",    info.email_.c_str());
-    query.bindValue(":password", info.password_.c_str());
+    query.bindValue(":username", username.c_str());
 
     if (!query.exec()) {
         throw std::runtime_error(query.lastError().text().toStdString());
@@ -117,6 +127,7 @@ StatusInfo LinkDoveSQLDataBase::get_status(LoginInfo info) {
             throw std::runtime_error("No such object in DataBase");
         } else {
             StatusInfo status_info;
+            status_info.id_          = query.value("ID").toULongLong();
             status_info.username_    = query.value("username").toString().toStdString();
             status_info.email_       = query.value("email").toString().toStdString();
             status_info.birthday_    = QDate::fromString(query.value("birthday").toString(), QString(BIRTHAY_FORMAT));

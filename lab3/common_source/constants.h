@@ -29,6 +29,12 @@ enum ApplicationMode {
 // Минимальный возраст пользователя, разрешенный для создания аккаунта
 const int MINIMUM_ALLOWED_AGE = 14;
 
+// Значение невалидного идентификатора пользователя
+const unsigned long long INVALID_USER_ID = 0;
+
+// Идентификатор админа (суперпользователя)
+const unsigned long long ADMIN_ID = 1;
+
 // Адрес хоста, к которому подключается клиент
 #define LOCAL_ADDRESS "127.0.0.1"
 
@@ -37,9 +43,6 @@ const int MINIMUM_ALLOWED_AGE = 14;
 
 // Формат строковой даты
 #define BIRTHAY_FORMAT "yyyy-MM-dd"
-
-// Никнейм админа
-extern const char *ADMIN_USERNAME;
 
 // Информация о приложении LinkDove
 extern const char *APPLICATION_DESCRIPTION;

@@ -11,6 +11,10 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
+/**
+ * @brief The MainWindow class
+ * Виджет, отображающий основную функциональность приложения: профиль, настройки и чаты.
+ */
 class MainWindow : public QMainWindow
 {
     Q_OBJECT

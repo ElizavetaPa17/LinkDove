@@ -1,6 +1,9 @@
 #include "mainwidget.h"
 #include "ui_mainwidget.h"
 
+#include <memory>
+#include "complaintdialog.h"
+
 MainWidget::MainWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MainWidget)
@@ -24,7 +27,7 @@ void MainWidget::setStatusInfo(const StatusInfo& status_info) {
     ui->birthdayLabel->setText(status_info.birthday_.toString(BIRTHAY_FORMAT));
     ui->textStatusLabel->setText(QString::fromUtf8(status_info.text_status_));
 
-    if (strcmp(status_info.username_.c_str(), ADMIN_USERNAME) == 0) {
+    if (status_info.id_ == ADMIN_ID) {
         setPrivilegedMode();
     } else {
         setSimpleMode();
@@ -38,6 +41,13 @@ void MainWidget::slotRedirectClick(QWidget *sender) {
         ui->stackedWidget->setCurrentIndex(CHAT_PAGE);
     } else if (sender == ui->settingLabel) {
         ui->stackedWidget->setCurrentIndex(SETTING_PAGE);
+    }
+}
+
+void MainWidget::slotDisplayComplaintDialog() {
+    std::unique_ptr<ComplaintDialog> dialog_ptr = std::make_unique<ComplaintDialog>();
+    if (dialog_ptr->exec() == QDialog::Accepted) {
+        //
     }
 }
 
@@ -66,8 +76,9 @@ void MainWidget::setSimpleMode() {
 }
 
 void MainWidget::setupConnection() {
-    connect(ui->profileLabel, &ClickableLabel::clicked, this, &MainWidget::slotRedirectClick);
-    connect(ui->chatLabel,    &ClickableLabel::clicked, this, &MainWidget::slotRedirectClick);
-    connect(ui->settingLabel, &ClickableLabel::clicked, this, &MainWidget::slotRedirectClick);
-    connect(ui->quitButton,   &QPushButton::clicked,    this, &MainWidget::slotQuit);
+    connect(ui->profileLabel,    &ClickableLabel::clicked, this, &MainWidget::slotRedirectClick);
+    connect(ui->chatLabel,       &ClickableLabel::clicked, this, &MainWidget::slotRedirectClick);
+    connect(ui->settingLabel,    &ClickableLabel::clicked, this, &MainWidget::slotRedirectClick);
+    connect(ui->complaintButton, &QPushButton::clicked,    this, &MainWidget::slotDisplayComplaintDialog);
+    connect(ui->quitButton,      &QPushButton::clicked,    this, &MainWidget::slotQuit);
 }

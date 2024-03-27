@@ -15,6 +15,10 @@
 namespace asio = boost::asio;
 using tcp = asio::ip::tcp;
 
+/**
+ * @brief The Client class
+ * Клиент, который осуществляет взаимодействие с сервером.
+ */
 class Client final : public QObject, public std::enable_shared_from_this<Client>
 {
     Q_OBJECT

@@ -6,7 +6,7 @@
 
 /**
  * @brief The ClickableLabel class
- * Класс-нааследник QLabel, генерирующий события при нажатии на него.
+ * Класс-наследник QLabel, генерирующий события при нажатии на него.
  */
 
 class ClickableLabel : public QLabel

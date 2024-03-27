@@ -6,6 +6,7 @@
 #include <QDate>
 
 struct StatusInfo final {
+    unsigned long long id_ = 0;
     std::string username_;
     std::string email_;
     QDate       birthday_;

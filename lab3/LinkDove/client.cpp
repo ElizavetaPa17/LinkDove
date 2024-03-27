@@ -138,10 +138,13 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
 
         if (answer_type == LOGIN_SUCCESS) {
             status_info_.deserialize(connection_.in_stream_);
+            std::cerr << status_info_.id_ << '\n';
             emit authorization_result(LOGIN_SUCCESS_ANSWER);
         } else if (answer_type == LOGIN_FAILED) {
             emit authorization_result(LOGIN_FAILED_ANSWER);
         } else if (answer_type == REGISTER_SUCCESS) {
+            status_info_.deserialize(connection_.in_stream_);
+            std::cerr << status_info_.id_ << '\n';
             emit authorization_result(REGISTRATION_SUCCESS_ANSWER);
         } else if (answer_type == REGISTER_FAILED) {
             emit authorization_result(REGISTRATION_FAILED_ANSWER);

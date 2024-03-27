@@ -146,7 +146,8 @@ void LinkDoveServer::handle_login_request(ConnectionIterator iterator) {
     if (data_base_.login_user(login_info)) {
         iterator->out_stream_ << LOGIN_SUCCESS << "\n";
 
-        StatusInfo status_info = data_base_.get_status(login_info);
+        // ДОБАВИТЬ TRY_CATCH (С ОТПРАВКОЙ КЛИЕНТУ INTERNAL_ERROR)
+        StatusInfo status_info = data_base_.get_status_info(login_info.username_);
         status_info.serialize(iterator->out_stream_);
 
         iterator->out_stream_ << END_OF_REQUEST;
@@ -163,14 +164,19 @@ void LinkDoveServer::handle_register_request(ConnectionIterator iterator) {
 
     remove_delimeter(iterator);
 
-    std::string answer;
+    std::stringstream answer;
     if (data_base_.register_user(user_info)) {
-        answer = std::string(REGISTER_SUCCESS) + "\n" + END_OF_REQUEST;
+        // В случае удачной регистрации отправляем клиенту структуру StatusInfo (в ней содержится ID)
+        user_info.status_info_ = data_base_.get_status_info(user_info.status_info_.username_);
+
+        answer << std::string(REGISTER_SUCCESS) << "\n";
+        user_info.status_info_.serialize(answer);
+        answer << END_OF_REQUEST;
     } else {
-        answer = std::string(REGISTER_FAILED) + "\n" + END_OF_REQUEST;
+        answer << std::string(REGISTER_FAILED) << "\n" << END_OF_REQUEST;
     }
 
-    iterator->out_stream_ << answer;
+    iterator->out_stream_ << answer.str();
     async_write(iterator);
 }
 

@@ -67,25 +67,3 @@ std::pair<size_t, std::vector<char>> Utility::deserialize_char_vec(std::istream&
     return std::make_pair(static_cast<size_t>(len), vec);
 }
 
-size_t Utility::serialize(std::ostream &os, bool value) {
-    const auto pos = os.tellp();
-
-    // Приводим к типу uint32_t, т.к. на разных машинах размер машинного слова отличается,
-    // что может привести к проблемам.
-    const auto len = static_cast<uint32_t>(sizeof(value));
-
-    os.write(reinterpret_cast<const char*>(&len), sizeof(len));
-    os.write(reinterpret_cast<const char*>(&value), sizeof(value));
-
-    return static_cast<size_t>(os.tellp() - pos);
-}
-
-std::pair<size_t, bool> Utility::deserialize_bool(std::istream& is) {
-    bool value = false;
-    uint32_t len = 0; // Размер сериализованной строки был записан в формате uint32_t
-
-    is.read(reinterpret_cast<char*>(&len), sizeof(len));
-    is.read(reinterpret_cast<char*>(&value), len);
-
-    return std::make_pair(static_cast<size_t>(len), value);
-}

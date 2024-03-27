@@ -41,6 +41,12 @@ private slots:
     void slotRedirectClick(QWidget *sender);
 
     /**
+     * <p> Слот, отображающий модальное диалоговое окно для написания жалобы админу. </p>
+     * @brief slotDisplayComplaintDialog
+     */
+    void slotDisplayComplaintDialog();
+
+    /**
      * <p> Принимает сигналы выхода из аккаунта. </p>
      * @brief slotQuit
      */

@@ -39,6 +39,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         clickablelabel.h clickablelabel.cpp
         registrationwidget.h registrationwidget.cpp registrationwidget.ui
         mainwidget.h mainwidget.cpp mainwidget.ui
+        complaintdialog.h complaintdialog.cpp complaintdialog.ui
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET LinkDove APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
