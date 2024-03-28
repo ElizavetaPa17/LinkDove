@@ -41,12 +41,6 @@ private slots:
     void slotRedirectClick(QWidget *sender);
 
     /**
-     * <p> Слот, отображающий модальное диалоговое окно для написания жалобы админу. </p>
-     * @brief slotDisplayComplaintDialog
-     */
-    void slotDisplayComplaintDialog();
-
-    /**
      * <p> Принимает сигналы выхода из аккаунта. </p>
      * @brief slotQuit
      */
@@ -58,16 +52,11 @@ private:
     int application_mode_ = SIMPLE_MODE;
 
     /**
-     * <p> Устанавливает привилегированный режим работы приложения. </p>
+     * <p> Устанавливает привилегированный режим работы приложения в зависимости от флага. </p>
      * @brief setPrivilegedMode
+     * @param - Если flag = true, то режим привилегированный, иначе - обычный.
      */
-    void setPrivilegedMode();
-
-    /**
-     * <p> Устанавливает обычный режим работы приложения. </p>
-     * @brief setSimpleMode
-     */
-    void setSimpleMode();
+    void setPrivilegedMode(bool flag);
 
     /**
      * <p> Настраивает соединения с виджетом главного меню. </p>

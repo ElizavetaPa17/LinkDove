@@ -29,7 +29,7 @@ WelcomeWidget::WelcomeWidget(QWidget *parent, Qt::WindowFlags flags)
     QPropertyAnimation *animation = new QPropertyAnimation(welcomeLabel_, "p_opacity_", welcomeLabel_);
 
     connect(animation, &QPropertyAnimation::finished, this, &WelcomeWidget::slotEnableMousePress);
-    animation->setDuration(10/*3000*/);
+    animation->setDuration(10/*2500*/);
     animation->setStartValue(0);
     animation->setEndValue(1);
     animation->start();

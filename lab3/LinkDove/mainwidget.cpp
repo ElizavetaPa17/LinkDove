@@ -2,7 +2,6 @@
 #include "ui_mainwidget.h"
 
 #include <memory>
-#include "complaintdialog.h"
 
 MainWidget::MainWidget(QWidget *parent) :
     QWidget(parent),
@@ -21,16 +20,12 @@ MainWidget::~MainWidget()
 
 void MainWidget::setStatusInfo(const StatusInfo& status_info) {
     status_info_ = status_info;
-
-    ui->usernameLabel->setText(QString::fromUtf8(status_info.username_));
-    ui->emailLabel->setText(QString::fromUtf8(status_info.email_));
-    ui->birthdayLabel->setText(status_info.birthday_.toString(BIRTHAY_FORMAT));
-    ui->textStatusLabel->setText(QString::fromUtf8(status_info.text_status_));
+    ui->profileWidget->setStatusInfo(status_info);
 
     if (status_info.id_ == ADMIN_ID) {
-        setPrivilegedMode();
+        setPrivilegedMode(PRIVILEGED_MODE);
     } else {
-        setSimpleMode();
+        setPrivilegedMode(SIMPLE_MODE);
     }
 }
 
@@ -44,13 +39,6 @@ void MainWidget::slotRedirectClick(QWidget *sender) {
     }
 }
 
-void MainWidget::slotDisplayComplaintDialog() {
-    std::unique_ptr<ComplaintDialog> dialog_ptr = std::make_unique<ComplaintDialog>();
-    if (dialog_ptr->exec() == QDialog::Accepted) {
-        //
-    }
-}
-
 void MainWidget::slotQuit() {
     // clear status info value
     //memset(&status_info_, 0, sizeof(status_info_));
@@ -59,26 +47,14 @@ void MainWidget::slotQuit() {
     emit switchToPage(this, LOGIN_PAGE);
 }
 
-void MainWidget::setPrivilegedMode() {
-    ui->complaintButton->setText("Жалобы");
-    ui->editIconLabel->setDisabled(true);
-
-    ui->privateButton->hide();
-    ui->banButton->show();
-}
-
-void MainWidget::setSimpleMode() {
-    ui->complaintButton->setText("Жалоба");
-    ui->editIconLabel->setDisabled(false);
-
-    ui->privateButton->show();
-    ui->banButton->hide();
+void MainWidget::setPrivilegedMode(bool flag) {
+    ui->profileWidget->setPrivelegedMode(flag);
+    ui->settingWidget->setPrivilegedMode(flag);
 }
 
 void MainWidget::setupConnection() {
-    connect(ui->profileLabel,    &ClickableLabel::clicked, this, &MainWidget::slotRedirectClick);
-    connect(ui->chatLabel,       &ClickableLabel::clicked, this, &MainWidget::slotRedirectClick);
-    connect(ui->settingLabel,    &ClickableLabel::clicked, this, &MainWidget::slotRedirectClick);
-    connect(ui->complaintButton, &QPushButton::clicked,    this, &MainWidget::slotDisplayComplaintDialog);
-    connect(ui->quitButton,      &QPushButton::clicked,    this, &MainWidget::slotQuit);
+    connect(ui->profileLabel,    &ClickableLabel::clicked,    this, &MainWidget::slotRedirectClick);
+    connect(ui->chatLabel,       &ClickableLabel::clicked,    this, &MainWidget::slotRedirectClick);
+    connect(ui->settingLabel,    &ClickableLabel::clicked,    this, &MainWidget::slotRedirectClick);
+    connect(ui->settingWidget,   &SettingWidget::quitAccount, this, &MainWidget::slotQuit);
 }

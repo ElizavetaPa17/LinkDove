@@ -95,7 +95,7 @@
         </sizepolicy>
        </property>
        <property name="styleSheet">
-        <string notr="true">QLineEdit {
+        <string notr="true">QLineEdit#passwordEdit {
 	background-color: rgb(245, 245, 245);
 	width: 500px;
 	height: 55px;
