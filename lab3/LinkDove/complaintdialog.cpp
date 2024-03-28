@@ -39,4 +39,6 @@ void ComplaintDialog::setEnabledSendButton(bool mode) {
 
 void ComplaintDialog::setupConnection() {
     connect(ui->complaintEdit, &QLineEdit::textChanged, this, &ComplaintDialog::slotEnableSendButton);
+    connect(ui->cancelButton,  &QPushButton::clicked,   this, &QDialog::reject);
+    connect(ui->sendButton,    &QPushButton::clicked,   this, &ComplaintDialog::accept);
 }

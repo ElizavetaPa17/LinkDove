@@ -34,12 +34,6 @@ public slots:
      */
     void setPrivilegedMode(bool flag);
 
-    /**
-     * <p> Слот, отображающий модальное диалоговое окно для написания жалобы админу. </p>
-     * @brief slotDisplayComplaintDialog
-     */
-    void slotDisplayComplaintDialog();
-
 private slots:
     /**
      * <p> Принимает сигнал кнопки нажатия выхода и генерирует сигнал выхода. </p>
@@ -47,8 +41,27 @@ private slots:
      */
     void slotQuitAccount();
 
+    /**
+     * <p> Слот, отображающий модальное диалоговое окно для написания жалобы админу. </p>
+     * @brief slotDisplayComplaintDialog
+     */
+    void slotDisplayComplaintDialog();
+
+    /**
+     * <p> Слот, отображающий список жалоб админу. </p>
+     * @brief slotDisplayComplaintList
+     */
+    void slotDisplayComplaintList();
+
+    /**
+     * <p> Отображает модальное окно с информацией о приложении. </p>
+     * @brief slotDisplayAboutDialog
+     */
+    void slotDisplayAboutDialog();
+
 private:
     Ui::SettingWidget *ui;
+    int privileged_mode_;
 
     /**
      * <p> Настраивает соединения с классом. </p>

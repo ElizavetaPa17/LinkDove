@@ -43,7 +43,7 @@ void MainWidget::slotQuit() {
     // clear status info value
     //memset(&status_info_, 0, sizeof(status_info_));
 
-    ui->tabWidget->setCurrentIndex(EMPTY_PAGE);
+    ui->stackedWidget->setCurrentIndex(EMPTY_PAGE);
     emit switchToPage(this, LOGIN_PAGE);
 }
 
