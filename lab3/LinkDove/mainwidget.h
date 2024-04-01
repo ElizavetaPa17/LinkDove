@@ -32,6 +32,13 @@ public:
 signals:
     void switchToPage(QWidget *sender, int index);
 
+    /**
+     * <p> Генерирует сигнал для отправки жалобы. </p>
+     * @brief sendComplaint
+     * @param complaint_text - Текст жалобы.
+     */
+    void sendComplaint(std::string complaint_text);
+
 private slots:
     /**
      * <p> Преобразовывает сигнал клика на функциональные вкладки в сигнал switchToPage на нужную страницу. </p>
@@ -45,6 +52,13 @@ private slots:
      * @brief slotQuit
      */
     void slotQuit();
+
+    /**
+     * <p> Принимает сигнал на отправку жалобы от пользователя администратору. </p>
+     * @brief slotSendComplaint
+     * @param text
+     */
+    void slotSendComplaint(std::string text);
 
 private:
     Ui::MainWidget *ui;

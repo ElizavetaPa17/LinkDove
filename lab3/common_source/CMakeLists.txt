@@ -19,7 +19,8 @@ set(LIB_FILES
     tcpconnection.h tcpconnection.cpp
     UserInfo.h      UserInfo.cpp
     utility.h       utility.cpp
-    logininfo.h     logininfo.cpp)
+    logininfo.h     logininfo.cpp
+    complaint.h     complaint.cpp)
 
 add_library(common_library ${LIB_FILES}
     constants.cpp)

@@ -16,7 +16,7 @@ public:
      * @param os - Поток, в который сериализуются данные.
      * @return - Размер сериализованных данных объекта.
      */
-    size_t serialize(std::ostream& os);
+    size_t serialize(std::ostream& os) const;
 
     /**
      * <p> Десериализует объект из потока ввода. </p>

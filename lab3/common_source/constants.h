@@ -18,7 +18,9 @@ enum AutorizationAnswer {
     REGISTRATION_FAILED_ANSWER,
     REGISTRATION_SUCCESS_ANSWER,
     LOGIN_FAILED_ANSWER,
-    LOGIN_SUCCESS_ANSWER
+    LOGIN_SUCCESS_ANSWER,
+    SEND_COMPLAINT_SUCCESS_ANSWER,
+    SEND_COMPLAINT_FAILED_ANSWER
 };
 
 enum ApplicationMode {
@@ -62,3 +64,9 @@ extern const char *REGISTER_REQUEST;
 extern const char *REGISTER_SUCCESS;
 // Ответ сервера в случае провала регистрации
 extern const char *REGISTER_FAILED;
+// Запрос администратору, содержащий жалобу пользователя
+extern const char *SEND_COMPLAINT;
+// Ответ сервера на успешную регистрацию жалобы
+extern const char *COMPLAINT_SUCCESS;
+// Ответ сервера на неудачную регистрацию жалобы
+extern const char *COMPLAINT_FAILED;

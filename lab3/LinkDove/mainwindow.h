@@ -39,6 +39,13 @@ public slots:
      */
     void slotPassAuthorization(int authorization_result);
 
+    /**
+     * <p> Слот, принимающий от предков запрос на отправку жалобы от пользователя администратору. </p>
+     * @brief slotSendComplaint
+     * @param text
+     */
+    void slotSendComplaint(std::string text);
+
 private:
     Ui::MainWindow *ui;
 

@@ -19,6 +19,13 @@ public:
     explicit ComplaintDialog(QWidget *parent = nullptr);
     ~ComplaintDialog();
 
+    /**
+     * <p> Позволяет получить текст жалобы. </p>
+     * @brief getComplaintText
+     * @return - Текст жалобы.
+     */
+    std::string getComplaintText();
+
 private slots:
     /**
      * <p> Слот, который делает кнопку отправления жалобы доступной. </p>

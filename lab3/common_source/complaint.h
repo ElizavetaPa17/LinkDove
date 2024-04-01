@@ -1,11 +1,13 @@
-#ifndef USERINFO_H
-#define USERINFO_H
+#ifndef COMPLAINT_H
+#define COMPLAINT_H
 
-#include "StatusInfo.h"
+#include <string>
 
-struct UserInfo final {
-    StatusInfo status_info_;
-    std::string password_;
+class Complaint final {
+public:
+    unsigned long long id_ = 0;
+    unsigned long long sender_id_ = 0;
+    std::string text_;
 
     /**
      * <p> Сериализует текущее состояние объекта. </p>
@@ -24,4 +26,4 @@ struct UserInfo final {
     size_t deserialize(std::istream& is);
 };
 
-#endif // USERINFO_H
+#endif // COMPLAINT_H

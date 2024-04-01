@@ -19,6 +19,10 @@ ComplaintDialog::~ComplaintDialog()
     delete ui;
 }
 
+std::string ComplaintDialog::getComplaintText() {
+    return ui->complaintEdit->text().toStdString();
+}
+
 void ComplaintDialog::slotEnableSendButton() {
     if (ui->complaintEdit->text().size() > 0) {
         setEnabledSendButton(true);

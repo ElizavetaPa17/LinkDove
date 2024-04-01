@@ -47,7 +47,7 @@ void SettingWidget::slotQuitAccount() {
 void SettingWidget::slotDisplayComplaintDialog() {
     std::unique_ptr<ComplaintDialog> dialog_ptr = std::make_unique<ComplaintDialog>();
     if (dialog_ptr->exec() == QDialog::Accepted) {
-        //
+        emit sendComplaint(dialog_ptr->getComplaintText());
     }
 }
 

@@ -52,11 +52,16 @@ void MainWindow::slotPassAuthorization(int authorization_result) {
     }
 }
 
+void MainWindow::slotSendComplaint(std::string text) {
+    std::cerr << "complaint text: " << text << '\n';
+}
+
 void MainWindow::setupConnection() {
     connect(ui->pageWelcome,  &WelcomeWidget::passWelcomePage, this, &MainWindow::slotSwitchToPage);
     connect(ui->pageLogin,    &LoginWidget::passLoginWidget,   this, &MainWindow::slotSwitchToPage);
     connect(ui->pageRegister, &RegistrationWidget::passRegistrationWidget, this, &MainWindow::slotSwitchToPage);
     connect(ui->pageMain,     &MainWidget::switchToPage,       this, &MainWindow::slotSwitchToPage);
+    connect(ui->pageMain,     &MainWidget::sendComplaint,      this, &MainWindow::slotSendComplaint);
 
     connect(client_ptr.get(), &Client::authorization_result,   this, &MainWindow::slotPassAuthorization);
 }

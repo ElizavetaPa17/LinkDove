@@ -47,14 +47,19 @@ void MainWidget::slotQuit() {
     emit switchToPage(this, LOGIN_PAGE);
 }
 
+void MainWidget::slotSendComplaint(std::string text) {
+    emit sendComplaint(text);
+}
+
 void MainWidget::setPrivilegedMode(bool flag) {
     ui->profileWidget->setPrivelegedMode(flag);
     ui->settingWidget->setPrivilegedMode(flag);
 }
 
 void MainWidget::setupConnection() {
-    connect(ui->profileLabel,    &ClickableLabel::clicked,    this, &MainWidget::slotRedirectClick);
-    connect(ui->chatLabel,       &ClickableLabel::clicked,    this, &MainWidget::slotRedirectClick);
-    connect(ui->settingLabel,    &ClickableLabel::clicked,    this, &MainWidget::slotRedirectClick);
-    connect(ui->settingWidget,   &SettingWidget::quitAccount, this, &MainWidget::slotQuit);
+    connect(ui->profileLabel,    &ClickableLabel::clicked,      this, &MainWidget::slotRedirectClick);
+    connect(ui->chatLabel,       &ClickableLabel::clicked,      this, &MainWidget::slotRedirectClick);
+    connect(ui->settingLabel,    &ClickableLabel::clicked,      this, &MainWidget::slotRedirectClick);
+    connect(ui->settingWidget,   &SettingWidget::quitAccount,   this, &MainWidget::slotQuit);
+    connect(ui->settingWidget,   &SettingWidget::sendComplaint, this, &MainWidget::slotSendComplaint);
 }

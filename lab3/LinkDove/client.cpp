@@ -4,9 +4,6 @@
 #include <iostream>
 #include <QDate>
 
-#include "UserInfo.h"
-#include "logininfo.h"
-
 Client::Client(std::shared_ptr<asio::io_context> io_context_ptr, boost::asio::ip::address address, uint16_t port)
     : io_context_ptr_(io_context_ptr),
       connection_(io_context_ptr_),
@@ -26,7 +23,7 @@ void Client::async_connect() {
     run_context();
 }
 
-void Client::async_login(LoginInfo login_info) {
+void Client::async_login(const LoginInfo& login_info) {
    connection_.out_stream_ << create_login_request(login_info);
 
    asio::async_write(connection_.socket_, connection_.buffer_,
@@ -38,7 +35,7 @@ void Client::async_login(LoginInfo login_info) {
    run_context();
 }
 
-void Client::async_register(UserInfo user_info) {
+void Client::async_register(const UserInfo& user_info) {
     connection_.out_stream_ << create_register_request(user_info);
     status_info_ = user_info.status_info_;
 
@@ -50,6 +47,18 @@ void Client::async_register(UserInfo user_info) {
     run_context();
 }
 
+void Client::async_send_complaint(const Complaint& complaint) {
+    connection_.out_stream_ << create_send_complaint_request(complaint);
+
+    asio::async_write(connection_.socket_, connection_.buffer_,
+                      boost::bind(&Client::handle_async_read,
+                                  shared_from_this(),
+                                  asio::placeholders::error(),
+                                  asio::placeholders::bytes_transferred));
+
+    run_context();
+}
+
 StatusInfo Client::get_status_info() {
     return status_info_;
 }
@@ -58,7 +67,7 @@ bool Client::is_connected() noexcept {
     return is_connected_;
 }
 
-std::string Client::create_login_request(LoginInfo login_info) {
+std::string Client::create_login_request(const LoginInfo& login_info) {
     std::stringstream str_stream;
     str_stream << LOGIN_REQUEST << "\n";
 
@@ -68,11 +77,21 @@ std::string Client::create_login_request(LoginInfo login_info) {
     return str_stream.str();
 }
 
-std::string Client::create_register_request(UserInfo user_info) {
+std::string Client::create_register_request(const UserInfo& user_info) {
     std::stringstream str_stream;
     str_stream << REGISTER_REQUEST << '\n';
 
     user_info.serialize(str_stream);
+    str_stream << END_OF_REQUEST;
+
+    return str_stream.str();
+}
+
+std::string Client::create_send_complaint_request(const Complaint& complaint) {
+    std::stringstream str_stream;
+    str_stream << SEND_COMPLAINT << '\n';
+
+    complaint.serialize(str_stream);
     str_stream << END_OF_REQUEST;
 
     return str_stream.str();
@@ -138,16 +157,18 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
 
         if (answer_type == LOGIN_SUCCESS) {
             status_info_.deserialize(connection_.in_stream_);
-            std::cerr << status_info_.id_ << '\n';
             emit authorization_result(LOGIN_SUCCESS_ANSWER);
         } else if (answer_type == LOGIN_FAILED) {
             emit authorization_result(LOGIN_FAILED_ANSWER);
         } else if (answer_type == REGISTER_SUCCESS) {
             status_info_.deserialize(connection_.in_stream_);
-            std::cerr << status_info_.id_ << '\n';
             emit authorization_result(REGISTRATION_SUCCESS_ANSWER);
         } else if (answer_type == REGISTER_FAILED) {
             emit authorization_result(REGISTRATION_FAILED_ANSWER);
+        } else if (answer_type == COMPLAINT_SUCCESS) {
+            emit complaint_result(SEND_COMPLAINT_FAILED_ANSWER);
+        } else if (answer_type == COMPLAINT_FAILED){
+            emit complaint_result(SEND_COMPLAINT_SUCCESS_ANSWER);
         } else {
             std::cerr << "что-то невнятное\n";
         }

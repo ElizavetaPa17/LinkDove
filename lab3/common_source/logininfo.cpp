@@ -2,7 +2,7 @@
 
 #include "utility.h"
 
-size_t LoginInfo::serialize(std::ostream &os) {
+size_t LoginInfo::serialize(std::ostream &os) const {
     size_t size = 0;
     size += Utility::serialize(os, username_);
     size += Utility::serialize(os, email_);

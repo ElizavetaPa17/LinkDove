@@ -26,6 +26,13 @@ signals:
      */
     void quitAccount();
 
+    /**
+     * <p> Генерирует сигнал для отправки жалобы. </p>
+     * @brief sendComplaint
+     * @param complaint_text - Текст жалобы.
+     */
+    void sendComplaint(std::string complaint_text);
+
 public slots:
     /**
      * <p> Устанавливает привилегированный режим работы в зависимости от флага. </p>

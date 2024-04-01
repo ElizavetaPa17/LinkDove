@@ -10,6 +10,7 @@
 #include "IStreamConnection.h"
 #include "logininfo.h"
 #include "UserInfo.h"
+#include "complaint.h"
 #include "constants.h"
 
 namespace asio = boost::asio;
@@ -36,14 +37,21 @@ public:
      * @param login_info - Структура, содержащая информацию для прохождения авторизации.
      * @brief async_login
      */
-    void async_login(LoginInfo login_info);
+    void async_login(const LoginInfo& login_info);
 
     /**
      * <p> Осуществляет попытку регистрации пользователя. </p>
      * @param register_info - Структура, содержащая информацию для прохождения регистрации.
      * @brief async_register
      */
-    void async_register(UserInfo user_info);
+    void async_register(const UserInfo& user_info);
+
+    /**
+     * <p> Отправляет жалобу от пользователя администратору. </p>
+     * @param complaint - Структура, содержащая информацию о жалобе
+     * @brief async_send_complaint
+     */
+    void async_send_complaint(const Complaint& complaint);
 
     /**
      * <p> Возвращает информацию о пользователе. </p>
@@ -61,6 +69,7 @@ public:
 
 signals:
     void authorization_result(int result);
+    void complaint_result(int result);
 
 private:
     std::shared_ptr<asio::io_context> io_context_ptr_;
@@ -76,16 +85,24 @@ private:
      * <p> Формирует запрос авторизации. </p>
      * @brief create_login_request
      * @param login_info - Структура, содержащая информацию для прохождения авторизации.
-     * @return - Строка запроса.
+     * @return - Строковое представление запроса.
      */
-    std::string create_login_request(LoginInfo login_info);
+    std::string create_login_request(const LoginInfo& login_info);
 
     /**
      * <p> Формирует запрос регистрации. </p>
      * @brief create_register_request
-     * @return - Строка запроса.
+     * @return - Строковое представление запроса.
      */
-    std::string create_register_request(UserInfo user_info);
+    std::string create_register_request(const UserInfo& user_info);
+
+    /**
+     * <p> Формирует запрос отправки жалобы от обычного пользователя администратору. </p>
+     * @brief create_send_complaint_request
+     * @param complaint - Структура, содержащая информацию о жалобе
+     * @return - Строковое представление запроса.
+     */
+    std::string create_send_complaint_request(const Complaint& complaint);
 
     /**
      * <p> Асинхронно читает ответ от сервера. </p>

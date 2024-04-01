@@ -6,7 +6,7 @@
 #include <QString>
 #include <iostream>
 
-size_t StatusInfo::serialize(std::ostream &os) {
+size_t StatusInfo::serialize(std::ostream &os) const {
     size_t size = 0;
 
     size += Utility::serialize_fundamental<unsigned long long>(os, id_);
