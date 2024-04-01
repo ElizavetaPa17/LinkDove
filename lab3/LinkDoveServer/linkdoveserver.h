@@ -118,6 +118,13 @@ private:
      */
     void handle_register_request(ConnectionIterator iterator);
 
+    /**
+     * <p> Обрабатывает запрос клиента на отправку жалобы администратору. </p>
+     * @brief handle_complaint_request
+     * @param iterator
+     */
+    void handle_complaint_request(ConnectionIterator iterator);
+
     /** <p> Запускает в отдельном потоке контекст для обработки асинхронных функций. </p>
      * @brief run_context
      */

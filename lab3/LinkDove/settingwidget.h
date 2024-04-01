@@ -29,7 +29,7 @@ signals:
     /**
      * <p> Генерирует сигнал для отправки жалобы. </p>
      * @brief sendComplaint
-     * @param complaint_text - Текст жалобы.
+     * @param complaint_text - Содержание жалобы.
      */
     void sendComplaint(std::string complaint_text);
 

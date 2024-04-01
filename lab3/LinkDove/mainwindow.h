@@ -40,6 +40,13 @@ public slots:
     void slotPassAuthorization(int authorization_result);
 
     /**
+     * <p> Слот, принимающий от клиента результат отправки жалобы. </p>
+     * @brief slotComplaintResult
+     * @param complaint_result - Результат отправки жалобы.
+     */
+    void slotComplaintResult(int complaint_result);
+
+    /**
      * <p> Слот, принимающий от предков запрос на отправку жалобы от пользователя администратору. </p>
      * @brief slotSendComplaint
      * @param text

@@ -69,7 +69,7 @@ bool LinkDoveSQLDataBase::setup_tables() {
     return true;
 }
 
-bool LinkDoveSQLDataBase::register_user(UserInfo info) {
+bool LinkDoveSQLDataBase::register_user(const UserInfo& info) {
     QSqlQuery query(data_base_);
     query.prepare("INSERT INTO USERS (username, email, password, birthday, text_status, image, is_banned) "
                   "VALUES (:username, :email, :password, :birthday, :text_status, :image, :is_banned); ");
@@ -90,7 +90,7 @@ bool LinkDoveSQLDataBase::register_user(UserInfo info) {
     }
 }
 
-bool LinkDoveSQLDataBase::login_user(LoginInfo info) {
+bool LinkDoveSQLDataBase::login_user(const LoginInfo& info) {
     QSqlQuery query(data_base_);
     query.prepare("SELECT * FROM USERS "
                   "WHERE "
@@ -109,6 +109,23 @@ bool LinkDoveSQLDataBase::login_user(LoginInfo info) {
         } else {
             return false;
         }
+    }
+}
+
+bool LinkDoveSQLDataBase::add_complaint(const Complaint& complaint) {
+    QSqlQuery query(data_base_);
+    query.prepare("INSERT INTO COMPLAINTS (sender_id, text) "
+                  "VALUES (:sender_id, :text); ");
+
+    query.bindValue(":sender_id", complaint.sender_id_);
+    query.bindValue(":text", complaint.text_.c_str());
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString();
+        return false;
+    } else {
+        // если вставка была успешна, то row affected > 0, иначе row affected == 0 (false).
+        return query.numRowsAffected();
     }
 }
 

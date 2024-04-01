@@ -27,7 +27,7 @@ void Client::async_login(const LoginInfo& login_info) {
    connection_.out_stream_ << create_login_request(login_info);
 
    asio::async_write(connection_.socket_, connection_.buffer_,
-                     boost::bind(&Client::handle_async_login,
+                     boost::bind(&Client::handle_async_write,
                                  shared_from_this(),
                                  asio::placeholders::error,
                                  asio::placeholders::bytes_transferred));
@@ -40,18 +40,22 @@ void Client::async_register(const UserInfo& user_info) {
     status_info_ = user_info.status_info_;
 
     asio::async_write(connection_.socket_, connection_.buffer_,
-                      boost::bind(&Client::handle_async_register,
+                      boost::bind(&Client::handle_async_write,
                                   shared_from_this(),
                                   asio::placeholders::error,
                                   asio::placeholders::bytes_transferred));
     run_context();
 }
 
-void Client::async_send_complaint(const Complaint& complaint) {
+void Client::async_send_complaint(const std::string& text) {
+    Complaint complaint;
+    complaint.sender_id_ = status_info_.id_;
+    complaint.text_ = text;
+
     connection_.out_stream_ << create_send_complaint_request(complaint);
 
     asio::async_write(connection_.socket_, connection_.buffer_,
-                      boost::bind(&Client::handle_async_read,
+                      boost::bind(&Client::handle_async_write,
                                   shared_from_this(),
                                   asio::placeholders::error(),
                                   asio::placeholders::bytes_transferred));
@@ -89,7 +93,7 @@ std::string Client::create_register_request(const UserInfo& user_info) {
 
 std::string Client::create_send_complaint_request(const Complaint& complaint) {
     std::stringstream str_stream;
-    str_stream << SEND_COMPLAINT << '\n';
+    str_stream << COMPLAINT_REQUEST << '\n';
 
     complaint.serialize(str_stream);
     str_stream << END_OF_REQUEST;
@@ -120,27 +124,16 @@ void Client::handle_async_connect(boost::system::error_code error) {
     }
 }
 
-void Client::handle_async_login(boost::system::error_code error, size_t bytes_transferred) {
-    if (error) {
-        std::cerr << "Failed to send login request: " << error.value() << ' ' << error.message() << '\n';
-        throw std::runtime_error("Failed to send login request");
-    }
 
-    if (bytes_transferred > 0) {
-        std::cerr << "Send login request to the server. Transfer " << bytes_transferred << " bytes.\n";
-        async_read();
-    }
-}
-
-void Client::handle_async_register(boost::system::error_code error, size_t bytes_transferred) {
+void Client::handle_async_write(boost::system::error_code error, size_t bytes_transferred) {
     if (error) {
-        std::cerr << "Failed to send register request: " << error.value() << ' ' << error.message() << '\n';
+        std::cerr << "Failed to send the request: " << error.value() << ' ' << error.message() << '\n';
         throw std::runtime_error("Failed to send register request");
     }
 
 
     if (bytes_transferred > 0) {
-        std::cerr << "Send register request to the server. Transfer " << bytes_transferred << " bytes.\n";
+        std::cerr << "Send the request to the server. Transfer " << bytes_transferred << " bytes.\n";
         async_read();
     }
 }
@@ -166,11 +159,11 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
         } else if (answer_type == REGISTER_FAILED) {
             emit authorization_result(REGISTRATION_FAILED_ANSWER);
         } else if (answer_type == COMPLAINT_SUCCESS) {
-            emit complaint_result(SEND_COMPLAINT_FAILED_ANSWER);
-        } else if (answer_type == COMPLAINT_FAILED){
             emit complaint_result(SEND_COMPLAINT_SUCCESS_ANSWER);
+        } else if (answer_type == COMPLAINT_FAILED){
+            emit complaint_result(SEND_COMPLAINT_FAILED_ANSWER);
         } else {
-            std::cerr << "что-то невнятное\n";
+            std::cerr << "что-то невнятное: " << answer_type << '\n';
         }
 
         remove_delimeter();

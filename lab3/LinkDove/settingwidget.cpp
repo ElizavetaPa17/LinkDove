@@ -1,7 +1,7 @@
 #include "settingwidget.h"
 #include "ui_settingwidget.h"
 
-#include "aboutappdialog.h"
+#include "infodialog.h"
 #include "complaintdialog.h"
 #include "constants.h"
 
@@ -56,7 +56,7 @@ void SettingWidget::slotDisplayComplaintList() {
 }
 
 void SettingWidget::slotDisplayAboutDialog() {
-    std::unique_ptr<AboutAppDialog> dialog_ptr = std::make_unique<AboutAppDialog>();
+    std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(APPLICATION_DESCRIPTION);
     dialog_ptr->exec();
 }
 

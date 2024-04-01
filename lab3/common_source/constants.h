@@ -65,7 +65,7 @@ extern const char *REGISTER_SUCCESS;
 // Ответ сервера в случае провала регистрации
 extern const char *REGISTER_FAILED;
 // Запрос администратору, содержащий жалобу пользователя
-extern const char *SEND_COMPLAINT;
+extern const char *COMPLAINT_REQUEST;
 // Ответ сервера на успешную регистрацию жалобы
 extern const char *COMPLAINT_SUCCESS;
 // Ответ сервера на неудачную регистрацию жалобы

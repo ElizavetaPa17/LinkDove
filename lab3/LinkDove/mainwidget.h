@@ -35,7 +35,7 @@ signals:
     /**
      * <p> Генерирует сигнал для отправки жалобы. </p>
      * @brief sendComplaint
-     * @param complaint_text - Текст жалобы.
+     * @param complaint_text - Содержание жалобы.
      */
     void sendComplaint(std::string complaint_text);
 
@@ -56,7 +56,7 @@ private slots:
     /**
      * <p> Принимает сигнал на отправку жалобы от пользователя администратору. </p>
      * @brief slotSendComplaint
-     * @param text
+     * @param text - Содержание жалобы.
      */
     void slotSendComplaint(std::string text);
 

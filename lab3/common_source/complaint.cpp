@@ -28,6 +28,8 @@ size_t Complaint::deserialize(std::istream &is) {
 
     std::pair<size_t, std::string> temp_str_pair;
     temp_str_pair = Utility::deserialize_string(is);
+    size += temp_str_pair.first;
+    text_ = temp_str_pair.second;
 
     return size;
 }

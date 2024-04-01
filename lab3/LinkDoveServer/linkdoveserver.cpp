@@ -134,6 +134,8 @@ void LinkDoveServer::handle_type_request(ConnectionIterator iterator) {
         handle_login_request(iterator);
     } else if (request_type == REGISTER_REQUEST) {
         handle_register_request(iterator);
+    } else if (request_type == COMPLAINT_REQUEST) {
+        handle_complaint_request(iterator);
     }
 }
 
@@ -169,14 +171,33 @@ void LinkDoveServer::handle_register_request(ConnectionIterator iterator) {
         // В случае удачной регистрации отправляем клиенту структуру StatusInfo (в ней содержится ID)
         user_info.status_info_ = data_base_.get_status_info(user_info.status_info_.username_);
 
-        answer << std::string(REGISTER_SUCCESS) << "\n";
+        answer << REGISTER_SUCCESS << "\n";
         user_info.status_info_.serialize(answer);
         answer << END_OF_REQUEST;
     } else {
-        answer << std::string(REGISTER_FAILED) << "\n" << END_OF_REQUEST;
+        answer << REGISTER_FAILED << "\n" << END_OF_REQUEST;
     }
 
     iterator->out_stream_ << answer.str();
+    std::cerr << answer.str() << '\n';
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_complaint_request(ConnectionIterator iterator) {
+    Complaint complaint;
+    complaint.deserialize(iterator->in_stream_);
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    if (data_base_.add_complaint(complaint)) {
+        answer << COMPLAINT_SUCCESS << "\n" << END_OF_REQUEST;
+    } else {
+        answer << COMPLAINT_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    std::cerr << answer.str() << '\n';
     async_write(iterator);
 }
 

@@ -48,10 +48,10 @@ public:
 
     /**
      * <p> Отправляет жалобу от пользователя администратору. </p>
-     * @param complaint - Структура, содержащая информацию о жалобе
+     * @param text - Содержание жалобы.
      * @brief async_send_complaint
      */
-    void async_send_complaint(const Complaint& complaint);
+    void async_send_complaint(const std::string& text);
 
     /**
      * <p> Возвращает информацию о пользователе. </p>
@@ -117,20 +117,12 @@ private:
     void handle_async_connect(boost::system::error_code error);
 
     /**
-     * <p> Обрабатывает попытку авторизации. </p>
+     * <p> Обработчик асинхронной функции записи. </p>
      * @brief handle_async_login
      * @param error - Параметр, содержащий ошибку в случае неудачной записи в сокет.
      * @param bytes_transfered - Количество записанных байтов.
      */
-    void handle_async_login(boost::system::error_code error, size_t bytes_transferred);
-
-    /**
-     * <p> Обрабатывает попытку регистрации. </p>
-     * @brief handle_async_login
-     * @param error - Параметр, содержащий ошибку в случае неудачной записи в сокет.
-     * @param bytes_transfered - Количество записанных байтов.
-     */
-    void handle_async_register(boost::system::error_code error, size_t bytes_transferred);
+    void handle_async_write(boost::system::error_code error, size_t bytes_transferred);
 
     /**
      * <p> Обрабатывает попытку чтения ответа от сервера. </p>

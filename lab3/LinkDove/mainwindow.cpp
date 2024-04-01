@@ -2,6 +2,9 @@
 #include "./ui_mainwindow.h"
 
 #include <iostream>
+#include <memory>
+
+#include "infodialog.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -52,8 +55,21 @@ void MainWindow::slotPassAuthorization(int authorization_result) {
     }
 }
 
+void MainWindow::slotComplaintResult(int complaint_result) {
+    std::string text;
+    if (complaint_result == SEND_COMPLAINT_SUCCESS_ANSWER) {
+        text = "Ваша жалоба была отправлена.";
+    } else {
+        text = "Ошибка отправки. Повторите попытку позже.";
+    }
+
+    std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(text);
+    dialog_ptr->exec();
+}
+
+
 void MainWindow::slotSendComplaint(std::string text) {
-    std::cerr << "complaint text: " << text << '\n';
+    client_ptr->async_send_complaint(text);
 }
 
 void MainWindow::setupConnection() {
@@ -64,6 +80,7 @@ void MainWindow::setupConnection() {
     connect(ui->pageMain,     &MainWidget::sendComplaint,      this, &MainWindow::slotSendComplaint);
 
     connect(client_ptr.get(), &Client::authorization_result,   this, &MainWindow::slotPassAuthorization);
+    connect(client_ptr.get(), &Client::complaint_result,       this, &MainWindow::slotComplaintResult);
 }
 
 void MainWindow::tryLoginAttempt() {
