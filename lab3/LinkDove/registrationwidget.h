@@ -59,7 +59,7 @@ public slots:
      * <p> Переключается на страницу логин-формы </p>
      * @brief slotSwitchToLogin
      */
-    void slotSwitchToLogin();
+    //void slotSwitchToLogin();
 
 private slots:
     /**

@@ -55,9 +55,9 @@ void LoginWidget::slotCheckInput() {
     }
 }
 
-void LoginWidget::slotSwitchToRegister() {
-    emit passLoginWidget(this, REGISTER_PAGE);
-}
+//void LoginWidget::slotSwitchToRegister() {
+//    emit passLoginWidget(this, REGISTER_PAGE);
+//}
 
 void LoginWidget::slotRestoreRegistrationLabel() {
     ui->registerLabel->setText("Зарегистрироваться");
@@ -69,5 +69,5 @@ void LoginWidget::slotRestoreRegistrationLabel() {
 
 void LoginWidget::setupConnection() {
     connect(ui->loginButton,   &QPushButton::clicked,    this, &LoginWidget::slotCheckInput);
-    connect(ui->registerLabel, &ClickableLabel::clicked, this, &LoginWidget::slotSwitchToRegister);
+    connect(ui->registerLabel, &ClickableLabel::clicked, [this] () {emit passLoginWidget(this, REGISTER_PAGE); });
 }

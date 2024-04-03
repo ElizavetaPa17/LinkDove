@@ -53,13 +53,6 @@ private slots:
      */
     void slotQuit();
 
-    /**
-     * <p> Принимает сигнал на отправку жалобы от пользователя администратору. </p>
-     * @brief slotSendComplaint
-     * @param text - Содержание жалобы.
-     */
-    void slotSendComplaint(std::string text);
-
 private:
     Ui::MainWidget *ui;
     StatusInfo status_info_;

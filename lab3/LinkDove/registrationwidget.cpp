@@ -67,9 +67,9 @@ void RegistrationWidget::slotCheckInput() {
     }
 }
 
-void RegistrationWidget::slotSwitchToLogin() {
-    emit passRegistrationWidget(this, LOGIN_PAGE);
-}
+//void RegistrationWidget::slotSwitchToLogin() {
+//    emit passRegistrationWidget(this, LOGIN_PAGE);
+//}
 
 void RegistrationWidget::slotRestoreLoginLabel() {
     ui->loginLabel->setText("Уже есть аккаунт");
@@ -81,5 +81,5 @@ void RegistrationWidget::slotRestoreLoginLabel() {
 
 void RegistrationWidget::setupConnection() {
     connect(ui->registrationButton, &QPushButton::clicked, this, &RegistrationWidget::slotCheckInput);
-    connect(ui->loginLabel, &ClickableLabel::clicked, this, &RegistrationWidget::slotSwitchToLogin);
+    connect(ui->loginLabel, &ClickableLabel::clicked, [this] () { emit passRegistrationWidget(this, LOGIN_PAGE); });
 }

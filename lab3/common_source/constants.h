@@ -14,6 +14,11 @@ enum InnerMainPage{
     SETTING_PAGE
 };
 
+enum profileTypePage {
+    SIMPLE_PROFILE_PAGE,
+    EDITED_PROFILE_PAGE
+};
+
 enum AutorizationAnswer {
     REGISTRATION_FAILED_ANSWER,
     REGISTRATION_SUCCESS_ANSWER,

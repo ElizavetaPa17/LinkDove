@@ -59,7 +59,7 @@ public slots:
      * <p> Переключается на страницу регистрации </p>
      * @brief slotSwitchToRegister
      */
-    void slotSwitchToRegister();
+    //void slotSwitchToRegister();
 
 private slots:
     /**

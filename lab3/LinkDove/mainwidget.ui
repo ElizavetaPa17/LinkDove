@@ -222,10 +222,28 @@
         <number>70</number>
        </property>
        <item row="0" column="0">
-        <widget class="ProfileWidget" name="profileWidget" native="true">
-         <property name="styleSheet">
-          <string notr="true"/>
+        <widget class="QStackedWidget" name="profileStackedWidget">
+         <property name="currentIndex">
+          <number>1</number>
          </property>
+         <widget class="QWidget" name="page_3">
+          <layout class="QGridLayout" name="gridLayout_3">
+           <item row="0" column="0">
+            <widget class="ProfileWidget" name="profileWidget" native="true">
+             <property name="styleSheet">
+              <string notr="true"/>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="page_4">
+          <layout class="QGridLayout" name="gridLayout_4">
+           <item row="0" column="0">
+            <widget class="EditProfileWidget" name="profileEditWidget" native="true"/>
+           </item>
+          </layout>
+         </widget>
         </widget>
        </item>
       </layout>
@@ -374,6 +392,12 @@ QTabBar::tab:selected {
    <class>SettingWidget</class>
    <extends>QWidget</extends>
    <header>settingwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>EditProfileWidget</class>
+   <extends>QWidget</extends>
+   <header>editprofilewidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -10,6 +10,7 @@ MainWidget::MainWidget(QWidget *parent) :
     ui->setupUi(this);
 
     ui->stackedWidget->setCurrentIndex(EMPTY_PAGE);
+    ui->profileStackedWidget->setCurrentIndex(SIMPLE_PROFILE_PAGE);
     setupConnection();
 }
 
@@ -47,19 +48,23 @@ void MainWidget::slotQuit() {
     emit switchToPage(this, LOGIN_PAGE);
 }
 
-void MainWidget::slotSendComplaint(std::string text) {
-    emit sendComplaint(text);
-}
-
 void MainWidget::setPrivilegedMode(bool flag) {
     ui->profileWidget->setPrivelegedMode(flag);
     ui->settingWidget->setPrivilegedMode(flag);
 }
 
 void MainWidget::setupConnection() {
-    connect(ui->profileLabel,    &ClickableLabel::clicked,      this, &MainWidget::slotRedirectClick);
-    connect(ui->chatLabel,       &ClickableLabel::clicked,      this, &MainWidget::slotRedirectClick);
-    connect(ui->settingLabel,    &ClickableLabel::clicked,      this, &MainWidget::slotRedirectClick);
-    connect(ui->settingWidget,   &SettingWidget::quitAccount,   this, &MainWidget::slotQuit);
-    connect(ui->settingWidget,   &SettingWidget::sendComplaint, this, &MainWidget::slotSendComplaint);
+    connect(ui->profileLabel,    &ClickableLabel::clicked,     this, &MainWidget::slotRedirectClick);
+    connect(ui->chatLabel,       &ClickableLabel::clicked,     this, &MainWidget::slotRedirectClick);
+    connect(ui->settingLabel,    &ClickableLabel::clicked,     this, &MainWidget::slotRedirectClick);
+    connect(ui->settingWidget,   &SettingWidget::quitAccount,  this, &MainWidget::slotQuit);
+
+    connect(ui->settingWidget,     &SettingWidget::sendComplaint,    [this] (std::string text) { emit sendComplaint(text);});
+    connect(ui->profileWidget,     &ProfileWidget::editProfile,      [this] () {
+                                                                                 ui->profileStackedWidget->setCurrentIndex(EDITED_PROFILE_PAGE);
+                                                                                 ui->profileEditWidget->setStatusInfo(ui->profileWidget->getStatusInfo());
+                                                                               } );
+    connect(ui->profileEditWidget, &EditProfileWidget::editFinished, [this] () {
+                                                                                 ui->profileStackedWidget->setCurrentIndex(SIMPLE_PROFILE_PAGE);
+                                                                               } );
 }

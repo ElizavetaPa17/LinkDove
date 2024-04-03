@@ -9,6 +9,7 @@
     <file alias="profile_envelope_icon.png">../resources/profile_envelope_icon.png</file>
     <file alias="profile_calendar_icon.png">../resources/profile_calendar_icon.png</file>
     <file alias="profile_edit_icon.png">../resources/profile_edit_icon.png</file>
+    <file alias="profile_ok_icon.png">../resources/profile_ok_icon.png</file>
     <file alias="chat_chat_icon.png">../resources/chat_chat_icon.png</file>
     <file alias="chat_group_icon.png">../resources/chat_group_icon.png</file>
     <file alias="chat_channel_icon.png">../resources/chat_channel_icon.png</file>
