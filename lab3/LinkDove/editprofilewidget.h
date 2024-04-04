@@ -39,8 +39,9 @@ signals:
     /**
      * <p> Сигнал, который отправляется, когда пользователь закончил редактировать профиль. </p>
      * @brief editFinished
+     * @param status_info - Структура, содержащая отредактированную информацию о пользователе.
      */
-    void editFinished();
+    void editFinished(StatusInfo status_info);
 
 private slots:
     /**
@@ -48,6 +49,12 @@ private slots:
      * @brief slotChooseUserIcon
      */
     void slotChooseUserIcon();
+
+    /**
+     * <p> Слот, вызываемый при окончании редактирования профиля. </p>
+     * @brief slotEditFinished
+     */
+    void slotEditFinished();
 
 private:
     /**
@@ -58,7 +65,6 @@ private:
 
 private:
     Ui::EditProfileWidget *ui;
-    StatusInfo status_info_;
 };
 
 #endif // EDITPROFILEWIDGET_H

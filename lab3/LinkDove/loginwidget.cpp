@@ -55,10 +55,6 @@ void LoginWidget::slotCheckInput() {
     }
 }
 
-//void LoginWidget::slotSwitchToRegister() {
-//    emit passLoginWidget(this, REGISTER_PAGE);
-//}
-
 void LoginWidget::slotRestoreRegistrationLabel() {
     ui->registerLabel->setText("Зарегистрироваться");
 

@@ -30,6 +30,14 @@ public:
     bool login_user(const LoginInfo& info);
 
     /**
+     * <p> Обновляет данные о пользователе. </p>
+     * @brief update_user
+     * @param status_info - Структура, содержащая обновленную информацию о пользователе.
+     * @return - В случае успешного обновления информации в БД возвращает true, иначе - false.
+     */
+    bool update_user(const StatusInfo& status_info);
+
+    /**
      * <p> Добавляет жалобу в БД. </p>
      * @brief add_complaint
      * @param complaint - Информация о жалобе, которая добавляется в БД.
@@ -38,12 +46,20 @@ public:
     bool add_complaint(const Complaint& complaint);
 
     /**
-     * <p> Возвращает информацию о пользователе, который соответсвует заданным критериям. </p>
+     * <p> Возвращает информацию о пользователе, который соответствует никнейму. </p>
      * @brief get_user
      * @param username - Никнейм пользователя
      * @return - Структура, содержащая информацию о пользователе
      */
     StatusInfo get_status_info(const std::string &username);
+
+    /**
+     * <p> Возвращает информацию о пользователе, который соответствует идентификатору. </p>
+     * @brief get_user
+     * @param username - Никнейм пользователя
+     * @return - Структура, содержащая информацию о пользователе
+     */
+    StatusInfo get_status_info(unsigned long long id);
 
 private:
     QSqlDatabase data_base_;
@@ -61,6 +77,14 @@ private:
      * @return - Возвращает true в случае успеха, иначе - false.
      */
     bool setup_tables();
+
+    /**
+     * <p> Извлекает данные о пользователе, которые возвращает объект query. </p>
+     * @brief LinkDoveSQLDataBase::retrieve_status_info
+     * @param query - Запрос, содержащий данные о пользователе.
+     * @return - Структура. содержащая данные о пользователе.
+     */
+    StatusInfo retrieve_status_info(const QSqlQuery& query);
 };
 
 #endif // LINKDOVESQLDATABASE_H

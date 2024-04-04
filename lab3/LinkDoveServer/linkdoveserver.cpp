@@ -136,6 +136,8 @@ void LinkDoveServer::handle_type_request(ConnectionIterator iterator) {
         handle_register_request(iterator);
     } else if (request_type == COMPLAINT_REQUEST) {
         handle_complaint_request(iterator);
+    } else if (request_type == UPDATE_USER_REQUEST) {
+        handle_update_user_request(iterator);
     }
 }
 
@@ -179,7 +181,6 @@ void LinkDoveServer::handle_register_request(ConnectionIterator iterator) {
     }
 
     iterator->out_stream_ << answer.str();
-    std::cerr << answer.str() << '\n';
     async_write(iterator);
 }
 
@@ -197,7 +198,22 @@ void LinkDoveServer::handle_complaint_request(ConnectionIterator iterator) {
     }
 
     iterator->out_stream_ << answer.str();
-    std::cerr << answer.str() << '\n';
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_update_user_request(ConnectionIterator iterator) {
+    StatusInfo status_info;
+    status_info.deserialize(iterator->in_stream_);
+
+    std::stringstream answer;
+    remove_delimeter(iterator);
+    if (data_base_.update_user(status_info)) {
+        answer << UPDATE_USER_SUCCESS << "\n" << END_OF_REQUEST;
+    } else {
+        answer << UPDATE_USER_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
     async_write(iterator);
 }
 

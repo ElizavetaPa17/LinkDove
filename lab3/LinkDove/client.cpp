@@ -63,6 +63,22 @@ void Client::async_send_complaint(const std::string& text) {
     run_context();
 }
 
+void Client::async_update_user(StatusInfo& status_info) {
+    // Идентификатор пользователя известен только классу Client
+    // Поэтому status_info не является константным, т.к. нам необходимо установить поле идентификатора.
+    updated_status_info_ = status_info;
+    updated_status_info_.id_ = status_info_.id_;
+    connection_.out_stream_ << create_update_user_request(updated_status_info_);
+
+    asio::async_write(connection_.socket_, connection_.buffer_,
+                      boost::bind(&Client::handle_async_write,
+                                  shared_from_this(),
+                                  asio::placeholders::error,
+                                  asio::placeholders::bytes_transferred));
+
+    run_context();
+}
+
 StatusInfo Client::get_status_info() {
     return status_info_;
 }
@@ -98,6 +114,17 @@ std::string Client::create_send_complaint_request(const Complaint& complaint) {
     complaint.serialize(str_stream);
     str_stream << END_OF_REQUEST;
 
+    return str_stream.str();
+}
+
+std::string Client::create_update_user_request(const StatusInfo& status_info) {
+    std::stringstream str_stream;
+    str_stream << UPDATE_USER_REQUEST << '\n';
+
+    status_info.serialize(str_stream);
+    str_stream << END_OF_REQUEST;
+
+    std::cerr << str_stream.str() << "\n\n";
     return str_stream.str();
 }
 
@@ -162,6 +189,11 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
             emit complaint_result(SEND_COMPLAINT_SUCCESS_ANSWER);
         } else if (answer_type == COMPLAINT_FAILED){
             emit complaint_result(SEND_COMPLAINT_FAILED_ANSWER);
+        } else if (answer_type == UPDATE_USER_SUCCESS) {
+            status_info_ = updated_status_info_;
+            emit update_user_result(UPDATE_USER_SUCCESS_ANSWER);
+        } else if (answer_type == UPDATE_USER_FAILED){
+            emit update_user_result(UPDATE_USER_FAILED_ANSWER);
         } else {
             std::cerr << "что-то невнятное: " << answer_type << '\n';
         }

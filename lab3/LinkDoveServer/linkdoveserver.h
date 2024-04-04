@@ -125,6 +125,13 @@ private:
      */
     void handle_complaint_request(ConnectionIterator iterator);
 
+    /**
+     * <p> Обрабатывает запрос клиента на обновление информации о пользователе. </p>
+     * @brief handle_update_user_request
+     * @param iterator
+     */
+    void handle_update_user_request(ConnectionIterator iterator);
+
     /** <p> Запускает в отдельном потоке контекст для обработки асинхронных функций. </p>
      * @brief run_context
      */

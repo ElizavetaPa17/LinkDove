@@ -60,7 +60,7 @@ bool LinkDoveSQLDataBase::setup_tables() {
                        " sender_id MEDIUMINT NOT NULL, "
                        " text TEXT NOT NULL,"
                        " FOREIGN KEY(sender_id) REFERENCES USERS(ID) "
-                       " ON DELETE CASCADE)");
+                       " ON DELETE CASCADE); ");
     if (!is_ok) {
         std::cerr << "Failed to setup COMPLAINTS table: " << query.lastError().text().toStdString() << '\n';
         return false;
@@ -94,7 +94,7 @@ bool LinkDoveSQLDataBase::login_user(const LoginInfo& info) {
     QSqlQuery query(data_base_);
     query.prepare("SELECT * FROM USERS "
                   "WHERE "
-                  "username = :username AND email = :email AND password = :password");
+                  "username = :username AND email = :email AND password = :password; ");
 
     query.bindValue(":username", info.username_.c_str());
     query.bindValue(":email",    info.email_.c_str());
@@ -112,6 +112,71 @@ bool LinkDoveSQLDataBase::login_user(const LoginInfo& info) {
     }
 }
 
+bool LinkDoveSQLDataBase::update_user(const StatusInfo& status_info) {
+    StatusInfo inner_info;
+    bool is_username_changed = false,
+         is_email_changed    = false;
+    try {
+        inner_info = get_status_info(status_info.id_);
+        if (inner_info.username_ != status_info.username_) {
+            is_username_changed = true;
+        }
+        if (inner_info.email_ != status_info.email_) {
+            is_email_changed = true;
+        }
+
+    } catch(std::runtime_error& ex) {
+        return false;
+    }
+
+    QSqlQuery query(data_base_);
+
+    // Если никнейм или почта меняется, нужно изменить вид запроса,
+    // так как БД даже в случае установки тех же значений выдаст ошибку (из-за UNIQUE флагов для никнейма и почты)
+    if (is_username_changed && is_email_changed) {
+        query.prepare("UPDATE USERS "
+                  "SET username = :username,"
+                  "    email = :email, "
+                  "    text_status = :text_status "
+                  "WHERE ID = :id; ");
+        query.bindValue(":username",    status_info.username_.c_str());
+        query.bindValue(":email",       status_info.email_.c_str());
+    } else if (is_username_changed) {
+        query.prepare("UPDATE USERS "
+                  "SET username = :username,"
+                  "    text_status = :text_status "
+                  "WHERE ID = :id; ");
+        query.bindValue(":username",    status_info.username_.c_str());
+    } else if (is_email_changed) {
+        query.prepare("UPDATE USERS "
+                  "SET email       = :email, "
+                  "    text_status = :text_status "
+                  "WHERE ID = :id; ");
+        query.bindValue(":email",       status_info.email_.c_str());
+    } else {
+        query.prepare("UPDATE USERS "
+                      "SET text_status = :text_status "
+                      "WHERE ID = :id; ");
+    }
+
+    query.bindValue(":text_status", status_info.text_status_.c_str());
+    query.bindValue(":id",          status_info.id_);
+
+    if (!query.exec()) {
+        std::cerr  << "here" << query.lastError().text().toStdString();
+        return false;
+    } else {
+        // если вставка была успешна, то row affected > 0, иначе row affected == 0 (false).
+        int num = query.numRowsAffected();
+        // Если num == 0, а поля никнейма или почты изменились, то на вход пришел дубликат.
+        if (num == 0 && is_username_changed || num == 0 && is_email_changed) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+}
+
 bool LinkDoveSQLDataBase::add_complaint(const Complaint& complaint) {
     QSqlQuery query(data_base_);
     query.prepare("INSERT INTO COMPLAINTS (sender_id, text) "
@@ -125,7 +190,7 @@ bool LinkDoveSQLDataBase::add_complaint(const Complaint& complaint) {
         return false;
     } else {
         // если вставка была успешна, то row affected > 0, иначе row affected == 0 (false).
-        return query.numRowsAffected();
+        return true;
     }
 }
 
@@ -133,7 +198,7 @@ StatusInfo LinkDoveSQLDataBase::get_status_info(const std::string &username) {
     QSqlQuery query(data_base_);
     query.prepare("SELECT * FROM USERS "
                   "WHERE "
-                  "username = :username;");
+                  "username = :username; ");
 
     query.bindValue(":username", username.c_str());
 
@@ -143,17 +208,40 @@ StatusInfo LinkDoveSQLDataBase::get_status_info(const std::string &username) {
         if (!query.next()) {
             throw std::runtime_error("No such object in DataBase");
         } else {
-            StatusInfo status_info;
-            status_info.id_          = query.value("ID").toULongLong();
-            status_info.username_    = query.value("username").toString().toStdString();
-            status_info.email_       = query.value("email").toString().toStdString();
-            status_info.birthday_    = QDate::fromString(query.value("birthday").toString(), QString(BIRTHAY_FORMAT));
-            status_info.text_status_ = query.value("text_status").toString().toStdString();
-
-            QByteArray image_bytes   = query.value("image").toByteArray();
-            status_info.image_bytes_ = std::vector(image_bytes.begin(), image_bytes.end());
-
-            return status_info;
+            return retrieve_status_info(query);
         }
     }
+}
+
+StatusInfo LinkDoveSQLDataBase::get_status_info(unsigned long long id) {
+    QSqlQuery query(data_base_);
+    query.prepare("SELECT * FROM USERS "
+                  "WHERE "
+                  "ID = :id; ");
+
+    query.bindValue(":id", id);
+
+    if (!query.exec()) {
+        throw std::runtime_error(query.lastError().text().toStdString());
+    } else {
+        if (!query.next()) {
+            throw std::runtime_error("No such object in DataBase");
+        } else {
+            return retrieve_status_info(query);
+        }
+    }
+}
+
+StatusInfo LinkDoveSQLDataBase::retrieve_status_info(const QSqlQuery& query) {
+    StatusInfo status_info;
+    status_info.id_          = query.value("ID").toULongLong();
+    status_info.username_    = query.value("username").toString().toStdString();
+    status_info.email_       = query.value("email").toString().toStdString();
+    status_info.birthday_    = QDate::fromString(query.value("birthday").toString(), QString(BIRTHAY_FORMAT));
+    status_info.text_status_ = query.value("text_status").toString().toStdString();
+
+    QByteArray image_bytes   = query.value("image").toByteArray();
+    status_info.image_bytes_ = std::vector(image_bytes.begin(), image_bytes.end());
+
+    return status_info;
 }

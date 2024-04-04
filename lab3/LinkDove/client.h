@@ -54,6 +54,13 @@ public:
     void async_send_complaint(const std::string& text);
 
     /**
+     * <p> Отправляет отредактированные данные пользователя. </p>
+     * @brief async_update_user
+     * @param status_info_ - Структура, содержащая отредактированные данные пользователя.
+     */
+    void async_update_user(StatusInfo& status_info_);
+
+    /**
      * <p> Возвращает информацию о пользователе. </p>
      * @brief get_status_info
      * @return - Структура, содержащая информацию о пользователе
@@ -68,8 +75,26 @@ public:
     bool is_connected() noexcept;
 
 signals:
+    /**
+     * <p> Генерирует сигнал после получения результата авторизации. </p>
+     * @brief authorization_result
+     * @param result - Параметр, содержащий результат авторизации.
+     */
     void authorization_result(int result);
+
+    /**
+     * <p> Генерирует сигнал после получения результата отправления жалобы. </p>
+     * @brief complaint_result
+     * @param result - Параметр, содержащий результат отправления жалобы.
+     */
     void complaint_result(int result);
+
+    /**
+     * <p> Генерирует сигнал после получения результата обновления данных о пользователе. </p>
+     * @brief update_user_result
+     * @param result - Параметр, содержащий результат обновления данных о пользователе.
+     */
+    void update_user_result(int result);
 
 private:
     std::shared_ptr<asio::io_context> io_context_ptr_;
@@ -78,6 +103,7 @@ private:
     bool is_connected_;
 
     StatusInfo status_info_;
+    StatusInfo updated_status_info_;
 
     void create_account() {}
 
@@ -103,6 +129,14 @@ private:
      * @return - Строковое представление запроса.
      */
     std::string create_send_complaint_request(const Complaint& complaint);
+
+    /**
+     * <p> Формирует запрос обновления данных о пользователе. </p>
+     * @brief create_update_user_request
+     * @param status_info - Структура, содержащая отредактированные данные пользователя.
+     * @return - Строковое представление запроса.
+     */
+    std::string create_update_user_request(const StatusInfo& status_info);
 
     /**
      * <p> Асинхронно читает ответ от сервера. </p>

@@ -64,7 +64,8 @@ void MainWidget::setupConnection() {
                                                                                  ui->profileStackedWidget->setCurrentIndex(EDITED_PROFILE_PAGE);
                                                                                  ui->profileEditWidget->setStatusInfo(ui->profileWidget->getStatusInfo());
                                                                                } );
-    connect(ui->profileEditWidget, &EditProfileWidget::editFinished, [this] () {
+    connect(ui->profileEditWidget, &EditProfileWidget::editFinished, [this] (StatusInfo status_info) {
                                                                                  ui->profileStackedWidget->setCurrentIndex(SIMPLE_PROFILE_PAGE);
+                                                                                 emit editFinished(status_info);
                                                                                } );
 }

@@ -19,13 +19,15 @@ enum profileTypePage {
     EDITED_PROFILE_PAGE
 };
 
-enum AutorizationAnswer {
+enum ResponseTypes {
     REGISTRATION_FAILED_ANSWER,
     REGISTRATION_SUCCESS_ANSWER,
     LOGIN_FAILED_ANSWER,
     LOGIN_SUCCESS_ANSWER,
     SEND_COMPLAINT_SUCCESS_ANSWER,
-    SEND_COMPLAINT_FAILED_ANSWER
+    SEND_COMPLAINT_FAILED_ANSWER,
+    UPDATE_USER_SUCCESS_ANSWER,
+    UPDATE_USER_FAILED_ANSWER
 };
 
 enum ApplicationMode {
@@ -75,3 +77,9 @@ extern const char *COMPLAINT_REQUEST;
 extern const char *COMPLAINT_SUCCESS;
 // Ответ сервера на неудачную регистрацию жалобы
 extern const char *COMPLAINT_FAILED;
+// Запрос клиента на обновление информации о пользователе
+extern const char *UPDATE_USER_REQUEST;
+// Ответ сервера на успешное обновление информации о пользователе
+extern const char *UPDATE_USER_SUCCESS;
+// Ответ сервера на неудачное обновление информации о пользователе
+extern const char *UPDATE_USER_FAILED;

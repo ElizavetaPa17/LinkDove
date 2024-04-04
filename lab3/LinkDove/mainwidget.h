@@ -39,6 +39,13 @@ signals:
      */
     void sendComplaint(std::string complaint_text);
 
+    /**
+     * <p> Генерирует сигнал после окончания редактирования профиля (с виджета EditProfileWidget). </p>
+     * @brief editFinished
+     * @param status_info
+     */
+    void editFinished(StatusInfo status_info);
+
 private slots:
     /**
      * <p> Преобразовывает сигнал клика на функциональные вкладки в сигнал switchToPage на нужную страницу. </p>

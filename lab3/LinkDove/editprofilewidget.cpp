@@ -3,9 +3,11 @@
 
 #include <QFileDialog>
 #include <QPixmap>
-
 #include <iostream>
+#include <memory>
+
 #include "constants.h"
+#include "infodialog.h"
 
 EditProfileWidget::EditProfileWidget(QWidget *parent) :
     QWidget(parent),
@@ -22,16 +24,28 @@ EditProfileWidget::~EditProfileWidget()
 }
 
 void EditProfileWidget::setStatusInfo(const StatusInfo& status_info) {
-    status_info_ = status_info;
-
     ui->usernameEdit->setText(status_info.username_.c_str());
     ui->emailEdit->setText(status_info.email_.c_str());
     ui->birthdayLabel->setText(status_info.birthday_.toString(BIRTHAY_FORMAT));
     ui->textEdit->setText(status_info.text_status_.c_str());
 }
 
-StatusInfo EditProfileWidget::getStatusInfo() {
-    return status_info_;
+void EditProfileWidget::slotEditFinished() {
+    if (ui->usernameEdit->text().isEmpty() ||
+        ui->emailEdit->text().isEmpty())
+    {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>("Поле имени и почты не должны быть пустыми.");
+        dialog_ptr->exec();
+        return;
+    }
+
+    StatusInfo status_info;
+    status_info.username_    = ui->usernameEdit->text().toStdString();
+    status_info.email_       = ui->emailEdit->text().toStdString();
+    status_info.birthday_    = QDate::fromString(ui->birthdayLabel->text());
+    status_info.text_status_ = ui->textEdit->toPlainText().toStdString();
+
+    emit editFinished(status_info);
 }
 
 void EditProfileWidget::slotChooseUserIcon() {
@@ -45,6 +59,6 @@ void EditProfileWidget::slotChooseUserIcon() {
 }
 
 void EditProfileWidget::setupConnection() {
-    connect(ui->okIconLabel,      &ClickableLabel::clicked, this, [this](){ emit editFinished(); });
+    connect(ui->okIconLabel,      &ClickableLabel::clicked, this, &EditProfileWidget::slotEditFinished);
     connect(ui->profileIconLabel, &ClickableLabel::clicked, this, &EditProfileWidget::slotChooseUserIcon);
 }

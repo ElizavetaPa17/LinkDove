@@ -67,10 +67,6 @@ void RegistrationWidget::slotCheckInput() {
     }
 }
 
-//void RegistrationWidget::slotSwitchToLogin() {
-//    emit passRegistrationWidget(this, LOGIN_PAGE);
-//}
-
 void RegistrationWidget::slotRestoreLoginLabel() {
     ui->loginLabel->setText("Уже есть аккаунт");
 
