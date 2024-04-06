@@ -39,9 +39,8 @@ signals:
     /**
      * <p> Сигнал, который отправляется, когда пользователь закончил редактировать профиль. </p>
      * @brief editFinished
-     * @param status_info - Структура, содержащая отредактированную информацию о пользователе.
      */
-    void editFinished(StatusInfo status_info);
+    void editFinished();
 
 private slots:
     /**
@@ -65,6 +64,7 @@ private:
 
 private:
     Ui::EditProfileWidget *ui;
+    StatusInfo status_info_;
 };
 
 #endif // EDITPROFILEWIDGET_H

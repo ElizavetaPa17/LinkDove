@@ -11,7 +11,7 @@ ProfileWidget::ProfileWidget(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    connect(ui->editIconLabel, &ClickableLabel::clicked, [this]() { ClientSingleton::get_client()->async_update_user(status_info_); });
+    connect(ui->editIconLabel, &ClickableLabel::clicked, [this]() { emit editProfile(); });
     connect(ClientSingleton::get_client(),  &Client::update_user_result, this, &ProfileWidget::slotUpdateUserResult);
 }
 
@@ -45,7 +45,6 @@ void ProfileWidget::slotUpdateUserResult(int update_result) {
     std::string text;
     if (update_result == UPDATE_USER_SUCCESS_ANSWER) {
         text = "Профиль был успешно обновлен.";
-        //ui->pageMain->setStatusInfo(ClientSingleton::get_client()->get_status_info());
     } else {
         text = "Ошибка обновления профиля. Проверьте корректность введенных данных и попытайтесь позже. ";
     }

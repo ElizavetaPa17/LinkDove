@@ -55,46 +55,15 @@ void MainWindow::slotPassAuthorization(int authorization_result) {
     }
 }
 
-/*void MainWindow::slotUpdateUserResult(int update_result) {
-    std::string text;
-    if (update_result == UPDATE_USER_SUCCESS_ANSWER) {
-        text = "Профиль был успешно обновлен.";
-        ui->pageMain->setStatusInfo(client_ptr->get_status_info());
-    } else {
-        text = "Ошибка обновления профиля. Проверьте корректность введенных данных и попытайтесь позже. ";
-    }
 
-    std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(text);
-    dialog_ptr->exec();
-}*/
-
-/*void MainWindow::slotComplaintResult(int complaint_result) {
-    std::string text;
-    if (complaint_result == SEND_COMPLAINT_SUCCESS_ANSWER) {
-        text = "Ваша жалоба была отправлена.";
-    } else {
-        text = "Ошибка отправки. Повторите попытку позже.";
-    }
-
-    std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(text);
-    dialog_ptr->exec();
-}*/
-
-/*void MainWindow::slotSendComplaint(std::string text) {
-    client_ptr->async_send_complaint(text);
-}*/
 
 void MainWindow::setupConnection() {
     connect(ui->pageWelcome,  &WelcomeWidget::passWelcomePage, this, &MainWindow::slotSwitchToPage);
     connect(ui->pageLogin,    &LoginWidget::passLoginWidget,   this, &MainWindow::slotSwitchToPage);
     connect(ui->pageRegister, &RegistrationWidget::passRegistrationWidget, this, &MainWindow::slotSwitchToPage);
     connect(ui->pageMain,     &MainWidget::switchToPage,       this, &MainWindow::slotSwitchToPage);
-    //connect(ui->pageMain,     &MainWidget::sendComplaint,      this, &MainWindow::slotSendComplaint); //!!
-    //connect(ui->pageMain,     &MainWidget::editFinished,       this, [this](StatusInfo status_info) { client_ptr->async_update_user(status_info); });
 
     connect(ClientSingleton::get_client(), &Client::authorization_result,   this, &MainWindow::slotPassAuthorization);
-    //connect(client_ptr.get(), &Client::complaint_result,       this, &MainWindow::slotComplaintResult);
-    //connect(client_ptr.get(), &Client::update_user_result,     this, &MainWindow::slotUpdateUserResult);
 }
 
 void MainWindow::tryLoginAttempt() {

@@ -32,20 +32,6 @@ public:
 signals:
     void switchToPage(QWidget *sender, int index);
 
-    /**
-     * <p> Генерирует сигнал для отправки жалобы. </p>
-     * @brief sendComplaint
-     * @param complaint_text - Содержание жалобы.
-     */
-    //void sendComplaint(std::string complaint_text);
-
-    /**
-     * <p> Генерирует сигнал после окончания редактирования профиля (с виджета EditProfileWidget). </p>
-     * @brief editFinished
-     * @param status_info
-     */
-    //void editFinished(StatusInfo status_info);
-
 private slots:
     /**
      * <p> Преобразовывает сигнал клика на функциональные вкладки в сигнал switchToPage на нужную страницу. </p>

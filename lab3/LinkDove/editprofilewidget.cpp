@@ -8,6 +8,7 @@
 
 #include "constants.h"
 #include "infodialog.h"
+#include "clientsingleton.h"
 
 EditProfileWidget::EditProfileWidget(QWidget *parent) :
     QWidget(parent),
@@ -30,6 +31,10 @@ void EditProfileWidget::setStatusInfo(const StatusInfo& status_info) {
     ui->textEdit->setText(status_info.text_status_.c_str());
 }
 
+StatusInfo EditProfileWidget::getStatusInfo() {
+    return status_info_;
+}
+
 void EditProfileWidget::slotEditFinished() {
     if (ui->usernameEdit->text().isEmpty() ||
         ui->emailEdit->text().isEmpty())
@@ -39,13 +44,14 @@ void EditProfileWidget::slotEditFinished() {
         return;
     }
 
-    StatusInfo status_info;
-    status_info.username_    = ui->usernameEdit->text().toStdString();
-    status_info.email_       = ui->emailEdit->text().toStdString();
-    status_info.birthday_    = QDate::fromString(ui->birthdayLabel->text());
-    status_info.text_status_ = ui->textEdit->toPlainText().toStdString();
+    status_info_.username_    = ui->usernameEdit->text().toStdString();
+    status_info_.email_       = ui->emailEdit->text().toStdString();
+    status_info_.birthday_    = QDate::fromString(ui->birthdayLabel->text());
+    status_info_.text_status_ = ui->textEdit->toPlainText().toStdString();
 
-    emit editFinished(status_info);
+
+    ClientSingleton::get_client()->async_update_user(status_info_);
+    emit editFinished();
 }
 
 void EditProfileWidget::slotChooseUserIcon() {

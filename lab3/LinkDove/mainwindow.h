@@ -39,27 +39,6 @@ public slots:
      */
     void slotPassAuthorization(int authorization_result);
 
-    /**
-     * <p> Слот, принимающий от клиента результат отправки жалобы. </p>
-     * @brief slotComplaintResult
-     * @param complaint_result - Результат отправки жалобы.
-     */
-    //void slotComplaintResult(int complaint_result);
-
-    /**
-     * <p> Слот, принимающий от клиента результат обновления данных о пользователе. </p>
-     * @brief slotUpdateUserResult
-     * @param update_result - Результат обновления данных о пользователе.
-     */
-    //void slotUpdateUserResult(int update_result);
-
-    /**
-     * <p> Слот, принимающий от предков запрос на отправку жалобы от пользователя администратору. </p>
-     * @brief slotSendComplaint
-     * @param text
-     */
-    //void slotSendComplaint(std::string text);
-
 private:
     Ui::MainWindow *ui;
 
