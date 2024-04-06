@@ -4,6 +4,7 @@
 #include "infodialog.h"
 #include "complaintdialog.h"
 #include "constants.h"
+#include "clientsingleton.h"
 
 SettingWidget::SettingWidget(QWidget *parent) :
     QWidget(parent),
@@ -44,10 +45,22 @@ void SettingWidget::slotQuitAccount() {
     emit quitAccount();
 }
 
+void SettingWidget::slotComplaintResult(int complaint_result) {
+    std::string text;
+    if (complaint_result == SEND_COMPLAINT_SUCCESS_ANSWER) {
+        text = "Ваша жалоба была отправлена.";
+    } else {
+        text = "Ошибка отправки. Повторите попытку позже.";
+    }
+
+    std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(text);
+    dialog_ptr->exec();
+}
+
 void SettingWidget::slotDisplayComplaintDialog() {
     std::unique_ptr<ComplaintDialog> dialog_ptr = std::make_unique<ComplaintDialog>();
     if (dialog_ptr->exec() == QDialog::Accepted) {
-        emit sendComplaint(dialog_ptr->getComplaintText());
+        ClientSingleton::get_client()->async_send_complaint(dialog_ptr->getComplaintText());
     }
 }
 
@@ -63,4 +76,5 @@ void SettingWidget::slotDisplayAboutDialog() {
 void SettingWidget::setupConnections() {
     connect(ui->quitButton,  &QPushButton::clicked, this, &SettingWidget::slotQuitAccount);
     connect(ui->aboutButton, &QPushButton::clicked, this, &SettingWidget::slotDisplayAboutDialog);
+    connect(ClientSingleton::get_client(), &Client::complaint_result, this, &SettingWidget::slotComplaintResult);
 }

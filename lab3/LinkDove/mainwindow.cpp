@@ -16,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
     setupConnection();
     setStyleSheet(" QMainWindow { background-image: url(:/resources/welcome_background.png); }");
 
-    client_ptr->async_connect();
+    ClientSingleton::get_client()->async_connect();
 }
 
 MainWindow::~MainWindow() {
@@ -39,7 +39,7 @@ void MainWindow::slotPassAuthorization(int authorization_result) {
         case LOGIN_SUCCESS_ANSWER:
         case REGISTRATION_SUCCESS_ANSWER:
             ui->mainStackedWidget->setCurrentIndex(MAIN_PAGE);
-            ui->pageMain->setStatusInfo(client_ptr->get_status_info());
+            ui->pageMain->setStatusInfo(ClientSingleton::get_client()->get_status_info());
 
             ui->pageLogin->clearLoginInfo();
             ui->pageRegister->clearRegistrationInfo();
@@ -55,7 +55,7 @@ void MainWindow::slotPassAuthorization(int authorization_result) {
     }
 }
 
-void MainWindow::slotUpdateUserResult(int update_result) {
+/*void MainWindow::slotUpdateUserResult(int update_result) {
     std::string text;
     if (update_result == UPDATE_USER_SUCCESS_ANSWER) {
         text = "Профиль был успешно обновлен.";
@@ -66,9 +66,9 @@ void MainWindow::slotUpdateUserResult(int update_result) {
 
     std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(text);
     dialog_ptr->exec();
-}
+}*/
 
-void MainWindow::slotComplaintResult(int complaint_result) {
+/*void MainWindow::slotComplaintResult(int complaint_result) {
     std::string text;
     if (complaint_result == SEND_COMPLAINT_SUCCESS_ANSWER) {
         text = "Ваша жалоба была отправлена.";
@@ -78,31 +78,31 @@ void MainWindow::slotComplaintResult(int complaint_result) {
 
     std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(text);
     dialog_ptr->exec();
-}
+}*/
 
-void MainWindow::slotSendComplaint(std::string text) {
+/*void MainWindow::slotSendComplaint(std::string text) {
     client_ptr->async_send_complaint(text);
-}
+}*/
 
 void MainWindow::setupConnection() {
     connect(ui->pageWelcome,  &WelcomeWidget::passWelcomePage, this, &MainWindow::slotSwitchToPage);
     connect(ui->pageLogin,    &LoginWidget::passLoginWidget,   this, &MainWindow::slotSwitchToPage);
     connect(ui->pageRegister, &RegistrationWidget::passRegistrationWidget, this, &MainWindow::slotSwitchToPage);
     connect(ui->pageMain,     &MainWidget::switchToPage,       this, &MainWindow::slotSwitchToPage);
-    connect(ui->pageMain,     &MainWidget::sendComplaint,      this, &MainWindow::slotSendComplaint);
-    connect(ui->pageMain,     &MainWidget::editFinished,       this, [this](StatusInfo status_info) { client_ptr->async_update_user(status_info); });
+    //connect(ui->pageMain,     &MainWidget::sendComplaint,      this, &MainWindow::slotSendComplaint); //!!
+    //connect(ui->pageMain,     &MainWidget::editFinished,       this, [this](StatusInfo status_info) { client_ptr->async_update_user(status_info); });
 
-    connect(client_ptr.get(), &Client::authorization_result,   this, &MainWindow::slotPassAuthorization);
-    connect(client_ptr.get(), &Client::complaint_result,       this, &MainWindow::slotComplaintResult);
-    connect(client_ptr.get(), &Client::update_user_result,     this, &MainWindow::slotUpdateUserResult);
+    connect(ClientSingleton::get_client(), &Client::authorization_result,   this, &MainWindow::slotPassAuthorization);
+    //connect(client_ptr.get(), &Client::complaint_result,       this, &MainWindow::slotComplaintResult);
+    //connect(client_ptr.get(), &Client::update_user_result,     this, &MainWindow::slotUpdateUserResult);
 }
 
 void MainWindow::tryLoginAttempt() {
     LoginInfo login_info = ui->pageLogin->getLoginRequest();
-    client_ptr->async_login(login_info);
+    ClientSingleton::get_client()->async_login(login_info);
 }
 
 void MainWindow::tryRegisterAttempt() {
     UserInfo user_info = ui->pageRegister->getRegistrationRequest();
-    client_ptr->async_register(user_info);
+    ClientSingleton::get_client()->async_register(user_info);
 }

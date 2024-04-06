@@ -37,14 +37,14 @@ signals:
      * @brief sendComplaint
      * @param complaint_text - Содержание жалобы.
      */
-    void sendComplaint(std::string complaint_text);
+    //void sendComplaint(std::string complaint_text);
 
     /**
      * <p> Генерирует сигнал после окончания редактирования профиля (с виджета EditProfileWidget). </p>
      * @brief editFinished
      * @param status_info
      */
-    void editFinished(StatusInfo status_info);
+    //void editFinished(StatusInfo status_info);
 
 private slots:
     /**

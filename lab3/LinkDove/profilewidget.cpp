@@ -1,7 +1,9 @@
 #include "profilewidget.h"
 #include "ui_profilewidget.h"
 
+#include "infodialog.h"
 #include "constants.h"
+#include "clientsingleton.h"
 
 ProfileWidget::ProfileWidget(QWidget *parent) :
     QWidget(parent),
@@ -9,7 +11,8 @@ ProfileWidget::ProfileWidget(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    connect(ui->editIconLabel, &ClickableLabel::clicked, [this]() { emit editProfile(); });
+    connect(ui->editIconLabel, &ClickableLabel::clicked, [this]() { ClientSingleton::get_client()->async_update_user(status_info_); });
+    connect(ClientSingleton::get_client(),  &Client::update_user_result, this, &ProfileWidget::slotUpdateUserResult);
 }
 
 ProfileWidget::~ProfileWidget()
@@ -36,4 +39,17 @@ void ProfileWidget::setPrivelegedMode(bool flag) {
     } else {
         ui->editIconLabel->setDisabled(true);
     }
+}
+
+void ProfileWidget::slotUpdateUserResult(int update_result) {
+    std::string text;
+    if (update_result == UPDATE_USER_SUCCESS_ANSWER) {
+        text = "Профиль был успешно обновлен.";
+        //ui->pageMain->setStatusInfo(ClientSingleton::get_client()->get_status_info());
+    } else {
+        text = "Ошибка обновления профиля. Проверьте корректность введенных данных и попытайтесь позже. ";
+    }
+
+    std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(text);
+    dialog_ptr->exec();
 }

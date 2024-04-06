@@ -31,7 +31,7 @@ signals:
      * @brief sendComplaint
      * @param complaint_text - Содержание жалобы.
      */
-    void sendComplaint(std::string complaint_text);
+    //void sendComplaint(std::string complaint_text);
 
 public slots:
     /**
@@ -40,6 +40,13 @@ public slots:
      * @param flag - Если flag = true, то режим привилегированный, иначе - обычный.
      */
     void setPrivilegedMode(bool flag);
+
+    /**
+     * <p> Слот, принимающий от клиента результат отправки жалобы. </p>
+     * @brief slotComplaintResult
+     * @param complaint_result - Результат отправки жалобы.
+     */
+    void slotComplaintResult(int complaint_result);
 
 private slots:
     /**

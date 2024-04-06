@@ -59,13 +59,12 @@ void MainWidget::setupConnection() {
     connect(ui->settingLabel,    &ClickableLabel::clicked,     this, &MainWidget::slotRedirectClick);
     connect(ui->settingWidget,   &SettingWidget::quitAccount,  this, &MainWidget::slotQuit);
 
-    connect(ui->settingWidget,     &SettingWidget::sendComplaint,    [this] (std::string text) { emit sendComplaint(text);});
+    //connect(ui->settingWidget,     &SettingWidget::sendComplaint,    [this] (std::string text) { emit sendComplaint(text);}); //!!!
     connect(ui->profileWidget,     &ProfileWidget::editProfile,      [this] () {
-                                                                                 ui->profileStackedWidget->setCurrentIndex(EDITED_PROFILE_PAGE);
-                                                                                 ui->profileEditWidget->setStatusInfo(ui->profileWidget->getStatusInfo());
+                                                                                 ui->profileStackedWidget->setCurrentIndex(EDITED_PROFILE_PAGE); //!!!
+                                                                                 ui->profileEditWidget->setStatusInfo(ui->profileWidget->getStatusInfo()); //!!!
                                                                                } );
     connect(ui->profileEditWidget, &EditProfileWidget::editFinished, [this] (StatusInfo status_info) {
-                                                                                 ui->profileStackedWidget->setCurrentIndex(SIMPLE_PROFILE_PAGE);
-                                                                                 emit editFinished(status_info);
+                                                                                 ui->profileStackedWidget->setCurrentIndex(SIMPLE_PROFILE_PAGE); //!!!
                                                                                } );
 }

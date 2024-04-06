@@ -4,7 +4,7 @@
 #include <QMainWindow>
 #include <utility>
 
-#include "client.h"
+#include "clientsingleton.h"
 #include "constants.h"
 
 QT_BEGIN_NAMESPACE
@@ -44,28 +44,24 @@ public slots:
      * @brief slotComplaintResult
      * @param complaint_result - Результат отправки жалобы.
      */
-    void slotComplaintResult(int complaint_result);
+    //void slotComplaintResult(int complaint_result);
 
     /**
      * <p> Слот, принимающий от клиента результат обновления данных о пользователе. </p>
      * @brief slotUpdateUserResult
      * @param update_result - Результат обновления данных о пользователе.
      */
-    void slotUpdateUserResult(int update_result);
+    //void slotUpdateUserResult(int update_result);
 
     /**
      * <p> Слот, принимающий от предков запрос на отправку жалобы от пользователя администратору. </p>
      * @brief slotSendComplaint
      * @param text
      */
-    void slotSendComplaint(std::string text);
+    //void slotSendComplaint(std::string text);
 
 private:
     Ui::MainWindow *ui;
-
-    std::shared_ptr<Client> client_ptr = std::make_shared<Client>(std::make_shared<boost::asio::io_context>(),
-                                                                      boost::asio::ip::make_address(LOCAL_ADDRESS),
-                                                                      8000);
 
     /**
      * <p> Настраивает соединения с главным виджетом. </p>
