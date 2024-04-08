@@ -4,6 +4,8 @@
 #include <iostream>
 #include <QDate>
 
+#include "utility.h"
+
 Client::Client(std::shared_ptr<asio::io_context> io_context_ptr, boost::asio::ip::address address, uint16_t port)
     : io_context_ptr_(io_context_ptr),
       connection_(io_context_ptr_),
@@ -57,7 +59,19 @@ void Client::async_send_complaint(const std::string& text) {
     asio::async_write(connection_.socket_, connection_.buffer_,
                       boost::bind(&Client::handle_async_write,
                                   shared_from_this(),
-                                  asio::placeholders::error(),
+                                  asio::placeholders::error,
+                                  asio::placeholders::bytes_transferred));
+
+    run_context();
+}
+
+void Client::async_get_complaints() {
+    connection_.out_stream_ << GET_COMPLAINTS_REQUEST << "\n" << END_OF_REQUEST;
+
+    asio::async_write(connection_.socket_, connection_.buffer_,
+                      boost::bind(&Client::handle_async_write,
+                                  shared_from_this(),
+                                  asio::placeholders::error,
                                   asio::placeholders::bytes_transferred));
 
     run_context();
@@ -81,6 +95,10 @@ void Client::async_update_user(StatusInfo& status_info) {
 
 StatusInfo Client::get_status_info() {
     return status_info_;
+}
+
+std::vector<Complaint> Client::get_complaints() {
+    return complaints_;
 }
 
 bool Client::is_connected() noexcept {
@@ -109,7 +127,7 @@ std::string Client::create_register_request(const UserInfo& user_info) {
 
 std::string Client::create_send_complaint_request(const Complaint& complaint) {
     std::stringstream str_stream;
-    str_stream << COMPLAINT_REQUEST << '\n';
+    str_stream << SEND_COMPLAINT_REQUEST << '\n';
 
     complaint.serialize(str_stream);
     str_stream << END_OF_REQUEST;
@@ -185,10 +203,15 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
             emit authorization_result(REGISTRATION_SUCCESS_ANSWER);
         } else if (answer_type == REGISTER_FAILED) {
             emit authorization_result(REGISTRATION_FAILED_ANSWER);
-        } else if (answer_type == COMPLAINT_SUCCESS) {
-            emit complaint_result(SEND_COMPLAINT_SUCCESS_ANSWER);
-        } else if (answer_type == COMPLAINT_FAILED){
-            emit complaint_result(SEND_COMPLAINT_FAILED_ANSWER);
+        } else if (answer_type == SEND_COMPLAINT_SUCCESS) {
+            emit send_complaint_result(SEND_COMPLAINT_SUCCESS_ANSWER);
+        } else if (answer_type == SEND_COMPLAINT_FAILED){
+            emit send_complaint_result(SEND_COMPLAINT_FAILED_ANSWER);
+        } else if (answer_type == GET_COMPLAINTS_SUCCESS) {
+            complaints_ = Utility::deserialize_compl_vec(connection_.in_stream_).second;
+            emit get_complaints_result(GET_COMPLAINTS_SUCCESS_ANSWER);
+        } else if (answer_type == GET_COMPLAINTS_FAILED) {
+            emit get_complaints_result(GET_COMPLAINTS_FAILED_ANSWER);
         } else if (answer_type == UPDATE_USER_SUCCESS) {
             status_info_ = updated_status_info_;
             emit update_user_result(UPDATE_USER_SUCCESS_ANSWER);

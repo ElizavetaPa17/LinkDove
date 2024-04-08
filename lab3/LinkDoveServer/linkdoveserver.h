@@ -121,14 +121,21 @@ private:
     /**
      * <p> Обрабатывает запрос клиента на отправку жалобы администратору. </p>
      * @brief handle_complaint_request
-     * @param iterator
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
      */
-    void handle_complaint_request(ConnectionIterator iterator);
+    void handle_send_complaint_request(ConnectionIterator iterator);
+
+    /**
+     * <p> Обрабатывает запрос на получение жалоб. </p>
+     * @brief handle_get_complaints_request
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_get_complaints_request(ConnectionIterator iterator);
 
     /**
      * <p> Обрабатывает запрос клиента на обновление информации о пользователе. </p>
      * @brief handle_update_user_request
-     * @param iterator
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
      */
     void handle_update_user_request(ConnectionIterator iterator);
 

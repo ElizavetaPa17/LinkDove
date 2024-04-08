@@ -64,8 +64,9 @@ private slots:
     /**
      * <p> Слот, отображающий список жалоб админу. </p>
      * @brief slotDisplayComplaintList
+     * @param get_complaints_result - Результат получения списка жалоб.
      */
-    void slotDisplayComplaintList();
+    void slotDisplayComplaintList(int complaints_result);
 
     /**
      * <p> Отображает модальное окно с информацией о приложении. </p>

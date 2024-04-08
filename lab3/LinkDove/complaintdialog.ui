@@ -110,7 +110,7 @@ QPushButton:hover {
       <cursorShape>PointingHandCursor</cursorShape>
      </property>
      <property name="autoFillBackground">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
      <property name="styleSheet">
       <string notr="true">QPushButton {
@@ -143,6 +143,9 @@ QPushButton:hover {
 	border-radius: 1px;
 	font-size: 20px;
 }</string>
+     </property>
+     <property name="maxLength">
+      <number>64</number>
      </property>
     </widget>
    </item>

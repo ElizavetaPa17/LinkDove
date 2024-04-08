@@ -54,6 +54,12 @@ public:
     void async_send_complaint(const std::string& text);
 
     /**
+     * <p> Получает список всех жалоб. </p>
+     * @brief async_get_complaints
+     */
+    void async_get_complaints();
+
+    /**
      * <p> Отправляет отредактированные данные пользователя. </p>
      * @brief async_update_user
      * @param status_info_ - Структура, содержащая отредактированные данные пользователя.
@@ -66,6 +72,13 @@ public:
      * @return - Структура, содержащая информацию о пользователе
      */
     StatusInfo get_status_info();
+
+    /**
+     * <p> Возвращает вектор жалоб. Вызывается после запроса на получение списка жалоб (в противном случае результат не определен). </p>
+     * @brief get_complaints
+     * @return - Вектор жалоб.
+     */
+    std::vector<Complaint> get_complaints();
 
     /**
      * <p> Определяет, установил ли клиент соединение с сервером. </p>
@@ -87,7 +100,14 @@ signals:
      * @brief complaint_result
      * @param result - Параметр, содержащий результат отправления жалобы.
      */
-    void complaint_result(int result);
+    void send_complaint_result(int result);
+
+    /**
+     * <p> Генерирует сигнал после получения результата извлечения всех жалоб.</p>
+     * @brief get_complaints_result
+     * @param result
+     */
+    void get_complaints_result(int result);
 
     /**
      * <p> Генерирует сигнал после получения результата обновления данных о пользователе. </p>
@@ -104,6 +124,7 @@ private:
 
     StatusInfo status_info_;
     StatusInfo updated_status_info_;
+    std::vector<Complaint> complaints_;
 
     void create_account() {}
 

@@ -194,6 +194,41 @@ bool LinkDoveSQLDataBase::add_complaint(const Complaint& complaint) {
     }
 }
 
+int LinkDoveSQLDataBase::get_complaints_count() {
+    QSqlQuery query(data_base_);
+    query.prepare("SELECT COUNT(*) FROM COMPLAINTS; ");
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString();
+        return -1;
+    } else {
+        if (!query.next()) {
+            std::cerr << "Can't get complaint count\n";
+            return -1;
+        } else {
+            return query.value("COUNT(*)").toInt();
+        }
+    }
+}
+
+std::vector<Complaint> LinkDoveSQLDataBase::get_complaints(int count) {
+    QSqlQuery query(data_base_);
+    query.prepare("SELECT * FROM COMPLAINTS");
+
+    std::vector<Complaint> complaints;
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString();
+        std::runtime_error("get_complaints failed: query.exec");
+    } else {
+        if (!query.next()) {
+            std::cerr << "Cant receive complaints\n";
+            std::runtime_error("get_complaints failed: query.next");
+        } else {
+            return link_dove_database_details__::retrieve_complaints(query, count);
+        }
+    }
+}
+
 StatusInfo LinkDoveSQLDataBase::get_status_info(const std::string &username) {
     QSqlQuery query(data_base_);
     query.prepare("SELECT * FROM USERS "
@@ -208,7 +243,7 @@ StatusInfo LinkDoveSQLDataBase::get_status_info(const std::string &username) {
         if (!query.next()) {
             throw std::runtime_error("No such object in DataBase");
         } else {
-            return retrieve_status_info(query);
+            return link_dove_database_details__::retrieve_status_info(query);
         }
     }
 }
@@ -227,21 +262,40 @@ StatusInfo LinkDoveSQLDataBase::get_status_info(unsigned long long id) {
         if (!query.next()) {
             throw std::runtime_error("No such object in DataBase");
         } else {
-            return retrieve_status_info(query);
+            return link_dove_database_details__::retrieve_status_info(query);
         }
     }
 }
 
-StatusInfo LinkDoveSQLDataBase::retrieve_status_info(const QSqlQuery& query) {
-    StatusInfo status_info;
-    status_info.id_          = query.value("ID").toULongLong();
-    status_info.username_    = query.value("username").toString().toStdString();
-    status_info.email_       = query.value("email").toString().toStdString();
-    status_info.birthday_    = QDate::fromString(query.value("birthday").toString(), QString(BIRTHAY_FORMAT));
-    status_info.text_status_ = query.value("text_status").toString().toStdString();
+namespace link_dove_database_details__ {
+    StatusInfo retrieve_status_info(const QSqlQuery& query) {
+        StatusInfo status_info;
+        status_info.id_          = query.value("ID").toULongLong();
+        status_info.username_    = query.value("username").toString().toStdString();
+        status_info.email_       = query.value("email").toString().toStdString();
+        status_info.birthday_    = QDate::fromString(query.value("birthday").toString(), QString(BIRTHAY_FORMAT));
+        status_info.text_status_ = query.value("text_status").toString().toStdString();
 
-    QByteArray image_bytes   = query.value("image").toByteArray();
-    status_info.image_bytes_ = std::vector(image_bytes.begin(), image_bytes.end());
+        QByteArray image_bytes   = query.value("image").toByteArray();
+        status_info.image_bytes_ = std::vector(image_bytes.begin(), image_bytes.end());
 
-    return status_info;
+        return status_info;
+    }
+
+    std::vector<Complaint> retrieve_complaints(QSqlQuery& query, int count) {
+        std::vector<Complaint> complaints;
+        Complaint complaint;
+
+        do {
+            complaint.id_ = query.value("ID").toInt();
+            complaint.sender_id_ = query.value("sender_id").toInt();
+            complaint.text_ = query.value("text").toString().toStdString();
+
+            complaints.push_back(complaint);
+            --count;
+
+        } while (query.next() && count);
+
+        return complaints;
+    }
 }

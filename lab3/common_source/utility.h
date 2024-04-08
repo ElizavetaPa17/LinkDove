@@ -6,10 +6,12 @@
 #include <vector>
 #include <utility>
 
+#include "complaint.h"
+
 class Utility final
 {
 public:
-    Utility();
+    Utility() = delete;
 
     /**
      * <p> Сериализует строку в поток. </p>
@@ -44,6 +46,23 @@ public:
      * @return - Пара - <размер десериализованных данных, десериализованный вектор символов>.
      */
     static std::pair<size_t, std::vector<char>> deserialize_char_vec(std::istream& is);
+
+    /**
+     * <p> Сериализует вектор жалоб в поток. </p>
+     * @brief serialize
+     * @param os - Поток, в который осуществляется сериализация.
+     * @param value - Сериализуемый вектор жалоб.
+     * @return - Размер сериализованных данных.
+     */
+    static size_t serialize(std::ostream &os, const std::vector<Complaint>& value);
+
+    /**
+     * <p> Десериализует вектор жалоб из потока. </p>
+     * @brief deserialize_compl_vec
+     * @param is - Поток, из которого осуществляется десериализация.
+     * @return - Пара - <размер десериализованных данных, десериализованный вектор жалоб>.
+     */
+    static std::pair<size_t, std::vector<Complaint>> deserialize_compl_vec(std::istream& is);
 
     /**
      * <p> Сериализует фундаментальное значение в поток. </p>

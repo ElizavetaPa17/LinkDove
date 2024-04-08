@@ -30,6 +30,7 @@ void SettingWidget::setPrivilegedMode(bool flag) {
         ui->banButton->hide();
 
         connect(ui->complaintButton, &QPushButton::clicked,    this, &SettingWidget::slotDisplayComplaintDialog);
+        connect(ClientSingleton::get_client(), &Client::send_complaint_result, this, &SettingWidget::slotComplaintResult);
     } else {
         privileged_mode_ = PRIVILEGED_MODE;
 
@@ -37,7 +38,8 @@ void SettingWidget::setPrivilegedMode(bool flag) {
         ui->privateButton->hide();
         ui->banButton->show();
 
-        connect(ui->complaintButton, &QPushButton::clicked,    this, &SettingWidget::slotDisplayComplaintList);
+        connect(ui->complaintButton, &QPushButton::clicked,    this, [] () { ClientSingleton::get_client()->async_get_complaints(); });
+        connect(ClientSingleton::get_client(), &Client::get_complaints_result, this, &SettingWidget::slotDisplayComplaintList);
     }
 }
 
@@ -64,8 +66,15 @@ void SettingWidget::slotDisplayComplaintDialog() {
     }
 }
 
-void SettingWidget::slotDisplayComplaintList() {
-    // TODO
+void SettingWidget::slotDisplayComplaintList(int get_complaints_result) {
+    if (get_complaints_result == GET_COMPLAINTS_FAILED_ANSWER) {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>("Ошибка получения списка жалоб. Попытайтесь позже.");
+        dialog_ptr->exec();
+        return;
+    }
+
+    std::vector<Complaint> complaints = ClientSingleton::get_client()->get_complaints();
+    std::cerr << complaints.size();
 }
 
 void SettingWidget::slotDisplayAboutDialog() {
@@ -76,5 +85,4 @@ void SettingWidget::slotDisplayAboutDialog() {
 void SettingWidget::setupConnections() {
     connect(ui->quitButton,  &QPushButton::clicked, this, &SettingWidget::slotQuitAccount);
     connect(ui->aboutButton, &QPushButton::clicked, this, &SettingWidget::slotDisplayAboutDialog);
-    connect(ClientSingleton::get_client(), &Client::complaint_result, this, &SettingWidget::slotComplaintResult);
 }

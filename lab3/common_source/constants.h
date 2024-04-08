@@ -26,6 +26,8 @@ enum ResponseTypes {
     LOGIN_SUCCESS_ANSWER,
     SEND_COMPLAINT_SUCCESS_ANSWER,
     SEND_COMPLAINT_FAILED_ANSWER,
+    GET_COMPLAINTS_SUCCESS_ANSWER,
+    GET_COMPLAINTS_FAILED_ANSWER,
     UPDATE_USER_SUCCESS_ANSWER,
     UPDATE_USER_FAILED_ANSWER
 };
@@ -44,6 +46,9 @@ const unsigned long long INVALID_USER_ID = 0;
 // Идентификатор админа (суперпользователя)
 const unsigned long long ADMIN_ID = 1;
 
+// Ограничение на размер списка жалоб, который отправляется администратору при запросе на его получение
+const int GET_COMPLAINTS_LIMIT = 100;
+
 // Адрес хоста, к которому подключается клиент
 #define LOCAL_ADDRESS "127.0.0.1"
 
@@ -59,24 +64,35 @@ extern const char *APPLICATION_DESCRIPTION;
 /*
  * Типы запросов
 */
+
 // Запрос клиента на авторизацию
 extern const char *LOGIN_REQUEST;
 // Ответ сервера в случае успешной авторизации
 extern const char *LOGIN_SUCCESS;
 // Ответ сервера в случае провала авторизации
 extern const char *LOGIN_FAILED;
+
 // Запрос клиента на регистрацию
 extern const char *REGISTER_REQUEST;
 // Ответ сервера в случае успешной регистрации
 extern const char *REGISTER_SUCCESS;
 // Ответ сервера в случае провала регистрации
 extern const char *REGISTER_FAILED;
+
 // Запрос администратору, содержащий жалобу пользователя
-extern const char *COMPLAINT_REQUEST;
+extern const char *SEND_COMPLAINT_REQUEST;
 // Ответ сервера на успешную регистрацию жалобы
-extern const char *COMPLAINT_SUCCESS;
+extern const char *SEND_COMPLAINT_SUCCESS;
 // Ответ сервера на неудачную регистрацию жалобы
-extern const char *COMPLAINT_FAILED;
+extern const char *SEND_COMPLAINT_FAILED;
+
+// Запрос на получение жалоб
+extern const char *GET_COMPLAINTS_REQUEST;
+// Ответ сервера на успешный запрос жалоб
+extern const char *GET_COMPLAINTS_SUCCESS;
+// Ответ сервера на неудачный запрос жалоб
+extern const char *GET_COMPLAINTS_FAILED;
+
 // Запрос клиента на обновление информации о пользователе
 extern const char *UPDATE_USER_REQUEST;
 // Ответ сервера на успешное обновление информации о пользователе

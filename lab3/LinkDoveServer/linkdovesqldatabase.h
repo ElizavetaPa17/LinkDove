@@ -46,6 +46,21 @@ public:
     bool add_complaint(const Complaint& complaint);
 
     /**
+     * <p> Запрос на количество жалоб. </p>
+     * @brief get_complaints_count
+     * @return - Возвращает количество жалоб.
+     */
+    int get_complaints_count();
+
+    /**
+     * <p> Извлекает первые count жалоб. </p>
+     * @brief get_complaints
+     * @param count - Количество жалоб для извлечения.
+     * @return - Вектор, содержащий count жалоб.
+     */
+    std::vector<Complaint> get_complaints(int count);
+
+    /**
      * <p> Возвращает информацию о пользователе, который соответствует никнейму. </p>
      * @brief get_user
      * @param username - Никнейм пользователя
@@ -77,6 +92,9 @@ private:
      * @return - Возвращает true в случае успеха, иначе - false.
      */
     bool setup_tables();
+};
+
+namespace link_dove_database_details__ {
 
     /**
      * <p> Извлекает данные о пользователе, которые возвращает объект query. </p>
@@ -85,6 +103,16 @@ private:
      * @return - Структура. содержащая данные о пользователе.
      */
     StatusInfo retrieve_status_info(const QSqlQuery& query);
-};
+
+    /**
+     * <p> Извлекает заданное количество жалоб. </p>
+     * @brief retrieve_complaints
+     * @param query - Запрос, содержащий жалобы
+     * @param count - Количество жалоб для извлечения
+     * @return - Вектор жалоб размером, которое равно заданному количеству жалоб.
+     */
+    std::vector<Complaint> retrieve_complaints(QSqlQuery& query, int count);
+
+}
 
 #endif // LINKDOVESQLDATABASE_H

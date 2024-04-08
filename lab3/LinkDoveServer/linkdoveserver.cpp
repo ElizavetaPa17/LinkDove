@@ -9,6 +9,7 @@
 #include <QDebug>
 
 #include "UserInfo.h"
+#include "utility.h"
 
 std::mutex connection_mutex;
 
@@ -134,8 +135,10 @@ void LinkDoveServer::handle_type_request(ConnectionIterator iterator) {
         handle_login_request(iterator);
     } else if (request_type == REGISTER_REQUEST) {
         handle_register_request(iterator);
-    } else if (request_type == COMPLAINT_REQUEST) {
-        handle_complaint_request(iterator);
+    } else if (request_type == SEND_COMPLAINT_REQUEST) {
+        handle_send_complaint_request(iterator);
+    } else if (request_type == GET_COMPLAINTS_REQUEST) {
+        handle_get_complaints_request(iterator);
     } else if (request_type == UPDATE_USER_REQUEST) {
         handle_update_user_request(iterator);
     }
@@ -184,7 +187,7 @@ void LinkDoveServer::handle_register_request(ConnectionIterator iterator) {
     async_write(iterator);
 }
 
-void LinkDoveServer::handle_complaint_request(ConnectionIterator iterator) {
+void LinkDoveServer::handle_send_complaint_request(ConnectionIterator iterator) {
     Complaint complaint;
     complaint.deserialize(iterator->in_stream_);
 
@@ -192,13 +195,39 @@ void LinkDoveServer::handle_complaint_request(ConnectionIterator iterator) {
 
     std::stringstream answer;
     if (data_base_.add_complaint(complaint)) {
-        answer << COMPLAINT_SUCCESS << "\n" << END_OF_REQUEST;
+        answer << SEND_COMPLAINT_SUCCESS << "\n" << END_OF_REQUEST;
     } else {
-        answer << COMPLAINT_FAILED << "\n" << END_OF_REQUEST;
+        answer << SEND_COMPLAINT_FAILED << "\n" << END_OF_REQUEST;
     }
 
     iterator->out_stream_ << answer.str();
     async_write(iterator);
+}
+
+void LinkDoveServer::handle_get_complaints_request(ConnectionIterator iterator) {
+    remove_delimeter(iterator);
+
+    size_t complaints_count = 0;
+    std::stringstream answer;
+    if ((complaints_count = data_base_.get_complaints_count()) < 0) {
+        answer << GET_COMPLAINTS_FAILED << "\n" << END_OF_REQUEST;
+    } else {
+        complaints_count = complaints_count > GET_COMPLAINTS_LIMIT ? GET_COMPLAINTS_LIMIT : complaints_count;
+
+        std::vector<Complaint> complaints;
+        try {
+            complaints = data_base_.get_complaints(complaints_count);
+
+            answer << GET_COMPLAINTS_SUCCESS << "\n";
+            Utility::serialize(answer, complaints);
+            answer << END_OF_REQUEST;
+        } catch (std::runtime_error& ex) {
+            answer << GET_COMPLAINTS_FAILED << "\n" << END_OF_REQUEST;
+        }
+
+        iterator->out_stream_ << answer.str();
+        async_write(iterator);
+    }
 }
 
 void LinkDoveServer::handle_update_user_request(ConnectionIterator iterator) {
