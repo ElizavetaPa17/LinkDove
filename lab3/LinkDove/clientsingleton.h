@@ -7,6 +7,10 @@
 #include "client.h"
 #include "constants.h"
 
+/**
+ * @brief The ClientSingleton class
+ * Клиент-синглтон для более удобного обмена информацией с сервером.
+ */
 class ClientSingleton final {
 public:
     ClientSingleton(const ClientSingleton&) = delete;

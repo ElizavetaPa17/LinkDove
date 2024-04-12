@@ -65,6 +65,20 @@ void Client::async_send_complaint(const std::string& text) {
     run_context();
 }
 
+void Client::async_del_complaint(unsigned long long complaint_id) {
+    connection_.out_stream_ << DEL_COMPLAINT_REQUEST << "\n";
+    Utility::serialize_fundamental<unsigned long long>(connection_.out_stream_, complaint_id);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    asio::async_write(connection_.socket_, connection_.buffer_,
+                      boost::bind(&Client::handle_async_write,
+                                  shared_from_this(),
+                                  asio::placeholders::error,
+                                  asio::placeholders::bytes_transferred));
+
+    run_context();
+}
+
 void Client::async_get_complaints() {
     connection_.out_stream_ << GET_COMPLAINTS_REQUEST << "\n" << END_OF_REQUEST;
 
@@ -83,6 +97,20 @@ void Client::async_update_user(StatusInfo& status_info) {
     updated_status_info_ = status_info;
     updated_status_info_.id_ = status_info_.id_;
     connection_.out_stream_ << create_update_user_request(updated_status_info_);
+
+    asio::async_write(connection_.socket_, connection_.buffer_,
+                      boost::bind(&Client::handle_async_write,
+                                  shared_from_this(),
+                                  asio::placeholders::error,
+                                  asio::placeholders::bytes_transferred));
+
+    run_context();
+}
+
+void Client::async_find_user(const std::string &username) {
+    connection_.out_stream_ << FIND_USER_REQUEST << "\n";
+    Utility::serialize(connection_.out_stream_, username);
+    connection_.out_stream_ << END_OF_REQUEST;
 
     asio::async_write(connection_.socket_, connection_.buffer_,
                       boost::bind(&Client::handle_async_write,
@@ -130,6 +158,16 @@ std::string Client::create_send_complaint_request(const Complaint& complaint) {
     str_stream << SEND_COMPLAINT_REQUEST << '\n';
 
     complaint.serialize(str_stream);
+    str_stream << END_OF_REQUEST;
+
+    return str_stream.str();
+}
+
+std::string Client::create_del_request(unsigned long long complaint_id) {
+    std::stringstream str_stream;
+
+    str_stream << DEL_COMPLAINT_REQUEST << '\n';
+    Utility::serialize_fundamental(str_stream, complaint_id);
     str_stream << END_OF_REQUEST;
 
     return str_stream.str();
@@ -207,6 +245,10 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
             emit send_complaint_result(SEND_COMPLAINT_SUCCESS_ANSWER);
         } else if (answer_type == SEND_COMPLAINT_FAILED){
             emit send_complaint_result(SEND_COMPLAINT_FAILED_ANSWER);
+        } else if (answer_type == DEL_COMPLAINT_SUCCESS) {
+            emit del_complaint_result(DEL_COMPLAINT_SUCCESS_ANSWER);
+        } else if (answer_type == DEL_COMPLAINT_FAILED) {
+            emit del_complaint_result(DEL_COMPLAINT_FAILED_ANSWER);
         } else if (answer_type == GET_COMPLAINTS_SUCCESS) {
             complaints_ = Utility::deserialize_compl_vec(connection_.in_stream_).second;
             emit get_complaints_result(GET_COMPLAINTS_SUCCESS_ANSWER);
@@ -217,6 +259,11 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
             emit update_user_result(UPDATE_USER_SUCCESS_ANSWER);
         } else if (answer_type == UPDATE_USER_FAILED){
             emit update_user_result(UPDATE_USER_FAILED_ANSWER);
+        } else if (answer_type == FIND_USER_SUCCESS) {
+            found_status_info_.deserialize(connection_.in_stream_);
+            emit find_user_result(FIND_USER_SUCCESS_ANSWER);
+        } else if (answer_type == FIND_USER_FAILED) {
+            emit find_user_result(FIND_USER_FAILED_ANWSER);
         } else {
             std::cerr << "что-то невнятное: " << answer_type << '\n';
         }

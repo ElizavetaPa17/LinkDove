@@ -85,7 +85,6 @@ std::pair<size_t, std::vector<Complaint>> Utility::deserialize_compl_vec(std::is
     uint32_t len = 0; // Размер сериализованной строки был записан в формате uint32_t
 
     is.read(reinterpret_cast<char*>(&len), sizeof(len));
-    std::cerr << len << '\n';
     if (len > 0) {
         vec.resize(len);
 

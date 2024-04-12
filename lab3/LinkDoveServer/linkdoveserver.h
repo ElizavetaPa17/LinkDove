@@ -126,6 +126,13 @@ private:
     void handle_send_complaint_request(ConnectionIterator iterator);
 
     /**
+     * <p> Обрабатывает запрос на удаление жалобы. </p>
+     * @brief handle_del_complaint_request
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_del_complaint_request(ConnectionIterator iterator);
+
+    /**
      * <p> Обрабатывает запрос на получение жалоб. </p>
      * @brief handle_get_complaints_request
      * @param iterator - Итератор на сокет, запрос которого обрабатывается.
@@ -138,6 +145,13 @@ private:
      * @param iterator - Итератор на сокет, запрос которого обрабатывается.
      */
     void handle_update_user_request(ConnectionIterator iterator);
+
+    /**
+     * <p> Обрабатывает запрос на поиск пользователя. </p>
+     * @brief handle_find_user_request
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_find_user_request(ConnectionIterator iterator);
 
     /** <p> Запускает в отдельном потоке контекст для обработки асинхронных функций. </p>
      * @brief run_context

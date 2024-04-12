@@ -73,8 +73,14 @@ void SettingWidget::slotDisplayComplaintList(int get_complaints_result) {
         return;
     }
 
+    complaint_dialog_.removeAllComplaints();
     std::vector<Complaint> complaints = ClientSingleton::get_client()->get_complaints();
-    std::cerr << complaints.size();
+    size_t sz = complaints.size();
+    for (int i = 0; i < sz; ++i) {
+        complaint_dialog_.addComplaint(complaints[i]);
+    }
+
+    complaint_dialog_.exec();
 }
 
 void SettingWidget::slotDisplayAboutDialog() {

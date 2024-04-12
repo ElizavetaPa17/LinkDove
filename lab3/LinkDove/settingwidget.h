@@ -3,6 +3,8 @@
 
 #include <QWidget>
 
+#include "complaintslistdialog.h"
+
 namespace Ui {
 class SettingWidget;
 }
@@ -76,6 +78,8 @@ private slots:
 
 private:
     Ui::SettingWidget *ui;
+    ComplaintsListDialog complaint_dialog_;
+
     int privileged_mode_;
 
     /**

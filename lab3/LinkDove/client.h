@@ -54,6 +54,13 @@ public:
     void async_send_complaint(const std::string& text);
 
     /**
+     * <p> Отправляет запрос на удаление жалобы с заданным идентификатором. </p>
+     * @brief async_del_complaint
+     * @param complaint_id - Идентификатор удаляемой жалобы.
+     */
+    void async_del_complaint(unsigned long long complaint_id);
+
+    /**
      * <p> Получает список всех жалоб. </p>
      * @brief async_get_complaints
      */
@@ -65,6 +72,13 @@ public:
      * @param status_info_ - Структура, содержащая отредактированные данные пользователя.
      */
     void async_update_user(StatusInfo& status_info_);
+
+    /**
+     * <p> Отправляет запрос на извлечение информации о пользователе с заданным идентификатором. </p>
+     * @brief async_find_user
+     * @param id - Идентификатор пользователя, поиск которого осуществляется.
+     */
+    void async_find_user(const std::string &username);
 
     /**
      * <p> Возвращает информацию о пользователе. </p>
@@ -102,6 +116,12 @@ signals:
      */
     void send_complaint_result(int result);
 
+    /** <p> Генерирует сигнал после получения результата удаления жалобы. </p>
+     * @brief del_complaint_result
+     * @param result - Параметр, содержащий результат удаления жалобы.
+     */
+    void del_complaint_result(int result);
+
     /**
      * <p> Генерирует сигнал после получения результата извлечения всех жалоб.</p>
      * @brief get_complaints_result
@@ -116,6 +136,13 @@ signals:
      */
     void update_user_result(int result);
 
+    /**
+     * <p> Генерирует сигнал после получение результата поиска данных о пользователе. </p>
+     * @brief find_user_result
+     * @param result
+     */
+    void find_user_result(int result);
+
 private:
     std::shared_ptr<asio::io_context> io_context_ptr_;
     IStreamConnection<tcp> connection_;
@@ -124,6 +151,7 @@ private:
 
     StatusInfo status_info_;
     StatusInfo updated_status_info_;
+    StatusInfo found_status_info_;
     std::vector<Complaint> complaints_;
 
     void create_account() {}
@@ -150,6 +178,14 @@ private:
      * @return - Строковое представление запроса.
      */
     std::string create_send_complaint_request(const Complaint& complaint);
+
+    /**
+     * <p> Формирует запрос на удаление жалобы. </p>
+     * @brief create_del_request
+     * @param complaint_id - Идентификатор удаляемой жалобы.
+     * @return - Строковое представление запроса.
+     */
+    std::string create_del_request(unsigned long long complaint_id);
 
     /**
      * <p> Формирует запрос обновления данных о пользователе. </p>

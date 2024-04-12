@@ -190,7 +190,23 @@ bool LinkDoveSQLDataBase::add_complaint(const Complaint& complaint) {
         return false;
     } else {
         // если вставка была успешна, то row affected > 0, иначе row affected == 0 (false).
-        return true;
+        return query.numRowsAffected();
+    }
+}
+
+bool LinkDoveSQLDataBase::del_complaint(unsigned long long complaint_id) {
+    QSqlQuery query(data_base_);
+    query.prepare("DELETE FROM COMPLAINTS "
+                  "WHERE ID=:id; ");
+
+    query.bindValue(":id", complaint_id);
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString();
+        return false;
+    } else {
+        // если удаление было успешным, то row affected > 0, иначе row affected == 0 (false).
+        std::cerr << query.numRowsAffected() << '\n';
+        return query.numRowsAffected();
     }
 }
 

@@ -46,6 +46,14 @@ public:
     bool add_complaint(const Complaint& complaint);
 
     /**
+     * <p> Удаляет жалобу из БД. </p>
+     * @brief del_complaint
+     * @param complaint_id - Идентификатор удаляемой жалобы.
+     * @return - В случае успеха возвращает true, иначе - false.
+     */
+    bool del_complaint(unsigned long long complaint_id);
+
+    /**
      * <p> Запрос на количество жалоб. </p>
      * @brief get_complaints_count
      * @return - Возвращает количество жалоб.

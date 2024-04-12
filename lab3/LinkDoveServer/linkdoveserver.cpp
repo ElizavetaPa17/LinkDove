@@ -130,6 +130,7 @@ void LinkDoveServer::handle_async_close_write(ConnectionIterator iterator, boost
 void LinkDoveServer::handle_type_request(ConnectionIterator iterator) {
     std::string request_type;
     std::getline(iterator->in_stream_, request_type);
+    std::cerr << request_type << '\n';
 
     if (request_type == LOGIN_REQUEST) {
         handle_login_request(iterator);
@@ -137,10 +138,14 @@ void LinkDoveServer::handle_type_request(ConnectionIterator iterator) {
         handle_register_request(iterator);
     } else if (request_type == SEND_COMPLAINT_REQUEST) {
         handle_send_complaint_request(iterator);
+    } else if (request_type == DEL_COMPLAINT_REQUEST) {
+        handle_del_complaint_request(iterator);
     } else if (request_type == GET_COMPLAINTS_REQUEST) {
         handle_get_complaints_request(iterator);
     } else if (request_type == UPDATE_USER_REQUEST) {
         handle_update_user_request(iterator);
+    } else if (request_type == FIND_USER_REQUEST) {
+        handle_find_user_request(iterator);
     }
 }
 
@@ -204,6 +209,22 @@ void LinkDoveServer::handle_send_complaint_request(ConnectionIterator iterator) 
     async_write(iterator);
 }
 
+void LinkDoveServer::handle_del_complaint_request(ConnectionIterator iterator) {
+    unsigned long long complaint_id = Utility::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    if (data_base_.del_complaint(complaint_id)) {
+        answer << DEL_COMPLAINT_SUCCESS << "\n" << END_OF_REQUEST;
+    } else {
+        answer << DEL_COMPLAINT_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
 void LinkDoveServer::handle_get_complaints_request(ConnectionIterator iterator) {
     remove_delimeter(iterator);
 
@@ -234,12 +255,36 @@ void LinkDoveServer::handle_update_user_request(ConnectionIterator iterator) {
     StatusInfo status_info;
     status_info.deserialize(iterator->in_stream_);
 
-    std::stringstream answer;
     remove_delimeter(iterator);
+
+    std::stringstream answer;
     if (data_base_.update_user(status_info)) {
         answer << UPDATE_USER_SUCCESS << "\n" << END_OF_REQUEST;
     } else {
         answer << UPDATE_USER_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_find_user_request(ConnectionIterator iterator) {
+    std::string username = Utility::deserialize_string(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    try {
+        StatusInfo status_info;
+        status_info = data_base_.get_status_info(username);
+
+        answer << FIND_USER_SUCCESS << "\n";
+        status_info.serialize(answer);
+        answer << END_OF_REQUEST;
+        std::cerr << "find\n";
+    } catch(std::runtime_error& ex) {
+        answer << FIND_USER_FAILED << "\n" << END_OF_REQUEST;
+        std::cerr << "not found\n";
     }
 
     iterator->out_stream_ << answer.str();

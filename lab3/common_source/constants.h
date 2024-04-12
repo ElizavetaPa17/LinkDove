@@ -26,10 +26,14 @@ enum ResponseTypes {
     LOGIN_SUCCESS_ANSWER,
     SEND_COMPLAINT_SUCCESS_ANSWER,
     SEND_COMPLAINT_FAILED_ANSWER,
+    DEL_COMPLAINT_SUCCESS_ANSWER,
+    DEL_COMPLAINT_FAILED_ANSWER,
     GET_COMPLAINTS_SUCCESS_ANSWER,
     GET_COMPLAINTS_FAILED_ANSWER,
     UPDATE_USER_SUCCESS_ANSWER,
-    UPDATE_USER_FAILED_ANSWER
+    UPDATE_USER_FAILED_ANSWER,
+    FIND_USER_SUCCESS_ANSWER,
+    FIND_USER_FAILED_ANWSER
 };
 
 enum ApplicationMode {
@@ -86,6 +90,13 @@ extern const char *SEND_COMPLAINT_SUCCESS;
 // Ответ сервера на неудачную регистрацию жалобы
 extern const char *SEND_COMPLAINT_FAILED;
 
+// Запрос на удаление жалобы от администратора
+extern const char *DEL_COMPLAINT_REQUEST;
+// Ответ сервера на успешное удаление жалобы
+extern const char *DEL_COMPLAINT_SUCCESS;
+// Ответ сервера на неудачное удаление жалобы
+extern const char *DEL_COMPLAINT_FAILED;
+
 // Запрос на получение жалоб
 extern const char *GET_COMPLAINTS_REQUEST;
 // Ответ сервера на успешный запрос жалоб
@@ -99,3 +110,10 @@ extern const char *UPDATE_USER_REQUEST;
 extern const char *UPDATE_USER_SUCCESS;
 // Ответ сервера на неудачное обновление информации о пользователе
 extern const char *UPDATE_USER_FAILED;
+
+// Запрос на поиск информации пользователя
+extern const char *FIND_USER_REQUEST;
+// Ответ сервера на успешный поиск информации о пользователе
+extern const char *FIND_USER_SUCCESS;
+// Ответ сервера на неудачный поиск информации о пользователе
+extern const char *FIND_USER_FAILED;

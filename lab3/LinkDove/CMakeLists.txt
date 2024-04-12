@@ -19,6 +19,7 @@ set(PROJECT_SOURCES
         mainwindow.h
         mainwindow.ui
         client.h client.cpp client.qrc
+        clientsingleton.h
 )
 
 set(COMMON_SOURCE_PATH ${CMAKE_SOURCE_DIR}/../common_source)
@@ -45,7 +46,10 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         infodialog.h infodialog.cpp infodialog.ui
         editprofilewidget.h editprofilewidget.cpp editprofilewidget.ui
         editprofilewidget.h editprofilewidget.cpp editprofilewidget.ui
-        clientsingleton.h
+        complaintcard.h complaintcard.cpp complaintcard.ui
+        complaintslistdialog.h complaintslistdialog.cpp
+        userslist.h userslist.cpp
+        userslist.h userslist.cpp userslist.ui
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET LinkDove APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
