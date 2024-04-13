@@ -125,6 +125,10 @@ StatusInfo Client::get_status_info() {
     return status_info_;
 }
 
+StatusInfo Client::get_found_user() {
+    return found_status_info_;
+}
+
 std::vector<Complaint> Client::get_complaints() {
     return complaints_;
 }

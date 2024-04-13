@@ -50,6 +50,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         complaintslistdialog.h complaintslistdialog.cpp
         userslist.h userslist.cpp
         userslist.h userslist.cpp userslist.ui
+        usercard.h usercard.cpp usercard.ui
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET LinkDove APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

@@ -46,6 +46,13 @@ private slots:
      */
     void slotQuit();
 
+    /**
+     * <p> Слот, открывающий чат с заданным пользователем. </p>
+     * @brief slotOpenChatWith
+     * @param status_info
+     */
+    void slotOpenChatWith(const StatusInfo &status_info);
+
 private:
     Ui::MainWidget *ui;
     StatusInfo status_info_;

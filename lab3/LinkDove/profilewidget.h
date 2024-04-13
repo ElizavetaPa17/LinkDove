@@ -59,6 +59,12 @@ signals:
 private:
     Ui::ProfileWidget *ui;
     StatusInfo status_info_;
+
+    /**
+     * <p> Настраивает соединения c виджетом авторизации (формы регистрации). </p>
+     * @brief setupConnection
+     */
+    void setupConnection();
 };
 
 #endif // PROFILEWIDGET_H

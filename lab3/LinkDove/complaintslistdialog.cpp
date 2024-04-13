@@ -64,14 +64,11 @@ void ComplaintsListDialog::removeAllComplaints() {
     size_t count = pvboxLayout->count();
     QLayoutItem *widget_item = nullptr;
 
-    std::cerr << "there\n";
     while (widget_item = (pvboxLayout->takeAt(0))) {
         if (widget_item != nullptr) {
             delete widget_item;
         }
     }
-
-    std::cerr << "here\n";
 }
 
 void ComplaintsListDialog::slotDeleteComplaintResult(int result) {

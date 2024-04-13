@@ -2,6 +2,7 @@
 #include "ui_mainwidget.h"
 
 #include <memory>
+#include <iostream>
 
 MainWidget::MainWidget(QWidget *parent) :
     QWidget(parent),
@@ -48,6 +49,10 @@ void MainWidget::slotQuit() {
     emit switchToPage(this, LOGIN_PAGE);
 }
 
+void MainWidget::slotOpenChatWith(const StatusInfo &status_info) {
+    std::cerr << "here\n";
+}
+
 void MainWidget::setPrivilegedMode(bool flag) {
     ui->profileWidget->setPrivelegedMode(flag);
     ui->settingWidget->setPrivilegedMode(flag);
@@ -67,4 +72,6 @@ void MainWidget::setupConnection() {
                                                                          ui->profileStackedWidget->setCurrentIndex(SIMPLE_PROFILE_PAGE);
                                                                          ui->profileWidget->setStatusInfo(ui->profileEditWidget->getStatusInfo());
                                                                      } );
+
+    connect(ui->usersList, &UsersList::userCardClicked, this, &MainWidget::slotOpenChatWith);
 }
