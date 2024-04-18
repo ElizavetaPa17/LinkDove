@@ -7,19 +7,19 @@
     <x>0</x>
     <y>0</y>
     <width>440</width>
-    <height>110</height>
+    <height>70</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>0</width>
-    <height>110</height>
+    <height>70</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>16777215</width>
-    <height>110</height>
+    <height>70</height>
    </size>
   </property>
   <property name="cursor">
@@ -33,6 +33,10 @@
 	background-color: rgb(32, 30, 30);
 	border: 3px solid rgb(245, 245, 245);
 	border-radius: 20px;
+}
+
+QWidget#UserCard:hover {
+	background-color: rgb(56, 82, 160)
 }</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -45,7 +49,7 @@
       </font>
      </property>
      <property name="cursor">
-      <cursorShape>ArrowCursor</cursorShape>
+      <cursorShape>PointingHandCursor</cursorShape>
      </property>
      <property name="text">
       <string>TextLabel</string>

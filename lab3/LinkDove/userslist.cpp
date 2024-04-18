@@ -18,6 +18,7 @@ UsersList::UsersList(QWidget *parent) :
     ui->setupUi(this);
     ui->scrollArea->setWidget(new QWidget());
     ui->scrollArea->widget()->setLayout(new QVBoxLayout());
+    ui->scrollArea->widget()->layout()->setAlignment(Qt::AlignTop);
 
     setupConnection();
 }

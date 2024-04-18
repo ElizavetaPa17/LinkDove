@@ -3,8 +3,13 @@
 #include <iostream>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <mutex>
 
 #include "constants.h"
+#include "individualmessage.h"
+#include "textmessagecontent.h"
+
+std::mutex modify_mutex;
 
 LinkDoveSQLDataBase::LinkDoveSQLDataBase(const std::string &connection_name)
     : connection_name_(connection_name)
@@ -59,10 +64,35 @@ bool LinkDoveSQLDataBase::setup_tables() {
                        "( ID MEDIUMINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
                        " sender_id MEDIUMINT NOT NULL, "
                        " text TEXT NOT NULL,"
-                       " FOREIGN KEY(sender_id) REFERENCES USERS(ID) "
-                       " ON DELETE CASCADE); ");
+                       " FOREIGN KEY(sender_id) REFERENCES USERS(ID) ON DELETE CASCADE); ");
     if (!is_ok) {
         std::cerr << "Failed to setup COMPLAINTS table: " << query.lastError().text().toStdString() << '\n';
+        return false;
+    }
+
+    is_ok = query.exec("CREATE TABLE IF NOT EXISTS INDIVIDUAL_MESSAGES "
+                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY , "
+                       " sender_id MEDIUMINT NOT NULL, "
+                       " receiver_id MEDIUMINT NOT NULL, "
+                       " content_id BIGINT DEFAULT 0, "
+                       " content_type ENUM('text', 'audio', 'image'), "
+                       " FOREIGN KEY (sender_id) REFERENCES USERS (ID) ON DELETE CASCADE, "
+                       " FOREIGN KEY (receiver_id) REFERENCES USERS (ID) ON DELETE CASCADE); ");
+
+    if (!is_ok) {
+        std::cerr << "Failed to setup INDIVIDUAL_MESSAGES table: " << query.lastError().text().toStdString() << '\n';
+        return false;
+    }
+
+    is_ok = query.exec("CREATE TABLE IF NOT EXISTS IND_TEXT_MESSAGE_CONTENTS "
+                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
+                       " msg_id BIGINT NOT NULL, "
+                       " send_date DATETIME NOT NULL, "
+                       " text_data TEXT NOT NULL, "
+                       " FOREIGN KEY (msg_id) REFERENCES INDIVIDUAL_MESSAGES (ID) ON DELETE CASCADE); ");
+
+    if (!is_ok) {
+        std::cerr << "Failed to setup IND_TEXT_MESSAGE_CONTENTS table: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
@@ -101,7 +131,7 @@ bool LinkDoveSQLDataBase::login_user(const LoginInfo& info) {
     query.bindValue(":password", info.password_.c_str());
 
     if (!query.exec()) {
-        std::cerr << query.lastError().text().toStdString();
+        std::cerr << query.lastError().text().toStdString() << '\n';
         return false;
     } else {
         if (query.next()) {
@@ -163,7 +193,7 @@ bool LinkDoveSQLDataBase::update_user(const StatusInfo& status_info) {
     query.bindValue(":id",          status_info.id_);
 
     if (!query.exec()) {
-        std::cerr  << "here" << query.lastError().text().toStdString();
+        std::cerr  << query.lastError().text().toStdString() << '\n';
         return false;
     } else {
         // если вставка была успешна, то row affected > 0, иначе row affected == 0 (false).
@@ -186,7 +216,7 @@ bool LinkDoveSQLDataBase::add_complaint(const Complaint& complaint) {
     query.bindValue(":text", complaint.text_.c_str());
 
     if (!query.exec()) {
-        std::cerr << query.lastError().text().toStdString();
+        std::cerr << query.lastError().text().toStdString() << '\n';
         return false;
     } else {
         // если вставка была успешна, то row affected > 0, иначе row affected == 0 (false).
@@ -201,7 +231,7 @@ bool LinkDoveSQLDataBase::del_complaint(unsigned long long complaint_id) {
 
     query.bindValue(":id", complaint_id);
     if (!query.exec()) {
-        std::cerr << query.lastError().text().toStdString();
+        std::cerr << query.lastError().text().toStdString() << '\n';
         return false;
     } else {
         // если удаление было успешным, то row affected > 0, иначе row affected == 0 (false).
@@ -215,7 +245,7 @@ int LinkDoveSQLDataBase::get_complaints_count() {
     query.prepare("SELECT COUNT(*) FROM COMPLAINTS; ");
 
     if (!query.exec()) {
-        std::cerr << query.lastError().text().toStdString();
+        std::cerr << query.lastError().text().toStdString() << '\n';
         return -1;
     } else {
         if (!query.next()) {
@@ -233,7 +263,7 @@ std::vector<Complaint> LinkDoveSQLDataBase::get_complaints(int count) {
 
     std::vector<Complaint> complaints;
     if (!query.exec()) {
-        std::cerr << query.lastError().text().toStdString();
+        std::cerr << query.lastError().text().toStdString() << '\n';
         std::runtime_error("get_complaints failed: query.exec");
     } else {
         if (!query.next()) {
@@ -243,6 +273,118 @@ std::vector<Complaint> LinkDoveSQLDataBase::get_complaints(int count) {
             return link_dove_database_details__::retrieve_complaints(query, count);
         }
     }
+}
+
+bool LinkDoveSQLDataBase::add_message(const IMessage& msg) {
+    QSqlQuery query(data_base_);
+    unsigned long long msg_id = 0;
+
+    // используем мьютекс для того, чтобы во время транзакции не было модификации данных
+    std::unique_lock<std::mutex> unique_mtx(modify_mutex);
+
+    // используем транзакцию, чтобы в случае ошибки добавления сообщения данные в БД были
+    // в согласованном состоянии
+    if (data_base_.transaction()) {
+        switch (msg.get_msg_type()) {
+            case INDIVIDUAL_MSG_TYPE:  {
+                query.prepare(" INSERT INTO INDIVIDUAL_MESSAGES "
+                              " (sender_id, receiver_id) "
+                              " VALUES (:sender_id, :receiver_id); ");
+
+                query.bindValue(":sender_id", static_cast<const IndividualMessage&>(msg).get_msg_edges().first);
+                query.bindValue(":receiver_id", static_cast<const IndividualMessage&>(msg).get_msg_edges().second);
+
+                if (!query.exec()) {
+                    std::cerr << query.lastError().text().toStdString() << '\n';
+                    return false;
+                }
+
+                query.prepare("SELECT * FROM INDIVIDUAL_MESSAGES "
+                              "WHERE "
+                              " sender_id=:sender_id AND receiver_id=:receiver_id AND content_id=0; ");
+                query.bindValue(":sender_id", static_cast<const IndividualMessage&>(msg).get_msg_edges().first);
+                query.bindValue(":receiver_id", static_cast<const IndividualMessage&>(msg).get_msg_edges().second);
+
+                if (!query.exec()) {
+                    std::cerr << query.lastError().text().toStdString() << '\n';
+                    return false;
+                } else {
+                    if (!query.next()) {
+                        std::cerr << "Can't retrieve message\n";
+                        return false;
+                    } else {
+                        msg_id = query.value("ID").toULongLong();
+                    }
+                }
+            }
+        }
+
+        std::string content_enum;
+        unsigned long long content_id = 0;
+        switch (msg.get_msg_content()->get_msg_content_type()) {
+            case TEXT_MSG_TYPE: {
+                query.prepare(" INSERT INTO IND_TEXT_MESSAGE_CONTENTS "
+                              " (msg_id, send_date, text_data) "
+                              " VALUES (:msg_id, NOW(), :text_data); ");
+                query.bindValue(":msg_id", msg_id);
+                query.bindValue(":text_data", msg.get_msg_content()->get_raw_data());
+
+                if (!query.exec()) {
+                    std::cerr << query.lastError().text().toStdString() << '\n';
+                    return false;
+                }
+
+                query.prepare(" SELECT * FROM IND_TEXT_MESSAGE_CONTENTS "
+                              " WHERE msg_id = :msg_id; ");
+                query.bindValue(":msg_id", msg_id);
+
+                if (!query.exec()) {
+                    std::cerr << query.lastError().text().toStdString() << '\n';
+                    return false;
+                } else {
+                    if (!query.next()) {
+                        return false;
+                    } else {
+                        content_id = query.value("ID").toULongLong();
+                    }
+                }
+
+                content_enum = "text";
+                break;
+            }
+        }
+
+        switch (msg.get_msg_type()) {
+            case INDIVIDUAL_MSG_TYPE:  {
+                query.prepare(" UPDATE INDIVIDUAL_MESSAGES "
+                              " SET content_id   = :content_id,"
+                              "     content_type = :content_type "
+                              " WHERE ID = :msg_id; ");
+
+                query.bindValue(":content_id", content_id);
+                query.bindValue(":content_type", content_enum.c_str());
+                query.bindValue(":msg_id", msg_id);
+
+                break;
+            }
+        }
+
+        if (!query.exec()) {
+            std::cerr << query.lastError().text().toStdString() << '\n';
+            return false;
+        }
+
+        if (!data_base_.commit()) {
+            std::cerr << "Failed to commit\n";
+            return false;
+        }
+    } else {
+        std::cerr << "Failed to start transaction\n";
+        return false;
+    }
+
+    query.exec(" COMMIT; ");
+    return true;
 }
 
 StatusInfo LinkDoveSQLDataBase::get_status_info(const std::string &username) {

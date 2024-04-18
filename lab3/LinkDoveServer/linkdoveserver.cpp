@@ -130,7 +130,6 @@ void LinkDoveServer::handle_async_close_write(ConnectionIterator iterator, boost
 void LinkDoveServer::handle_type_request(ConnectionIterator iterator) {
     std::string request_type;
     std::getline(iterator->in_stream_, request_type);
-    std::cerr << request_type << '\n';
 
     if (request_type == LOGIN_REQUEST) {
         handle_login_request(iterator);
@@ -146,6 +145,8 @@ void LinkDoveServer::handle_type_request(ConnectionIterator iterator) {
         handle_update_user_request(iterator);
     } else if (request_type == FIND_USER_REQUEST) {
         handle_find_user_request(iterator);
+    } else if (request_type == SEND_MSG_REQUEST) {
+        handle_send_msg_request(iterator);
     }
 }
 
@@ -281,10 +282,24 @@ void LinkDoveServer::handle_find_user_request(ConnectionIterator iterator) {
         answer << FIND_USER_SUCCESS << "\n";
         status_info.serialize(answer);
         answer << END_OF_REQUEST;
-        std::cerr << "find\n";
     } catch(std::runtime_error& ex) {
         answer << FIND_USER_FAILED << "\n" << END_OF_REQUEST;
-        std::cerr << "not found\n";
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_send_msg_request(ConnectionIterator iterator) {
+    std::shared_ptr<IMessage> msg_ptr = Utility::deserialize_msg(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    if (data_base_.add_message(*msg_ptr)) {
+        answer << SEND_MSG_SUCCESS << "\n" << END_OF_REQUEST;
+    } else {
+        answer << SEND_MSG_FAILED << "\n" << END_OF_REQUEST;
     }
 
     iterator->out_stream_ << answer.str();

@@ -153,6 +153,13 @@ private:
      */
     void handle_find_user_request(ConnectionIterator iterator);
 
+    /**
+     * <p> Обрабатывает запрос на отправку сообщения. </p>
+     * @brief handle_send_msg_request
+     * @param iterator
+     */
+    void handle_send_msg_request(ConnectionIterator iterator);
+
     /** <p> Запускает в отдельном потоке контекст для обработки асинхронных функций. </p>
      * @brief run_context
      */

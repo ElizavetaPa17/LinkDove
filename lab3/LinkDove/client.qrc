@@ -14,5 +14,7 @@
     <file alias="chat_group_icon.png">../resources/chat_group_icon.png</file>
     <file alias="chat_channel_icon.png">../resources/chat_channel_icon.png</file>
     <file alias="search_icon.png">../resources/search_icon.png</file>
+    <file alias="media_icon.png">../resources/media_icon.png</file>
+    <file alias="send_icon.png">../resources/send_icon.png</file>
 </qresource>
 </RCC>

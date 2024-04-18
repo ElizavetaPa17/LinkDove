@@ -5,6 +5,10 @@ const char *APPLICATION_DESCRIPTION =
         "со всех уголков планеты. Вы можете переписываться в чатах, группах и "
         "каналах, настраивать свой профиль и приложение. Вперед к новому общению!";
 
+const char *TEXT_MSG = "TEXT_MSG_TYPE";
+const char *AUDIO_MSG = "AUDIO_MSG_TYPE";
+const char *IMAGE_MSG = "IMAGE_MSG_TYPE";
+
 const char *LOGIN_REQUEST = "LOGIN";
 const char *LOGIN_SUCCESS = "LOGIN_SUCCESS";
 const char *LOGIN_FAILED  = "LOGIN_FAILED";
@@ -32,3 +36,7 @@ const char *UPDATE_USER_FAILED  = "UPDATE_USER_FAILED";
 const char *FIND_USER_REQUEST = "FIND_USER";
 const char *FIND_USER_SUCCESS = "FIND_USER_SUCCESS";
 const char *FIND_USER_FAILED  = "FIND_USER_FAILED";
+
+const char *SEND_MSG_REQUEST = "SEND_MSG";
+const char *SEND_MSG_SUCCESS = "SEND_MSG_SUCCESS";
+const char *SEND_MSG_FAILED  = "SEND_MSG_FAILED";

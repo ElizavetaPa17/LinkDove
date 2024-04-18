@@ -12,6 +12,7 @@
 #include "UserInfo.h"
 #include "complaint.h"
 #include "constants.h"
+#include "imessage.h"
 
 namespace asio = boost::asio;
 using tcp = asio::ip::tcp;
@@ -81,6 +82,13 @@ public:
     void async_find_user(const std::string &username);
 
     /**
+     * <p> Отправляет сообщение. </p>
+     * @brief async_send_message
+     * @param message - Отправляемое сообщение.
+     */
+    void async_send_message(const IMessage& message);
+
+    /**
      * <p> Возвращает информацию о пользователе. </p>
      * @brief get_status_info
      * @return - Структура, содержащая информацию о пользователе.
@@ -132,7 +140,7 @@ signals:
     /**
      * <p> Генерирует сигнал после получения результата извлечения всех жалоб.</p>
      * @brief get_complaints_result
-     * @param result
+     * @param result - Параметр, содержащий результат получения списка жалоб.
      */
     void get_complaints_result(int result);
 
@@ -146,9 +154,16 @@ signals:
     /**
      * <p> Генерирует сигнал после получение результата поиска данных о пользователе. </p>
      * @brief find_user_result
-     * @param result
+     * @param result - Параметр, содержащий результат поиска пользователя.
      */
     void find_user_result(int result);
+
+    /**
+     * <p> Генерирует сигнал после получения результата отправки сообщения. </p>
+     * @brief send_msg_result
+     * @param result - Параметр, содержащий результат отправки сообщения.
+     */
+    void send_msg_result(int result);
 
 private:
     std::shared_ptr<asio::io_context> io_context_ptr_;

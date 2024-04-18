@@ -306,7 +306,7 @@ QTabBar::tab:selected {
          </property>
          <widget class="QWidget" name="tabChats">
           <property name="styleSheet">
-           <string notr="true">QWidget {
+           <string notr="true">QWidget#tabChats {
 	background-color: rgb(245, 245, 245);
 	border-radius: 10px;
 }</string>
@@ -342,17 +342,7 @@ QTabBar::tab:selected {
             </widget>
            </item>
            <item row="0" column="1">
-            <spacer name="horizontalSpacer">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
+            <widget class="ChatWidget" name="chatWidget" native="true"/>
            </item>
           </layout>
          </widget>
@@ -441,6 +431,12 @@ QTabBar::tab:selected {
    <class>UsersList</class>
    <extends>QWidget</extends>
    <header>userslist.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ChatWidget</class>
+   <extends>QWidget</extends>
+   <header>chatwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

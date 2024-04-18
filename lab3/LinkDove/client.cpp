@@ -121,6 +121,20 @@ void Client::async_find_user(const std::string &username) {
     run_context();
 }
 
+void Client::async_send_message(const IMessage& message) {
+    connection_.out_stream_ << SEND_MSG_REQUEST << "\n";
+    Utility::serialize(connection_.out_stream_, message);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    asio::async_write(connection_.socket_, connection_.buffer_,
+                      boost::bind(&Client::handle_async_write,
+                                  shared_from_this(),
+                                  asio::placeholders::error,
+                                  asio::placeholders::bytes_transferred));
+
+    run_context();
+}
+
 StatusInfo Client::get_status_info() {
     return status_info_;
 }
@@ -268,6 +282,10 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
             emit find_user_result(FIND_USER_SUCCESS_ANSWER);
         } else if (answer_type == FIND_USER_FAILED) {
             emit find_user_result(FIND_USER_FAILED_ANWSER);
+        } else if (answer_type == SEND_MSG_SUCCESS) {
+            emit send_msg_result(SEND_MSG_SUCCESS_ANSWER);
+        } else if (answer_type == SEND_MSG_FAILED) {
+            emit send_msg_result(SEND_MSG_FAILED_ANSWER);
         } else {
             std::cerr << "что-то невнятное: " << answer_type << '\n';
         }

@@ -21,7 +21,12 @@ set(LIB_FILES
     utility.h       utility.cpp
     logininfo.h     logininfo.cpp
     complaint.h     complaint.cpp
-    shortstatusinfo.h shortstatusinfo.cpp)
+    shortstatusinfo.h shortstatusinfo.cpp
+    imessage.h imessage.cpp
+    individualmessage.h individualmessage.cpp
+    imessagecontent.h imessagecontent.cpp
+    textmessagecontent.h textmessagecontent.cpp
+)
 
 add_library(common_library ${LIB_FILES})
 target_link_libraries(common_library PRIVATE Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Widgets)

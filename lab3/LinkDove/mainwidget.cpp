@@ -49,10 +49,6 @@ void MainWidget::slotQuit() {
     emit switchToPage(this, LOGIN_PAGE);
 }
 
-void MainWidget::slotOpenChatWith(const StatusInfo &status_info) {
-    std::cerr << "here\n";
-}
-
 void MainWidget::setPrivilegedMode(bool flag) {
     ui->profileWidget->setPrivelegedMode(flag);
     ui->settingWidget->setPrivilegedMode(flag);
@@ -73,5 +69,5 @@ void MainWidget::setupConnection() {
                                                                          ui->profileWidget->setStatusInfo(ui->profileEditWidget->getStatusInfo());
                                                                      } );
 
-    connect(ui->usersList, &UsersList::userCardClicked, this, &MainWidget::slotOpenChatWith);
+    connect(ui->usersList, &UsersList::userCardClicked, ui->chatWidget, &ChatWidget::slotOpenChatWith);
 }

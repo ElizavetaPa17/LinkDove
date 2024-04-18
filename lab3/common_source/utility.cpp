@@ -3,6 +3,9 @@
 #include <algorithm>
 #include <iostream>
 
+#include "individualmessage.h"
+#include "textmessagecontent.h"
+
 size_t Utility::serialize(std::ostream& os, const std::string& value) {
     const auto pos = os.tellp();
 
@@ -94,4 +97,51 @@ std::pair<size_t, std::vector<Complaint>> Utility::deserialize_compl_vec(std::is
     }
 
     return std::make_pair(static_cast<size_t>(len), vec);
+}
+
+size_t Utility::serialize(std::ostream &os, const IMessage& msg) {
+    const auto pos = os.tellp();
+
+    std::cerr << msg.get_msg_type();
+    // Сериализуем тип сообщения.
+    auto type = static_cast<uint32_t>(msg.get_msg_type());
+    os.write(reinterpret_cast<const char*>(&type), sizeof(type));
+
+    // Сериализуем тип содержимого сообщения
+    type = static_cast<uint32_t>(msg.get_msg_content()->get_msg_content_type());
+    os.write(reinterpret_cast<const char*>(&type), sizeof(type));
+
+    msg.serialize(os);
+
+    return static_cast<size_t>(os.tellp() - pos);
+}
+
+std::pair<size_t, std::shared_ptr<IMessage>> Utility::deserialize_msg(std::istream& is) {
+    std::shared_ptr<IMessage> msg_ptr;
+    uint32_t type = 0;
+    size_t size = 0;
+
+    // Десериализуем тип сообщения
+    is.read(reinterpret_cast<char*>(&type), sizeof(type));
+    switch (type) {
+        case INDIVIDUAL_MSG_TYPE: {
+            msg_ptr = std::make_shared<IndividualMessage>(CREATED_MSG_ID);
+            break;
+        }
+        case BROAD_MSG_TYPE: {
+            break;
+        }
+    }
+
+    // Десериализуем тип содержимого сообщения
+    is.read(reinterpret_cast<char*>(&type), sizeof(type));
+    switch(type) {
+        case TEXT_MSG_TYPE: {
+            msg_ptr->set_msg_content(std::make_shared<TextMessageContent>());
+            break;
+        }
+    }
+
+    size += msg_ptr->deserialize(is) + 2*sizeof(type);
+    return std::pair<size_t, std::shared_ptr<IMessage>>(size, msg_ptr);
 }

@@ -22,18 +22,38 @@ enum profileTypePage {
 enum ResponseTypes {
     REGISTRATION_FAILED_ANSWER,
     REGISTRATION_SUCCESS_ANSWER,
+
     LOGIN_FAILED_ANSWER,
     LOGIN_SUCCESS_ANSWER,
+
     SEND_COMPLAINT_SUCCESS_ANSWER,
     SEND_COMPLAINT_FAILED_ANSWER,
+
     DEL_COMPLAINT_SUCCESS_ANSWER,
     DEL_COMPLAINT_FAILED_ANSWER,
+
     GET_COMPLAINTS_SUCCESS_ANSWER,
     GET_COMPLAINTS_FAILED_ANSWER,
+
     UPDATE_USER_SUCCESS_ANSWER,
     UPDATE_USER_FAILED_ANSWER,
+
     FIND_USER_SUCCESS_ANSWER,
-    FIND_USER_FAILED_ANWSER
+    FIND_USER_FAILED_ANWSER,
+
+    SEND_MSG_SUCCESS_ANSWER,
+    SEND_MSG_FAILED_ANSWER
+};
+
+enum MessageType {
+    INDIVIDUAL_MSG_TYPE,
+    BROAD_MSG_TYPE
+};
+
+enum MessageContentType {
+    TEXT_MSG_TYPE,
+    AUDIO_MSG_TYPE,
+    IMAGE_MSG_TYPE
 };
 
 enum ApplicationMode {
@@ -62,8 +82,17 @@ const int GET_COMPLAINTS_LIMIT = 100;
 // Формат строковой даты
 #define BIRTHAY_FORMAT "yyyy-MM-dd"
 
+// Идентификатор для сообщения, которое создано, но еще не инициализировано или не сохранено в БД.
+const int CREATED_MSG_ID = 0;
+
+
 // Информация о приложении LinkDove
 extern const char *APPLICATION_DESCRIPTION;
+
+// Типы сообщений
+extern const char *TEXT_MSG;
+extern const char *AUDIO_MSG;
+extern const char *IMAGE_MSG;
 
 /*
  * Типы запросов
@@ -117,3 +146,10 @@ extern const char *FIND_USER_REQUEST;
 extern const char *FIND_USER_SUCCESS;
 // Ответ сервера на неудачный поиск информации о пользователе
 extern const char *FIND_USER_FAILED;
+
+// Запрос на отправку сообщения
+extern const char *SEND_MSG_REQUEST;
+// Ответ сервера на успешную отправку сообщения от пользователя
+extern const char *SEND_MSG_SUCCESS;
+// Ответ сервера на неудачную отправку сообщения от пользователя
+extern const char *SEND_MSG_FAILED;

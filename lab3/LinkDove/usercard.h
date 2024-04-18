@@ -31,6 +31,10 @@ protected:
     // открывать чат с пользователем
     void mousePressEvent(QMouseEvent *event);
 
+    // Переопределяем метод отрисовки, т.к. иначе с виджетом
+    // не работают css-таблицы (проблема самого  Qt)
+    void paintEvent(QPaintEvent *);
+
 private:
     Ui::UserCard *ui;
     StatusInfo status_info_;

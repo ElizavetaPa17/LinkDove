@@ -1,6 +1,9 @@
 #include "usercard.h"
 #include "ui_usercard.h"
 
+#include <QStyleOption>
+#include <QPainter>
+
 #include "clientsingleton.h"
 
 UserCard::UserCard(QWidget *parent, const StatusInfo &status_info)
@@ -19,4 +22,11 @@ UserCard::~UserCard()
 
 void UserCard::mousePressEvent(QMouseEvent *event) {
     emit userCardClicked(status_info_);
+}
+
+void UserCard::paintEvent(QPaintEvent *) {
+    QStyleOption opt;
+    opt.initFrom(this);
+    QPainter p(this);
+    style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 }

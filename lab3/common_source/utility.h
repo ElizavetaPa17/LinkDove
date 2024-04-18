@@ -7,6 +7,7 @@
 #include <utility>
 
 #include "complaint.h"
+#include "imessage.h"
 
 class Utility final
 {
@@ -63,6 +64,23 @@ public:
      * @return - Пара - <размер десериализованных данных, десериализованный вектор жалоб>.
      */
     static std::pair<size_t, std::vector<Complaint>> deserialize_compl_vec(std::istream& is);
+
+    /**
+     * <p> Сериализует сообщение в поток. </p>
+     * @brief serialize
+     * @param os - Поток, в который осуществляется сериализация.
+     * @param msg - Сериализуемое сообщение
+     * @return - Размер сериализованных данных.
+     */
+    static size_t serialize(std::ostream &os, const IMessage& msg);
+
+    /**
+     * <p> Десериализует сообщение из потока. </p>
+     * @brief deserialize_msg
+     * @param is - Поток, из которого осуществляется десериализация
+     * @return - Пара - <размер десериализованных данных, умный указатель на десериализованное сообщение>
+     */
+    static std::pair<size_t, std::shared_ptr<IMessage>> deserialize_msg(std::istream& is);
 
     /**
      * <p> Сериализует фундаментальное значение в поток. </p>

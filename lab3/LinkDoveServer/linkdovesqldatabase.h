@@ -6,6 +6,7 @@
 #include "UserInfo.h"
 #include "logininfo.h"
 #include "complaint.h"
+#include "imessage.h"
 
 class LinkDoveSQLDataBase
 {
@@ -67,6 +68,14 @@ public:
      * @return - Вектор, содержащий count жалоб.
      */
     std::vector<Complaint> get_complaints(int count);
+
+    /**
+     * <p> Добавляет сообщение в БД. </p>
+     * @brief add_msg
+     * @param msg - Добавляемое сообщение.
+     * @return - В случае успеха возвращает true, иначе - false.
+     */
+    bool add_message(const IMessage& msg);
 
     /**
      * <p> Возвращает информацию о пользователе, который соответствует никнейму. </p>
