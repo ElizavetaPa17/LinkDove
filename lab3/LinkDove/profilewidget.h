@@ -41,14 +41,6 @@ public:
      */
     void setPrivelegedMode(bool flag);
 
-public slots:
-    /**
-     * <p> Слот, принимающий от клиента результат обновления данных о пользователе. </p>
-     * @brief slotUpdateUserResult
-     * @param update_result - Результат обновления данных о пользователе.
-     */
-    void slotUpdateUserResult(int update_result);
-
 signals:
     /**
      * <p> Сигнал, который отправляется,  когда пользователь хочет отредактировать профиль (идет переключение на виджет EditProfileWidget). </p>

@@ -4,6 +4,9 @@
 #include <memory>
 #include <iostream>
 
+#include "clientsingleton.h"
+#include "infodialog.h"
+
 MainWidget::MainWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MainWidget)
@@ -54,20 +57,49 @@ void MainWidget::setPrivilegedMode(bool flag) {
     ui->settingWidget->setPrivilegedMode(flag);
 }
 
+void MainWidget::enableNavigationBoard() {
+    ui->profileLabel->setEnabled(true);
+    ui->chatLabel->setEnabled(true);
+    ui->settingLabel->setEnabled(true);
+}
+
+void MainWidget::disableNavigationBoard() {
+    ui->profileLabel->setEnabled(false);
+    ui->chatLabel->setEnabled(false);
+    ui->settingLabel->setEnabled(false);
+}
+
+
+void MainWidget::slotUpdateUserResult(int update_result) {
+    std::string text;
+    if (update_result == UPDATE_USER_SUCCESS_ANSWER) {
+        text = "Профиль был успешно обновлен.";
+        ui->profileWidget->setStatusInfo(ui->profileEditWidget->getStatusInfo());
+    } else {
+        text = "Ошибка обновления профиля. Проверьте корректность введенных данных и попытайтесь позже. ";
+    }
+
+    std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(text);
+    dialog_ptr->exec();
+
+    ui->profileStackedWidget->setCurrentIndex(SIMPLE_PROFILE_PAGE);
+    enableNavigationBoard();
+}
+
 void MainWidget::setupConnection() {
     connect(ui->profileLabel,    &ClickableLabel::clicked,     this, &MainWidget::slotRedirectClick);
     connect(ui->chatLabel,       &ClickableLabel::clicked,     this, &MainWidget::slotRedirectClick);
     connect(ui->settingLabel,    &ClickableLabel::clicked,     this, &MainWidget::slotRedirectClick);
     connect(ui->settingWidget,   &SettingWidget::quitAccount,  this, &MainWidget::slotQuit);
+    connect(ui->settingWidget,   &SettingWidget::quitAccount,  ui->chatWidget, &ChatWidget::slotClear);
+    connect(ui->settingWidget,   &SettingWidget::quitAccount, ui->usersList,   &UsersList::slotClear);
 
     connect(ui->profileWidget,     &ProfileWidget::editProfile, [this] () {
                                                                     ui->profileStackedWidget->setCurrentIndex(EDITED_PROFILE_PAGE);
                                                                     ui->profileEditWidget->setStatusInfo(ui->profileWidget->getStatusInfo());
+                                                                    disableNavigationBoard();
                                                                 } );
-    connect(ui->profileEditWidget, &EditProfileWidget::editFinished, [this] () {
-                                                                         ui->profileStackedWidget->setCurrentIndex(SIMPLE_PROFILE_PAGE);
-                                                                         ui->profileWidget->setStatusInfo(ui->profileEditWidget->getStatusInfo());
-                                                                     } );
+    connect(ClientSingleton::get_client(), &Client::update_user_result, this, &MainWidget::slotUpdateUserResult);
 
     connect(ui->usersList, &UsersList::userCardClicked, ui->chatWidget, &ChatWidget::slotOpenChatWith);
 }

@@ -8,6 +8,7 @@
 #include "infodialog.h"
 #include "complaintcard.h"
 #include "clientsingleton.h"
+#include "utility.h"
 
 #include <iostream>
 #include <QListWidget>
@@ -61,14 +62,7 @@ void ComplaintsListDialog::removeComplaint(unsigned long long complaint_id) {
 
 void ComplaintsListDialog::removeAllComplaints() {
     QLayout *pvboxLayout = scroll_area_->widget()->layout();
-    size_t count = pvboxLayout->count();
-    QLayoutItem *widget_item = nullptr;
-
-    while (widget_item = (pvboxLayout->takeAt(0))) {
-        if (widget_item != nullptr) {
-            delete widget_item;
-        }
-    }
+    QtUtility::clean_layout(pvboxLayout);
 }
 
 void ComplaintsListDialog::slotDeleteComplaintResult(int result) {

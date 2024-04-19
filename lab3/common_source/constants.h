@@ -42,7 +42,10 @@ enum ResponseTypes {
     FIND_USER_FAILED_ANWSER,
 
     SEND_MSG_SUCCESS_ANSWER,
-    SEND_MSG_FAILED_ANSWER
+    SEND_MSG_FAILED_ANSWER,
+
+    GET_IND_MSG_SUCCESS_ANSWER,
+    GET_IND_MSG_FAILED_ANSWER,
 };
 
 enum MessageType {
@@ -153,3 +156,10 @@ extern const char *SEND_MSG_REQUEST;
 extern const char *SEND_MSG_SUCCESS;
 // Ответ сервера на неудачную отправку сообщения от пользователя
 extern const char *SEND_MSG_FAILED;
+
+// Запрос на получение сообщений в чате с собеседником
+extern const char *GET_IND_MSG_REQUEST;
+// Ответ сервера на успешную отправку списка сообщений из чата с собеседником.
+extern const char *GET_IND_MSG_SUCCESS;
+// Ответ сервера на успешную отправку списка сообщений из чата с собеседником.
+extern const char *GET_IND_MSG_FAILED;

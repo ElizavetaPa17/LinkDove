@@ -5,14 +5,20 @@
 #include <iostream>
 #include <vector>
 #include <utility>
+#include <memory>
+#include <QLayout>
 
 #include "complaint.h"
 #include "imessage.h"
 
-class Utility final
+/**
+ * @brief The UtilitySerializator class
+ * Отвечает за сериализацию и десериализацию объектов
+ */
+class UtilitySerializator final
 {
 public:
-    Utility() = delete;
+    UtilitySerializator() = delete;
 
     /**
      * <p> Сериализует строку в поток. </p>
@@ -83,6 +89,23 @@ public:
     static std::pair<size_t, std::shared_ptr<IMessage>> deserialize_msg(std::istream& is);
 
     /**
+     * <p> Сериализует вектор сообщений в поток. </p>
+     * @brief serialize
+     * @param os - Поток, в который осуществляется сериализация.
+     * @param value - Сериализуемый вектор сообщений.
+     * @return - Размер сериализованных данных.
+     */
+    static size_t serialize(std::ostream &os, const std::vector<std::shared_ptr<IMessage>> &value);
+
+    /**
+     * <p> Десериализует вектор сообщений из потока. </p>
+     * @brief deserialize_msg_vec
+     * @param is - Поток, из которого осуществляется десериализация
+     * @return - Пара - <размер десериализованных данных, умный указатель на десериализованное сообщение>
+     */
+    static std::pair<size_t, std::vector<std::shared_ptr<IMessage>>> deserialize_msg_vec(std::istream& is);
+
+    /**
      * <p> Сериализует фундаментальное значение в поток. </p>
      * @brief serialize_fundamental
      * @param os - Поток, в который осуществляется сериализация
@@ -106,7 +129,7 @@ public:
 
 template <typename T>
 typename std::enable_if<std::is_fundamental<T>::value, size_t>::type
-Utility::serialize_fundamental(std::ostream &os, T value) {
+UtilitySerializator::serialize_fundamental(std::ostream &os, T value) {
     const auto pos = os.tellp();
 
     // Приводим к типу uint32_t, т.к. на разных машинах размер машинного слова отличается,
@@ -121,7 +144,7 @@ Utility::serialize_fundamental(std::ostream &os, T value) {
 
 template<typename T>
 typename std::enable_if<std::is_fundamental<T>::value, std::pair<size_t, T>>::type
-Utility::deserialize_fundamental(std::istream &is) {
+UtilitySerializator::deserialize_fundamental(std::istream &is) {
     T value{};
     uint32_t len = 0; // Размер сериализованной строки был записан в формате uint32_t
 
@@ -130,5 +153,19 @@ Utility::deserialize_fundamental(std::istream &is) {
 
     return std::make_pair(static_cast<size_t>(len), value);
 }
+
+/**
+ * @brief The QtUtility class
+ * Утилита для части кода, написанной при помощи Qt.
+ */
+class QtUtility final {
+public:
+    /**
+     * <p> Удаляет все виджеты и объекты из компоновщика. </p>
+     * @brief clean_layout
+     * @param layout - Очищаемый компоновщик.
+     */
+    static void clean_layout(QLayout *layout);
+};
 
 #endif // UTILITY_H

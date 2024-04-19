@@ -264,11 +264,10 @@ std::vector<Complaint> LinkDoveSQLDataBase::get_complaints(int count) {
     std::vector<Complaint> complaints;
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString() << '\n';
-        std::runtime_error("get_complaints failed: query.exec");
+        throw std::runtime_error("get_complaints failed: query.exec");
     } else {
         if (!query.next()) {
-            std::cerr << "Cant receive complaints\n";
-            std::runtime_error("get_complaints failed: query.next");
+            std::vector<Complaint>(); // в БД нет жалоб
         } else {
             return link_dove_database_details__::retrieve_complaints(query, count);
         }
@@ -387,6 +386,29 @@ bool LinkDoveSQLDataBase::add_message(const IMessage& msg) {
     return true;
 }
 
+std::vector<std::shared_ptr<IMessage>> LinkDoveSQLDataBase::get_ind_messages(unsigned long long sender_id, unsigned long long receiver_id) {
+    QSqlQuery query(data_base_);
+
+    query.prepare("SELECT * FROM INDIVIDUAL_MESSAGES "
+                  " WHERE sender_id=:sender_id and receiver_id=:receiver_id; ");
+
+    query.bindValue(":sender_id", sender_id);
+    query.bindValue(":receiver_id", receiver_id);
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString() << '\n';
+        throw std::runtime_error("get_ind_messages failed: cannot get individual messages\n");
+    }
+
+    if (!query.next()) {
+        return std::vector<std::shared_ptr<IMessage>>(); // в БД нет сообщений с указанными требованиями
+    } else {
+        QSqlQuery content_query(data_base_);
+        return link_dove_database_details__::retrieve_messages(query, content_query);
+    }
+
+}
+
 StatusInfo LinkDoveSQLDataBase::get_status_info(const std::string &username) {
     QSqlQuery query(data_base_);
     query.prepare("SELECT * FROM USERS "
@@ -455,5 +477,48 @@ namespace link_dove_database_details__ {
         } while (query.next() && count);
 
         return complaints;
+    }
+
+    std::vector<std::shared_ptr<IMessage>> retrieve_messages(QSqlQuery &query, QSqlQuery &content_query) {
+        if (query.size() < 0) {
+            throw std::runtime_error("retrieve_messages failed: query size is negative.\n");
+        }
+
+        std::vector<std::shared_ptr<IMessage>> messages;
+        std::string msg_type;
+        unsigned long long sender_id = query.value("sender_id").toULongLong(),
+                           receiver_id = query.value("receiver_id").toULongLong();
+
+
+        do {
+            std::shared_ptr<IndividualMessage> message_ptr = std::make_shared<IndividualMessage>(query.value(0).toULongLong());
+            message_ptr->set_msg_edges(sender_id, receiver_id);
+
+            msg_type = query.value(4).toString().toStdString();
+            if (msg_type == "text") {
+                content_query.prepare("SELECT * FROM IND_TEXT_MESSAGE_CONTENTS "
+                                      "WHERE msg_id=:msg_id; ");
+
+                content_query.bindValue(":msg_id", message_ptr->get_id());
+
+                if (!content_query.exec() || !content_query.next()) {
+                    std::cerr << content_query.lastError().text().toStdString() << '\n';
+                    continue;
+                }
+
+                std::shared_ptr<TextMessageContent> text_msg_content_ptr = std::make_shared<TextMessageContent>();
+                text_msg_content_ptr->set_text(content_query.value("text_data").toString().toStdString());
+                message_ptr->set_msg_content(text_msg_content_ptr);
+
+            } else if (msg_type == "audio") {
+                // TODO
+            } else if (msg_type == "image") {
+                // TODO
+            }
+
+            messages.push_back(message_ptr);
+        } while (query.next());
+
+        return messages;
     }
 }

@@ -32,6 +32,14 @@ public:
 signals:
     void switchToPage(QWidget *sender, int index);
 
+public slots:
+    /**
+     * <p> Слот, принимающий от клиента результат обновления данных о пользователе. </p>
+     * @brief slotUpdateUserResult
+     * @param update_result - Результат обновления данных о пользователе.
+     */
+    void slotUpdateUserResult(int update_result);
+
 private slots:
     /**
      * <p> Преобразовывает сигнал клика на функциональные вкладки в сигнал switchToPage на нужную страницу. </p>
@@ -57,6 +65,18 @@ private:
      * @param - Если flag = true, то режим привилегированный, иначе - обычный.
      */
     void setPrivilegedMode(bool flag);
+
+    /**
+     * <p> Делает виджет навигации доступным. </p>
+     * @brief enableNavigationBoard
+     */
+    void enableNavigationBoard();
+
+    /**
+     * <p> Делает виджет навигации недоступным. </p>
+     * @brief enableNavigationBoard
+     */
+    void disableNavigationBoard();
 
     /**
      * <p> Настраивает соединения с виджетом главного меню. </p>

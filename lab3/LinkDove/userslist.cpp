@@ -8,6 +8,7 @@
 #include "clientsingleton.h"
 #include "infodialog.h"
 #include "usercard.h"
+#include "utility.h"
 
 #include <iostream>
 
@@ -28,6 +29,10 @@ UsersList::~UsersList()
     delete ui;
 }
 
+void UsersList::slotClear() {
+    removeUsers();
+}
+
 void UsersList::paintEvent(QPaintEvent *)
 {
     QStyleOption opt;
@@ -44,15 +49,9 @@ void UsersList::addUser(const StatusInfo &status_info) {
 }
 
 void UsersList::removeUsers() {
+    std::cerr << "removeUsers\n";
     QLayout *pvboxLayout = ui->scrollArea->widget()->layout();
-    size_t count = pvboxLayout->count();
-    QLayoutItem *widget_item = nullptr;
-
-    while (widget_item = (pvboxLayout->takeAt(0))) {
-        if (widget_item != nullptr) {
-            delete widget_item;
-        }
-    }
+    QtUtility::clean_layout(pvboxLayout);
 }
 
 void UsersList::slotsHandleReturnPress() {

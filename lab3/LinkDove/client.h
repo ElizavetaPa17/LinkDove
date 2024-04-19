@@ -89,6 +89,13 @@ public:
     void async_send_message(const IMessage& message);
 
     /**
+     * <p> Отправляет запрос на получение всех сообщений в чате с одним собеседником с идентификатором other_id. </p>
+     * @brief async_get_messages
+     * @param other_id - Идентификатор собеседника.
+     */
+    void async_get_ind_messages(unsigned long long other_id);
+
+    /**
      * <p> Возвращает информацию о пользователе. </p>
      * @brief get_status_info
      * @return - Структура, содержащая информацию о пользователе.
@@ -108,6 +115,13 @@ public:
      * @return - Вектор жалоб.
      */
     std::vector<Complaint> get_complaints();
+
+    /**
+     * <p> Возвращает вектор сообщений. Вызывается после запроса на получение списка жалоб. </p>
+     * @brief get_messages
+     * @return - Список сообщений.
+     */
+    std::vector<std::shared_ptr<IMessage>> get_messages();
 
     /**
      * <p> Определяет, установил ли клиент соединение с сервером. </p>
@@ -165,6 +179,13 @@ signals:
      */
     void send_msg_result(int result);
 
+    /**
+     * <p> Генерирует сигнал после получения результата запроса на список сообщений. </p>
+     * @brief get_msg_result
+     * @param result
+     */
+    void get_ind_msg_result(int result);
+
 private:
     std::shared_ptr<asio::io_context> io_context_ptr_;
     IStreamConnection<tcp> connection_;
@@ -175,6 +196,7 @@ private:
     StatusInfo updated_status_info_;
     StatusInfo found_status_info_;
     std::vector<Complaint> complaints_;
+    std::vector<std::shared_ptr<IMessage>> messages_;
 
     void create_account() {}
 
@@ -216,6 +238,14 @@ private:
      * @return - Строковое представление запроса.
      */
     std::string create_update_user_request(const StatusInfo& status_info);
+
+    /**
+     * <p> Формирует запрос на получение сообщений из чата с одним собеседником с идентификатором other_id. </p>
+     * @brief create_get_message_request
+     * @param other_id - Идентификатор собеседника.
+     * @return - Строковое представление запроса.
+     */
+    std::string create_get_ind_message_request(unsigned long long other_id);
 
     /**
      * <p> Асинхронно читает ответ от сервера. </p>

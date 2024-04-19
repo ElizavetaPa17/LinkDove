@@ -34,6 +34,13 @@ public:
     virtual int get_msg_type() const = 0;
 
     /**
+     * <p> Возвращает идентификатор сообщения. </p>
+     * @brief get_id
+     * @return - Идентификатор сообщения.
+     */
+    unsigned long long get_id();
+
+    /**
      * <p> Устанавливает содержимое сообщения. </p>
      * @brief set_msg_content
      * @param - Умный указатель на содержимое сообщения.

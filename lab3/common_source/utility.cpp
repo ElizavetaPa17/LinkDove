@@ -6,7 +6,7 @@
 #include "individualmessage.h"
 #include "textmessagecontent.h"
 
-size_t Utility::serialize(std::ostream& os, const std::string& value) {
+size_t UtilitySerializator::serialize(std::ostream& os, const std::string& value) {
     const auto pos = os.tellp();
 
     // Приводим к типу uint32_t, т.к. на разных машинах размер машинного слова отличается,
@@ -22,7 +22,7 @@ size_t Utility::serialize(std::ostream& os, const std::string& value) {
     return static_cast<size_t>(os.tellp() - pos);
 }
 
-std::pair<size_t, std::string> Utility::deserialize_string(std::istream& is) {
+std::pair<size_t, std::string> UtilitySerializator::deserialize_string(std::istream& is) {
     std::string str;
     uint32_t len = 0; // Размер сериализованной строки был записан в формате uint32_t
 
@@ -36,7 +36,7 @@ std::pair<size_t, std::string> Utility::deserialize_string(std::istream& is) {
     return std::make_pair(static_cast<size_t>(len), str);
 }
 
-size_t Utility::serialize(std::ostream &os, const std::vector<char>& value) {
+size_t UtilitySerializator::serialize(std::ostream &os, const std::vector<char>& value) {
     const auto pos = os.tellp();
 
     // Приводим к типу uint32_t, т.к. на разных машинах размер машинного слова отличается,
@@ -52,7 +52,7 @@ size_t Utility::serialize(std::ostream &os, const std::vector<char>& value) {
     return static_cast<size_t>(os.tellp() - pos);
 }
 
-std::pair<size_t, std::vector<char>> Utility::deserialize_char_vec(std::istream& is) {
+std::pair<size_t, std::vector<char>> UtilitySerializator::deserialize_char_vec(std::istream& is) {
     std::vector<char> vec;
     uint32_t len = 0; // Размер сериализованной строки был записан в формате uint32_t
 
@@ -65,7 +65,7 @@ std::pair<size_t, std::vector<char>> Utility::deserialize_char_vec(std::istream&
     return std::make_pair(static_cast<size_t>(len), vec);
 }
 
-size_t Utility::serialize(std::ostream &os, const std::vector<Complaint>& value) {
+size_t UtilitySerializator::serialize(std::ostream &os, const std::vector<Complaint>& value) {
     const auto pos = os.tellp();
 
     // Приводим к типу uint32_t, т.к. на разных машинах размер машинного слова отличается,
@@ -83,7 +83,7 @@ size_t Utility::serialize(std::ostream &os, const std::vector<Complaint>& value)
     return static_cast<size_t>(os.tellp() - pos);
 }
 
-std::pair<size_t, std::vector<Complaint>> Utility::deserialize_compl_vec(std::istream& is) {
+std::pair<size_t, std::vector<Complaint>> UtilitySerializator::deserialize_compl_vec(std::istream& is) {
     std::vector<Complaint> vec;
     uint32_t len = 0; // Размер сериализованной строки был записан в формате uint32_t
 
@@ -99,10 +99,9 @@ std::pair<size_t, std::vector<Complaint>> Utility::deserialize_compl_vec(std::is
     return std::make_pair(static_cast<size_t>(len), vec);
 }
 
-size_t Utility::serialize(std::ostream &os, const IMessage& msg) {
+size_t UtilitySerializator::serialize(std::ostream &os, const IMessage& msg) {
     const auto pos = os.tellp();
 
-    std::cerr << msg.get_msg_type();
     // Сериализуем тип сообщения.
     auto type = static_cast<uint32_t>(msg.get_msg_type());
     os.write(reinterpret_cast<const char*>(&type), sizeof(type));
@@ -116,7 +115,7 @@ size_t Utility::serialize(std::ostream &os, const IMessage& msg) {
     return static_cast<size_t>(os.tellp() - pos);
 }
 
-std::pair<size_t, std::shared_ptr<IMessage>> Utility::deserialize_msg(std::istream& is) {
+std::pair<size_t, std::shared_ptr<IMessage>> UtilitySerializator::deserialize_msg(std::istream& is) {
     std::shared_ptr<IMessage> msg_ptr;
     uint32_t type = 0;
     size_t size = 0;
@@ -144,4 +143,44 @@ std::pair<size_t, std::shared_ptr<IMessage>> Utility::deserialize_msg(std::istre
 
     size += msg_ptr->deserialize(is) + 2*sizeof(type);
     return std::pair<size_t, std::shared_ptr<IMessage>>(size, msg_ptr);
+}
+
+size_t UtilitySerializator::serialize(std::ostream &os, const std::vector<std::shared_ptr<IMessage>> &value) {
+    const auto pos = os.tellp();
+
+    // Приводим к типу uint32_t, т.к. на разных машинах размер машинного слова отличается,
+    // что может привести к проблемам.
+    const auto len = static_cast<uint32_t>(value.size());
+
+    // Сериализуем сначала размер вектора, а потом сам вектор.
+    os.write(reinterpret_cast<const char*>(&len), sizeof(len));
+    for (int i = 0; i < len; ++i) {
+        UtilitySerializator::serialize(os, *value[i]);
+    }
+
+    return static_cast<size_t>(os.tellp() - pos);
+}
+
+std::pair<size_t, std::vector<std::shared_ptr<IMessage>>> UtilitySerializator::deserialize_msg_vec(std::istream& is) {
+    std::vector<std::shared_ptr<IMessage>> vec;
+    uint32_t len = 0; // Размер сериализованной строки был записан в формате uint32_t
+
+    is.read(reinterpret_cast<char*>(&len), sizeof(len));
+    if (len > 0) {
+        vec.resize(len);
+
+        for (int i = 0; i < len; ++i) {
+            vec[i] = UtilitySerializator::deserialize_msg(is).second;
+        }
+    }
+
+    return std::make_pair(static_cast<size_t>(len), vec);
+}
+
+void QtUtility::clean_layout(QLayout *layout) {
+    QLayoutItem *widget_item = nullptr;
+
+    while (widget_item = (layout->takeAt(0))) {
+        delete widget_item;
+    }
 }

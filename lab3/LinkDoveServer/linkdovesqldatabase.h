@@ -78,6 +78,15 @@ public:
     bool add_message(const IMessage& msg);
 
     /**
+     * <p> Возвращает сообщения между двумя собеседниками. </p>
+     * @brief get_ind_messages
+     * @param sender_id - Идентификатор отправителя сообщений.
+     * @param receiver_id - Идентификатор получателя сообщений.
+     * @return
+     */
+    std::vector<std::shared_ptr<IMessage>> get_ind_messages(unsigned long long sender_id, unsigned long long receiver_id);
+
+    /**
      * <p> Возвращает информацию о пользователе, который соответствует никнейму. </p>
      * @brief get_user
      * @param username - Никнейм пользователя
@@ -129,6 +138,14 @@ namespace link_dove_database_details__ {
      * @return - Вектор жалоб размером, которое равно заданному количеству жалоб.
      */
     std::vector<Complaint> retrieve_complaints(QSqlQuery& query, int count);
+
+    /**
+     * <p> Извлекает список сообщений, котороый возвращает объект query. </p>
+     * @brief retrieve_messages
+     * @param query - Запрос, содержащий список сообщений
+     * @return - Список сообщений.
+     */
+    std::vector<std::shared_ptr<IMessage>> retrieve_messages(QSqlQuery &query, QSqlQuery &content_query);
 
 }
 

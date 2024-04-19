@@ -156,9 +156,16 @@ private:
     /**
      * <p> Обрабатывает запрос на отправку сообщения. </p>
      * @brief handle_send_msg_request
-     * @param iterator
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
      */
     void handle_send_msg_request(ConnectionIterator iterator);
+
+    /**
+     * <p> Обрабатывает запрос на получение списка сообщений с одним собеседником. </p>
+     * @brief handle_get_msg_request
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_get_msg_request(ConnectionIterator iterator);
 
     /** <p> Запускает в отдельном потоке контекст для обработки асинхронных функций. </p>
      * @brief run_context

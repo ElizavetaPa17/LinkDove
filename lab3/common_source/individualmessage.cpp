@@ -13,9 +13,9 @@ IndividualMessage::IndividualMessage(unsigned long long id)
 size_t IndividualMessage::serialize(std::ostream &os) const {
     size_t size = 0;
 
-    size += Utility::serialize_fundamental<unsigned long long>(os, id_);
-    size += Utility::serialize_fundamental<unsigned long long>(os, sender_id_);
-    size += Utility::serialize_fundamental<unsigned long long>(os, receiver_id_);
+    size += UtilitySerializator::serialize_fundamental<unsigned long long>(os, id_);
+    size += UtilitySerializator::serialize_fundamental<unsigned long long>(os, sender_id_);
+    size += UtilitySerializator::serialize_fundamental<unsigned long long>(os, receiver_id_);
     size += msg_content_ptr_->serialize(os);
 
     return size;
@@ -25,15 +25,15 @@ size_t IndividualMessage::deserialize(std::istream& is) {
     size_t size = 0;
 
     std::pair<size_t, unsigned long long> temp_ullong_pair;
-    temp_ullong_pair = Utility::deserialize_fundamental<unsigned long long>(is);
+    temp_ullong_pair = UtilitySerializator::deserialize_fundamental<unsigned long long>(is);
     size += temp_ullong_pair.first;
     id_ = temp_ullong_pair.second;
 
-    temp_ullong_pair = Utility::deserialize_fundamental<unsigned long long>(is);
+    temp_ullong_pair = UtilitySerializator::deserialize_fundamental<unsigned long long>(is);
     size += temp_ullong_pair.first;
     sender_id_ = temp_ullong_pair.second;
 
-    temp_ullong_pair = Utility::deserialize_fundamental<unsigned long long>(is);
+    temp_ullong_pair = UtilitySerializator::deserialize_fundamental<unsigned long long>(is);
     size += temp_ullong_pair.first;
     receiver_id_ = temp_ullong_pair.second;
 

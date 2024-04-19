@@ -28,6 +28,12 @@ public slots:
      */
     void slotOpenChatWith(const StatusInfo &status_info);
 
+    /**
+     * <p> Полностью очищает виджет от сообщений. </p>
+     * @brief slotClear
+     */
+    void slotClear();
+
 private slots:
     /**
      * <p> Слот, обрабатывающий отправку сообщения. </p>
@@ -41,6 +47,13 @@ private slots:
      * @param result - Параметр, содержащий результат отправки сообщения.
      */
     void slotHandleSendMessage(int result);
+
+    /**
+     * <p> Слот, обрабатывающий результат получения списка сообщеий. </p>
+     * @brief slotHandleGetMessage
+     * @param result - Параметр, содержащий результат получения сообщений.
+     */
+    void slotHandleGetMessages(int result);
 
 private:
     Ui::ChatWidget *ui;

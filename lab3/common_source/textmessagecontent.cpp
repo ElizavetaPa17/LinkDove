@@ -10,7 +10,7 @@ TextMessageContent::TextMessageContent() {
 size_t TextMessageContent::serialize(std::ostream &os) const {
     size_t size = 0;
 
-    size += Utility::serialize(os, text_data_);
+    size += UtilitySerializator::serialize(os, text_data_);
     return size;
 }
 
@@ -18,7 +18,7 @@ size_t TextMessageContent::deserialize(std::istream& is) {
     size_t size = 0;
 
     std::pair<size_t, std::string> temp_str_pair;
-    temp_str_pair = Utility::deserialize_string(is);
+    temp_str_pair = UtilitySerializator::deserialize_string(is);
     size += temp_str_pair.first;
     text_data_ = temp_str_pair.second;
 

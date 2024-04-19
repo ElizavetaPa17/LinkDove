@@ -64,10 +64,12 @@ void Client::async_send_complaint(const std::string& text) {
 
     run_context();
 }
-
+// ВЕЗДЕ СОЗДАТЬ ФУНКЦИИ СОЗДАНИЯ ЗАПРОСА!
+// выделить отдельный stringstream, чтобы каждый раз не создавать на стеке новый
+// вынести async_write в отдельную функцию
 void Client::async_del_complaint(unsigned long long complaint_id) {
     connection_.out_stream_ << DEL_COMPLAINT_REQUEST << "\n";
-    Utility::serialize_fundamental<unsigned long long>(connection_.out_stream_, complaint_id);
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, complaint_id);
     connection_.out_stream_ << END_OF_REQUEST;
 
     asio::async_write(connection_.socket_, connection_.buffer_,
@@ -109,7 +111,7 @@ void Client::async_update_user(StatusInfo& status_info) {
 
 void Client::async_find_user(const std::string &username) {
     connection_.out_stream_ << FIND_USER_REQUEST << "\n";
-    Utility::serialize(connection_.out_stream_, username);
+    UtilitySerializator::serialize(connection_.out_stream_, username);
     connection_.out_stream_ << END_OF_REQUEST;
 
     asio::async_write(connection_.socket_, connection_.buffer_,
@@ -123,8 +125,20 @@ void Client::async_find_user(const std::string &username) {
 
 void Client::async_send_message(const IMessage& message) {
     connection_.out_stream_ << SEND_MSG_REQUEST << "\n";
-    Utility::serialize(connection_.out_stream_, message);
+    UtilitySerializator::serialize(connection_.out_stream_, message);
     connection_.out_stream_ << END_OF_REQUEST;
+
+    asio::async_write(connection_.socket_, connection_.buffer_,
+                      boost::bind(&Client::handle_async_write,
+                                  shared_from_this(),
+                                  asio::placeholders::error,
+                                  asio::placeholders::bytes_transferred));
+
+    run_context();
+}
+
+void Client::async_get_ind_messages(unsigned long long other_id) {
+    connection_.out_stream_ << create_get_ind_message_request(other_id);
 
     asio::async_write(connection_.socket_, connection_.buffer_,
                       boost::bind(&Client::handle_async_write,
@@ -145,6 +159,10 @@ StatusInfo Client::get_found_user() {
 
 std::vector<Complaint> Client::get_complaints() {
     return complaints_;
+}
+
+std::vector<std::shared_ptr<IMessage>> Client::get_messages() {
+    return messages_;
 }
 
 bool Client::is_connected() noexcept {
@@ -185,7 +203,7 @@ std::string Client::create_del_request(unsigned long long complaint_id) {
     std::stringstream str_stream;
 
     str_stream << DEL_COMPLAINT_REQUEST << '\n';
-    Utility::serialize_fundamental(str_stream, complaint_id);
+    UtilitySerializator::serialize_fundamental(str_stream, complaint_id);
     str_stream << END_OF_REQUEST;
 
     return str_stream.str();
@@ -198,7 +216,18 @@ std::string Client::create_update_user_request(const StatusInfo& status_info) {
     status_info.serialize(str_stream);
     str_stream << END_OF_REQUEST;
 
-    std::cerr << str_stream.str() << "\n\n";
+    return str_stream.str();
+}
+
+std::string Client::create_get_ind_message_request(unsigned long long other_id) {
+    std::stringstream str_stream;
+    str_stream << GET_IND_MSG_REQUEST << '\n';
+
+    UtilitySerializator::serialize_fundamental<unsigned long long>(str_stream, status_info_.id_);
+    UtilitySerializator::serialize_fundamental<unsigned long long>(str_stream, other_id);
+
+    str_stream << END_OF_REQUEST;
+
     return str_stream.str();
 }
 
@@ -249,6 +278,8 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
         std::string answer_type;
         std::getline(connection_.in_stream_, answer_type);
 
+        // вместо гигантского else if прикрути MAP!!!1!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         if (answer_type == LOGIN_SUCCESS) {
             status_info_.deserialize(connection_.in_stream_);
             emit authorization_result(LOGIN_SUCCESS_ANSWER);
@@ -268,7 +299,7 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
         } else if (answer_type == DEL_COMPLAINT_FAILED) {
             emit del_complaint_result(DEL_COMPLAINT_FAILED_ANSWER);
         } else if (answer_type == GET_COMPLAINTS_SUCCESS) {
-            complaints_ = Utility::deserialize_compl_vec(connection_.in_stream_).second;
+            complaints_ = UtilitySerializator::deserialize_compl_vec(connection_.in_stream_).second;
             emit get_complaints_result(GET_COMPLAINTS_SUCCESS_ANSWER);
         } else if (answer_type == GET_COMPLAINTS_FAILED) {
             emit get_complaints_result(GET_COMPLAINTS_FAILED_ANSWER);
@@ -286,6 +317,11 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
             emit send_msg_result(SEND_MSG_SUCCESS_ANSWER);
         } else if (answer_type == SEND_MSG_FAILED) {
             emit send_msg_result(SEND_MSG_FAILED_ANSWER);
+        } else if (answer_type ==  GET_IND_MSG_SUCCESS) {
+            messages_ = UtilitySerializator::deserialize_msg_vec(connection_.in_stream_).second;
+            emit get_ind_msg_result(GET_IND_MSG_SUCCESS_ANSWER);
+        } else if (answer_type == GET_IND_MSG_FAILED) {
+            emit get_ind_msg_result(GET_IND_MSG_FAILED_ANSWER);
         } else {
             std::cerr << "что-то невнятное: " << answer_type << '\n';
         }

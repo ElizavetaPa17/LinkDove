@@ -3,6 +3,7 @@
 #include <thread>
 #include <mutex>
 #include <iostream>
+#include <iterator>
 #include <boost/asio/ip/tcp.hpp>
 
 #include <QSqlError>
@@ -147,6 +148,8 @@ void LinkDoveServer::handle_type_request(ConnectionIterator iterator) {
         handle_find_user_request(iterator);
     } else if (request_type == SEND_MSG_REQUEST) {
         handle_send_msg_request(iterator);
+    } else if (request_type == GET_IND_MSG_REQUEST) {
+        handle_get_msg_request(iterator);
     }
 }
 
@@ -211,7 +214,7 @@ void LinkDoveServer::handle_send_complaint_request(ConnectionIterator iterator) 
 }
 
 void LinkDoveServer::handle_del_complaint_request(ConnectionIterator iterator) {
-    unsigned long long complaint_id = Utility::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+    unsigned long long complaint_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
 
     remove_delimeter(iterator);
 
@@ -241,9 +244,10 @@ void LinkDoveServer::handle_get_complaints_request(ConnectionIterator iterator) 
             complaints = data_base_.get_complaints(complaints_count);
 
             answer << GET_COMPLAINTS_SUCCESS << "\n";
-            Utility::serialize(answer, complaints);
+            UtilitySerializator::serialize(answer, complaints);
             answer << END_OF_REQUEST;
         } catch (std::runtime_error& ex) {
+            std::cerr << ex.what() << '\n';
             answer << GET_COMPLAINTS_FAILED << "\n" << END_OF_REQUEST;
         }
 
@@ -270,7 +274,7 @@ void LinkDoveServer::handle_update_user_request(ConnectionIterator iterator) {
 }
 
 void LinkDoveServer::handle_find_user_request(ConnectionIterator iterator) {
-    std::string username = Utility::deserialize_string(iterator->in_stream_).second;
+    std::string username = UtilitySerializator::deserialize_string(iterator->in_stream_).second;
 
     remove_delimeter(iterator);
 
@@ -283,6 +287,7 @@ void LinkDoveServer::handle_find_user_request(ConnectionIterator iterator) {
         status_info.serialize(answer);
         answer << END_OF_REQUEST;
     } catch(std::runtime_error& ex) {
+        std::cerr << ex.what() << '\n';
         answer << FIND_USER_FAILED << "\n" << END_OF_REQUEST;
     }
 
@@ -291,7 +296,7 @@ void LinkDoveServer::handle_find_user_request(ConnectionIterator iterator) {
 }
 
 void LinkDoveServer::handle_send_msg_request(ConnectionIterator iterator) {
-    std::shared_ptr<IMessage> msg_ptr = Utility::deserialize_msg(iterator->in_stream_).second;
+    std::shared_ptr<IMessage> msg_ptr = UtilitySerializator::deserialize_msg(iterator->in_stream_).second;
 
     remove_delimeter(iterator);
 
@@ -300,6 +305,38 @@ void LinkDoveServer::handle_send_msg_request(ConnectionIterator iterator) {
         answer << SEND_MSG_SUCCESS << "\n" << END_OF_REQUEST;
     } else {
         answer << SEND_MSG_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_get_msg_request(ConnectionIterator iterator) {
+    unsigned long long first_id = 0, second_id = 0; // идентификаторы двух собеседников чата
+
+    first_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+    second_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    try { // получаем сообщения от first_id к second_id и наоборот
+        std::vector<std::shared_ptr<IMessage>> first_messages = data_base_.get_ind_messages(first_id, second_id);
+        std::vector<std::shared_ptr<IMessage>> second_messages = data_base_.get_ind_messages(second_id, first_id);
+
+        std::vector<std::shared_ptr<IMessage>> all_messages;
+        all_messages.reserve(first_messages.size() + second_messages.size());
+
+        all_messages.insert(all_messages.end(), first_messages.begin(),  first_messages.end());
+        all_messages.insert(all_messages.end(), second_messages.begin(),  second_messages.end());
+
+        answer << GET_IND_MSG_SUCCESS << "\n";
+        UtilitySerializator::serialize(answer, all_messages);
+        answer << END_OF_REQUEST;
+
+    } catch (std::runtime_error& ex) {
+        std::cerr << ex.what() << '\n';
+        answer << GET_IND_MSG_FAILED << "\n" << END_OF_REQUEST;
     }
 
     iterator->out_stream_ << answer.str();

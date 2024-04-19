@@ -26,6 +26,13 @@ signals:
      */
     void userCardClicked(const StatusInfo &status_info);
 
+public slots:
+    /**
+     * <p> Полностью очищает виджет от объектов UserCard. </p>
+     * @brief slotClear
+     */
+    void slotClear();
+
 protected:
     // Переопределяем метод отрисовки, т.к. иначе с виджетом
     // не работают css-таблицы (проблема самого  Qt)
