@@ -188,16 +188,12 @@ void QtUtility::clean_layout(QLayout *layout) {
 }
 
 void QtUtility::clean_complex_layout(QLayout *layout) {
-    QLayoutItem* child;
-    while (layout->count()) {
-        child = layout->takeAt(0);
-        if (child->layout()) {
-            QtUtility::clean_complex_layout(child->layout());
-            // delete child->layout(); // memory LEAK?
-        } else if (child->widget()) {
-            delete child->widget();
-        }
+    if (layout == NULL) {
+            return;
+    }
 
-        delete child;
+    for(QLayoutItem* item{}; item = layout->takeAt(0);) {
+        QtUtility::clean_complex_layout(item->layout());
+        delete item;
     }
 }
