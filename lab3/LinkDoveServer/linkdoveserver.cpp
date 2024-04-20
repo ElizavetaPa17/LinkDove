@@ -330,6 +330,9 @@ void LinkDoveServer::handle_get_msg_request(ConnectionIterator iterator) {
         all_messages.insert(all_messages.end(), first_messages.begin(),  first_messages.end());
         all_messages.insert(all_messages.end(), second_messages.begin(),  second_messages.end());
 
+        // сортируем сообщения по дате
+        std::sort(all_messages.begin(), all_messages.end(), message_ptr_less_comparator());
+
         answer << GET_IND_MSG_SUCCESS << "\n";
         UtilitySerializator::serialize(answer, all_messages);
         answer << END_OF_REQUEST;

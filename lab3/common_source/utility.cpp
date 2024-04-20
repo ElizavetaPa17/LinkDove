@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <iostream>
 
+#include <QWidget>
 #include "individualmessage.h"
 #include "textmessagecontent.h"
 
@@ -124,7 +125,7 @@ std::pair<size_t, std::shared_ptr<IMessage>> UtilitySerializator::deserialize_ms
     is.read(reinterpret_cast<char*>(&type), sizeof(type));
     switch (type) {
         case INDIVIDUAL_MSG_TYPE: {
-            msg_ptr = std::make_shared<IndividualMessage>(CREATED_MSG_ID);
+            msg_ptr = std::make_shared<IndividualMessage>();
             break;
         }
         case BROAD_MSG_TYPE: {
@@ -180,7 +181,23 @@ std::pair<size_t, std::vector<std::shared_ptr<IMessage>>> UtilitySerializator::d
 void QtUtility::clean_layout(QLayout *layout) {
     QLayoutItem *widget_item = nullptr;
 
-    while (widget_item = (layout->takeAt(0))) {
+    while ((widget_item = layout->takeAt(0)) != nullptr) {
+        delete widget_item->widget();
         delete widget_item;
+    }
+}
+
+void QtUtility::clean_complex_layout(QLayout *layout) {
+    QLayoutItem* child;
+    while (layout->count()) {
+        child = layout->takeAt(0);
+        if (child->layout()) {
+            QtUtility::clean_complex_layout(child->layout());
+            // delete child->layout(); // memory LEAK?
+        } else if (child->widget()) {
+            delete child->widget();
+        }
+
+        delete child;
     }
 }

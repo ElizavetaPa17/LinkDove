@@ -2,6 +2,7 @@
 #include "ui_chatwidget.h"
 
 #include <iostream>
+#include <QSpacerItem>
 
 #include "infodialog.h"
 #include "messagecard.h"
@@ -29,12 +30,11 @@ void ChatWidget::slotOpenChatWith(const StatusInfo &status_info) {
     ui->label->setText(status_info.username_.c_str());
 
     ClientSingleton::get_client()->async_get_ind_messages(receiver_id_);
-    std::cerr << "here\n";
 }
 
 void ChatWidget::slotSendMessage() {
     if (!ui->messageEdit->text().isEmpty()) {
-        IndividualMessage ind_message(CREATED_MSG_ID);
+        IndividualMessage ind_message;
         ind_message.set_msg_edges(ClientSingleton::get_client()->get_status_info().id_, receiver_id_);
 
         std::shared_ptr<TextMessageContent> text_msg_content_ptr = std::make_shared<TextMessageContent>();
@@ -47,7 +47,10 @@ void ChatWidget::slotSendMessage() {
 
 void ChatWidget::slotHandleSendMessage(int result) {
     if (result == SEND_MSG_SUCCESS_ANSWER) {
-        ui->rightVerticalLayout->addWidget(new MessageCard(nullptr, ui->messageEdit->text()));
+        QHBoxLayout *phboxLayout = new QHBoxLayout();
+        phboxLayout->addStretch();
+        phboxLayout->addWidget(new MessageCard(nullptr, ui->messageEdit->text()));
+        ui->verticalLayout->addLayout(phboxLayout);
         ui->messageEdit->setText("");
     } else {
         std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>("Ошибка отправки сообщения. Попытайтесь снова. ");
@@ -61,11 +64,15 @@ void ChatWidget::slotHandleGetMessages(int result) {
         for (auto& elem : messages) {
             switch(elem->get_msg_content()->get_msg_content_type()) {
                 case TEXT_MSG_TYPE: {
+                    QHBoxLayout *phboxLayout = new QHBoxLayout();
                     if (std::dynamic_pointer_cast<IndividualMessage>(elem)->get_msg_edges().second == receiver_id_) {
-                        ui->rightVerticalLayout->addWidget(new MessageCard(nullptr, elem->get_msg_content()->get_raw_data()));
+                        phboxLayout->addStretch();
+                        phboxLayout->addWidget(new MessageCard(nullptr, elem->get_msg_content()->get_raw_data()));
                     } else {
-                        ui->leftVerticalLayout->addWidget(new MessageCard(nullptr, elem->get_msg_content()->get_raw_data()));
+                        phboxLayout->addWidget(new MessageCard(nullptr, elem->get_msg_content()->get_raw_data()));
+                        phboxLayout->addStretch();
                     }
+                    ui->verticalLayout->addLayout(phboxLayout);
                 }
             }
         }
@@ -77,9 +84,7 @@ void ChatWidget::slotHandleGetMessages(int result) {
 
 void ChatWidget::slotClear() {
     ui->messageEdit->clear();
-
-    QLayout *pvboxLayout = ui->leftVerticalLayout;
-    QtUtility::clean_layout(pvboxLayout);
+    QtUtility::clean_complex_layout(ui->verticalLayout);
 }
 
 void ChatWidget::setupConnection() {

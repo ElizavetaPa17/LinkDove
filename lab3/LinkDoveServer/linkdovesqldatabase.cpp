@@ -74,6 +74,7 @@ bool LinkDoveSQLDataBase::setup_tables() {
                        "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY , "
                        " sender_id MEDIUMINT NOT NULL, "
                        " receiver_id MEDIUMINT NOT NULL, "
+                       " send_datetime DATETIME NOT NULL, "
                        " content_id BIGINT DEFAULT 0, "
                        " content_type ENUM('text', 'audio', 'image'), "
                        " FOREIGN KEY (sender_id) REFERENCES USERS (ID) ON DELETE CASCADE, "
@@ -87,7 +88,6 @@ bool LinkDoveSQLDataBase::setup_tables() {
     is_ok = query.exec("CREATE TABLE IF NOT EXISTS IND_TEXT_MESSAGE_CONTENTS "
                        "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
                        " msg_id BIGINT NOT NULL, "
-                       " send_date DATETIME NOT NULL, "
                        " text_data TEXT NOT NULL, "
                        " FOREIGN KEY (msg_id) REFERENCES INDIVIDUAL_MESSAGES (ID) ON DELETE CASCADE); ");
 
@@ -287,8 +287,8 @@ bool LinkDoveSQLDataBase::add_message(const IMessage& msg) {
         switch (msg.get_msg_type()) {
             case INDIVIDUAL_MSG_TYPE:  {
                 query.prepare(" INSERT INTO INDIVIDUAL_MESSAGES "
-                              " (sender_id, receiver_id) "
-                              " VALUES (:sender_id, :receiver_id); ");
+                              " (sender_id, send_datetime, receiver_id) "
+                              " VALUES (:sender_id, NOW(), :receiver_id); ");
 
                 query.bindValue(":sender_id", static_cast<const IndividualMessage&>(msg).get_msg_edges().first);
                 query.bindValue(":receiver_id", static_cast<const IndividualMessage&>(msg).get_msg_edges().second);
@@ -323,8 +323,8 @@ bool LinkDoveSQLDataBase::add_message(const IMessage& msg) {
         switch (msg.get_msg_content()->get_msg_content_type()) {
             case TEXT_MSG_TYPE: {
                 query.prepare(" INSERT INTO IND_TEXT_MESSAGE_CONTENTS "
-                              " (msg_id, send_date, text_data) "
-                              " VALUES (:msg_id, NOW(), :text_data); ");
+                              " (msg_id, text_data) "
+                              " VALUES (:msg_id, :text_data); ");
                 query.bindValue(":msg_id", msg_id);
                 query.bindValue(":text_data", msg.get_msg_content()->get_raw_data());
 
@@ -491,10 +491,12 @@ namespace link_dove_database_details__ {
 
 
         do {
-            std::shared_ptr<IndividualMessage> message_ptr = std::make_shared<IndividualMessage>(query.value(0).toULongLong());
+            std::shared_ptr<IndividualMessage> message_ptr = std::make_shared<IndividualMessage>();
+            message_ptr->set_id(query.value("ID").toULongLong());
+            message_ptr->set_send_datetime(query.value("send_datetime").toDateTime());
             message_ptr->set_msg_edges(sender_id, receiver_id);
 
-            msg_type = query.value(4).toString().toStdString();
+            msg_type = query.value("content_type").toString().toStdString();
             if (msg_type == "text") {
                 content_query.prepare("SELECT * FROM IND_TEXT_MESSAGE_CONTENTS "
                                       "WHERE msg_id=:msg_id; ");

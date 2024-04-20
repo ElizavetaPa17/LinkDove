@@ -49,9 +49,8 @@ void UsersList::addUser(const StatusInfo &status_info) {
 }
 
 void UsersList::removeUsers() {
-    std::cerr << "removeUsers\n";
-    QLayout *pvboxLayout = ui->scrollArea->widget()->layout();
-    QtUtility::clean_layout(pvboxLayout);
+    ui->searchEdit->setText("");
+    QtUtility::clean_layout(ui->scrollArea->widget()->layout());
 }
 
 void UsersList::slotsHandleReturnPress() {

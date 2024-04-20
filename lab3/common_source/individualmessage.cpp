@@ -2,9 +2,8 @@
 
 #include "utility.h"
 
-IndividualMessage::IndividualMessage(unsigned long long id)
-    : IMessage(id)
-    , sender_id_(0)
+IndividualMessage::IndividualMessage()
+    : sender_id_(0)
     , receiver_id_(0)
 {
 
@@ -14,6 +13,7 @@ size_t IndividualMessage::serialize(std::ostream &os) const {
     size_t size = 0;
 
     size += UtilitySerializator::serialize_fundamental<unsigned long long>(os, id_);
+    size += UtilitySerializator::serialize(os, send_datetime_.toString(DATETIME_FORMAT).toStdString());
     size += UtilitySerializator::serialize_fundamental<unsigned long long>(os, sender_id_);
     size += UtilitySerializator::serialize_fundamental<unsigned long long>(os, receiver_id_);
     size += msg_content_ptr_->serialize(os);
@@ -28,6 +28,11 @@ size_t IndividualMessage::deserialize(std::istream& is) {
     temp_ullong_pair = UtilitySerializator::deserialize_fundamental<unsigned long long>(is);
     size += temp_ullong_pair.first;
     id_ = temp_ullong_pair.second;
+
+    std::pair<size_t, std::string> temp_str_pair;
+    temp_str_pair = UtilitySerializator::deserialize_string(is);
+    size += temp_str_pair.first;
+    send_datetime_ = QDateTime::fromString(QString(temp_str_pair.second.c_str()), DATETIME_FORMAT);
 
     temp_ullong_pair = UtilitySerializator::deserialize_fundamental<unsigned long long>(is);
     size += temp_ullong_pair.first;

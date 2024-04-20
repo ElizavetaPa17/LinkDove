@@ -166,6 +166,13 @@ public:
      * @param layout - Очищаемый компоновщик.
      */
     static void clean_layout(QLayout *layout);
+
+    /**
+     * <p> Рекурсивно удаляет виджеты и компоновщики, которые содержатся в переданном компоновщике. </p>
+     * @brief clean_complex_layout
+     * @param layout - Очищаемый компоновщик.
+     */
+    static void clean_complex_layout(QLayout *layout);
 };
 
 #endif // UTILITY_H

@@ -85,6 +85,9 @@ const int GET_COMPLAINTS_LIMIT = 100;
 // Формат строковой даты
 #define BIRTHAY_FORMAT "yyyy-MM-dd"
 
+// Формат строковой даты с отметкой времени дня
+#define DATETIME_FORMAT "yyyy-MM-dd hh:mm:ss"
+
 // Идентификатор для сообщения, которое создано, но еще не инициализировано или не сохранено в БД.
 const int CREATED_MSG_ID = 0;
 

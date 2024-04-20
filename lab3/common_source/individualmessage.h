@@ -12,7 +12,7 @@
 class IndividualMessage : public IMessage
 {
 public:
-    IndividualMessage(unsigned long long id);
+    IndividualMessage();
 
     size_t serialize(std::ostream &os) const override;
 
