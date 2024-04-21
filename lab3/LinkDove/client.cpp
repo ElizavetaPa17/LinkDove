@@ -123,6 +123,18 @@ void Client::async_find_user(const std::string &username) {
     run_context();
 }
 
+void Client::async_ban_user(const std::string &username, bool is_ban) {
+    connection_.out_stream_ << create_ban_user_request(username, is_ban);
+
+    asio::async_write(connection_.socket_, connection_.buffer_,
+                      boost::bind(&Client::handle_async_write,
+                                  shared_from_this(),
+                                  asio::placeholders::error,
+                                  asio::placeholders::bytes_transferred));
+
+    run_context();
+}
+
 void Client::async_send_message(const IMessage& message) {
     connection_.out_stream_ << SEND_MSG_REQUEST << "\n";
     UtilitySerializator::serialize(connection_.out_stream_, message);
@@ -214,6 +226,17 @@ std::string Client::create_update_user_request(const StatusInfo& status_info) {
     str_stream << UPDATE_USER_REQUEST << '\n';
 
     status_info.serialize(str_stream);
+    str_stream << END_OF_REQUEST;
+
+    return str_stream.str();
+}
+
+std::string Client::create_ban_user_request(const std::string &username, bool is_ban) {
+    std::stringstream str_stream;
+    str_stream << BAN_USER_REQUEST << '\n';
+
+    UtilitySerializator::serialize(str_stream, username);
+    UtilitySerializator::serialize_fundamental<uint8_t>(str_stream, is_ban);
     str_stream << END_OF_REQUEST;
 
     return str_stream.str();
@@ -313,6 +336,10 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
             emit find_user_result(FIND_USER_SUCCESS_ANSWER);
         } else if (answer_type == FIND_USER_FAILED) {
             emit find_user_result(FIND_USER_FAILED_ANWSER);
+        } else if (answer_type == BAN_USER_SUCCESS) {
+            emit ban_user_result(BAN_USER_SUCCESS_ANSWER);
+        } else if (answer_type == BAN_USER_FAILED){
+            emit ban_user_result(BAN_USER_FAILED_ANSWER);
         } else if (answer_type == SEND_MSG_SUCCESS) {
             emit send_msg_result(SEND_MSG_SUCCESS_ANSWER);
         } else if (answer_type == SEND_MSG_FAILED) {

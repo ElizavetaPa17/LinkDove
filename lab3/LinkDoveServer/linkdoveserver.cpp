@@ -146,6 +146,8 @@ void LinkDoveServer::handle_type_request(ConnectionIterator iterator) {
         handle_update_user_request(iterator);
     } else if (request_type == FIND_USER_REQUEST) {
         handle_find_user_request(iterator);
+    } else if (request_type == BAN_USER_REQUEST) {
+        handle_ban_user_request(iterator);
     } else if (request_type == SEND_MSG_REQUEST) {
         handle_send_msg_request(iterator);
     } else if (request_type == GET_IND_MSG_REQUEST) {
@@ -289,6 +291,23 @@ void LinkDoveServer::handle_find_user_request(ConnectionIterator iterator) {
     } catch(std::runtime_error& ex) {
         std::cerr << ex.what() << '\n';
         answer << FIND_USER_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_ban_user_request(ConnectionIterator iterator) {
+    std::string username = UtilitySerializator::deserialize_string(iterator->in_stream_).second;
+    uint8_t is_ban = UtilitySerializator::deserialize_fundamental<uint8_t>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    if (data_base_.ban_user(username, is_ban)) {
+        answer << BAN_USER_SUCCESS << "\n" << END_OF_REQUEST;
+    } else {
+        answer << BAN_USER_FAILED << "\n" << END_OF_REQUEST;
     }
 
     iterator->out_stream_ << answer.str();

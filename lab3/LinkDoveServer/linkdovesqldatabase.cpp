@@ -196,7 +196,7 @@ bool LinkDoveSQLDataBase::update_user(const StatusInfo& status_info) {
         std::cerr  << query.lastError().text().toStdString() << '\n';
         return false;
     } else {
-        // если вставка была успешна, то row affected > 0, иначе row affected == 0 (false).
+        // если изменение было успешно, то row affected > 0, иначе row affected == 0 (false).
         int num = query.numRowsAffected();
         // Если num == 0, а поля никнейма или почты изменились, то на вход пришел дубликат.
         if (num == 0 && is_username_changed || num == 0 && is_email_changed) {
@@ -204,6 +204,25 @@ bool LinkDoveSQLDataBase::update_user(const StatusInfo& status_info) {
         } else {
             return true;
         }
+    }
+}
+
+bool LinkDoveSQLDataBase::ban_user(const std::string &username, bool is_ban) {
+    QSqlQuery query(data_base_);
+    query.prepare(" UPDATE USERS "
+                  " SET "
+                  "     is_banned=:is_banned "
+                  " WHERE username=:username; ");
+
+    query.bindValue(":username", username.c_str());
+    query.bindValue(":is_banned", is_ban);
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString() << '\n';
+        return false;
+    } else {
+        // если изменение было успешно, то row affected > 0, иначе row affected == 0 (false).
+        return query.numRowsAffected();
     }
 }
 

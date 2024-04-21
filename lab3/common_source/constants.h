@@ -41,6 +41,9 @@ enum ResponseTypes {
     FIND_USER_SUCCESS_ANSWER,
     FIND_USER_FAILED_ANWSER,
 
+    BAN_USER_SUCCESS_ANSWER,
+    BAN_USER_FAILED_ANSWER,
+
     SEND_MSG_SUCCESS_ANSWER,
     SEND_MSG_FAILED_ANSWER,
 
@@ -152,6 +155,13 @@ extern const char *FIND_USER_REQUEST;
 extern const char *FIND_USER_SUCCESS;
 // Ответ сервера на неудачный поиск информации о пользователе
 extern const char *FIND_USER_FAILED;
+
+// Запрос на блокирувку/разблокировку пользователя от администратора
+extern const char *BAN_USER_REQUEST;
+// Ответ сервера на успешную блокирувку/разблокировку пользователя
+extern const char *BAN_USER_SUCCESS;
+// Ответ сервера на неудачную блокирувку/разблокировку пользователя
+extern const char *BAN_USER_FAILED;
 
 // Запрос на отправку сообщения
 extern const char *SEND_MSG_REQUEST;

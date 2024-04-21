@@ -91,6 +91,7 @@ void SettingWidget::slotDisplayAboutDialog() {
 
 void SettingWidget::slotDisplayBanDialog() {
     std::unique_ptr<BanDialog> dialog_ptr = std::make_unique<BanDialog>();
+    connect(ClientSingleton::get_client(), &Client::ban_user_result, dialog_ptr.get(), &BanDialog::slotHandleBanResult);
     dialog_ptr->exec();
 }
 

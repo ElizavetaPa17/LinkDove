@@ -68,6 +68,9 @@
        <bold>true</bold>
       </font>
      </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="styleSheet">
       <string notr="true">QPushButton {
 	background-color: rgb(245, 245, 245);
@@ -99,6 +102,9 @@ QPushButton:hover {
        <pointsize>17</pointsize>
        <bold>true</bold>
       </font>
+     </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
      </property>
      <property name="styleSheet">
       <string notr="true">QPushButton {
@@ -132,6 +138,9 @@ QPushButton:hover {
        <bold>true</bold>
       </font>
      </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="styleSheet">
       <string notr="true">QPushButton {
 	background-color: rgb(245, 245, 245);
@@ -151,7 +160,7 @@ QPushButton:hover {
     </widget>
    </item>
    <item row="1" column="0" colspan="3">
-    <widget class="QLineEdit" name="lineEdit">
+    <widget class="QLineEdit" name="usernameEdit">
      <property name="styleSheet">
       <string notr="true">QLineEdit {
 	background-color: rgb(245, 245, 245);

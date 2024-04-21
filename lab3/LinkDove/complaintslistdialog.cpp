@@ -52,7 +52,7 @@ void ComplaintsListDialog::removeAllComplaints() {
 }
 
 void ComplaintsListDialog::slotDeleteComplaintResult(int result) {
-    QString text;
+    std::string text;
     if (result == DEL_COMPLAINT_SUCCESS_ANSWER) {
         text = "Жалоба была успешно удалена.";
         removeComplaint(removed_complaint_id_);
@@ -60,7 +60,7 @@ void ComplaintsListDialog::slotDeleteComplaintResult(int result) {
         text = "Ошибка удаления жалобы. Попытайтесь снова.";
     }
 
-    std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(text.toStdString());
+    std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(text);
     dialog_ptr->exec();
 }
 

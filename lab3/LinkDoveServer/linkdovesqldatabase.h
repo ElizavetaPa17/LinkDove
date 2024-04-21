@@ -39,6 +39,15 @@ public:
     bool update_user(const StatusInfo& status_info);
 
     /**
+     * <p> Блокирует или разблокировывает пользователя с никнеймом username в зависимости от флага is_ban. </p>
+     * @brief ban_user
+     * @param username - Идентификатор пользователя.
+     * @param is_ban - Если is_ban равно true, то пользователь блокируется, иначе - разблокировывается.
+     * @return
+     */
+    bool ban_user(const std::string &username, bool is_ban);
+
+    /**
      * <p> Добавляет жалобу в БД. </p>
      * @brief add_complaint
      * @param complaint - Информация о жалобе, которая добавляется в БД.

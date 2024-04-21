@@ -82,6 +82,14 @@ public:
     void async_find_user(const std::string &username);
 
     /**
+     * <p> Отправляет запрос на блокировку/разблокировку пользователя с никнеймом username в зависимости от флага is_ban.</p>
+     * @brief async_ban_user
+     * @param username - Никнейм пользователя.
+     * @param is_ban - Если is_ban равно true, то пользователь блокируется, иначе - разблокировывается..
+     */
+    void async_ban_user(const std::string &username, bool is_ban);
+
+    /**
      * <p> Отправляет сообщение. </p>
      * @brief async_send_message
      * @param message - Отправляемое сообщение.
@@ -173,6 +181,13 @@ signals:
     void find_user_result(int result);
 
     /**
+     * <p> Генерирует сигнал после получения результата блокировки/разблокировки пользователя. </p>
+     * @brief ban_user_result
+     * @param result - Параметр, содержащий результат блокировки/разблокировки пользователя.
+     */
+    void ban_user_result(int result);
+
+    /**
      * <p> Генерирует сигнал после получения результата отправки сообщения. </p>
      * @brief send_msg_result
      * @param result - Параметр, содержащий результат отправки сообщения.
@@ -238,6 +253,15 @@ private:
      * @return - Строковое представление запроса.
      */
     std::string create_update_user_request(const StatusInfo& status_info);
+
+    /**
+     * Формирует запрос на блокировку/разблокировку пользователя.
+     * @brief create_ban_user_request
+     * @param username - Никнейм пользователя.
+     * @param is_ban - Флаг блокировки/разблокировки пользователя.
+     * @return - Строковое представление запроса.
+     */
+    std::string create_ban_user_request(const std::string &username, bool is_ban);
 
     /**
      * <p> Формирует запрос на получение сообщений из чата с одним собеседником с идентификатором other_id. </p>
