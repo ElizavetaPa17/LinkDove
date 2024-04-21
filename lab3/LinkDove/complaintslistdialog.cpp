@@ -42,22 +42,8 @@ ComplaintsListDialog::~ComplaintsListDialog() {
 void ComplaintsListDialog::addComplaint(const Complaint& complaint) {
     ComplaintCard *complaint_card = new ComplaintCard(this, complaint);
     scroll_area_->widget()->layout()->addWidget(complaint_card);
-}
 
-void ComplaintsListDialog::removeComplaint(unsigned long long complaint_id) {
-    QLayout *pvboxLayout = scroll_area_->widget()->layout();
-    size_t count = pvboxLayout->count();
-    QWidget *widget = nullptr;
-
-    for (int i = 0; i < count; ++i) {
-        widget = pvboxLayout->itemAt(i)->widget();
-        if (widget != nullptr) {
-            if (static_cast<ComplaintCard*>(widget)->getComplaintId() == complaint_id) {
-                scroll_area_->layout()->removeWidget(widget);
-                break;
-            }
-        }
-    }
+    connect(complaint_card, &ComplaintCard::removed, this, &ComplaintsListDialog::slotRemoveComplaint);
 }
 
 void ComplaintsListDialog::removeAllComplaints() {
@@ -69,10 +55,31 @@ void ComplaintsListDialog::slotDeleteComplaintResult(int result) {
     QString text;
     if (result == DEL_COMPLAINT_SUCCESS_ANSWER) {
         text = "Жалоба была успешно удалена.";
+        removeComplaint(removed_complaint_id_);
     } else {
         text = "Ошибка удаления жалобы. Попытайтесь снова.";
     }
 
     std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(text.toStdString());
     dialog_ptr->exec();
+}
+
+void ComplaintsListDialog::slotRemoveComplaint(unsigned long long id) {
+    removed_complaint_id_ = id;
+}
+
+void ComplaintsListDialog::removeComplaint(unsigned long long complaint_id) {
+    QLayout *layout = scroll_area_->widget()->layout();
+
+    QLayoutItem *widget_item = nullptr;
+    for (int i = 0; i < layout->count(); ++i) {
+        if (((widget_item = layout->itemAt(i)) != nullptr) && widget_item->widget()) {
+            if (static_cast<ComplaintCard*>(widget_item->widget())->getComplaintId() == complaint_id) {
+                layout->removeItem(widget_item);
+                delete widget_item->widget();
+                delete widget_item;
+                break;
+            }
+        }
+    }
 }

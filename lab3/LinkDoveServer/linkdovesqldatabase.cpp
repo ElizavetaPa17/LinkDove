@@ -230,6 +230,7 @@ bool LinkDoveSQLDataBase::del_complaint(unsigned long long complaint_id) {
                   "WHERE ID=:id; ");
 
     query.bindValue(":id", complaint_id);
+    std::cerr << "id: " << complaint_id << '\n';
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString() << '\n';
         return false;

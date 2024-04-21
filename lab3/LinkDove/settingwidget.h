@@ -76,6 +76,12 @@ private slots:
      */
     void slotDisplayAboutDialog();
 
+    /**
+     * <p> Отображает модальное окно блокировки для суперпользователя. </p>
+     * @brief slotDisplayBanDialog
+     */
+    void slotDisplayBanDialog();
+
 private:
     Ui::SettingWidget *ui;
     ComplaintsListDialog complaint_dialog_;

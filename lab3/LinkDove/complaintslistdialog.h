@@ -25,13 +25,6 @@ public:
     void addComplaint(const Complaint& complaint);
 
     /**
-     * <p> Удаляет жалобу из отображаемого списка. </p>
-     * @brief removeComplaint
-     * @param complaint_id - Идентификатор удаляемой жалобы.
-     */
-    void removeComplaint(unsigned long long complaint_id);
-
-    /**
      * <p> Удаляет все жалобы из отображаемого списка. </p>
      * @brief removeAllComplaints
      */
@@ -45,8 +38,23 @@ public slots:
      */
     void slotDeleteComplaintResult(int result);
 
+    /**
+     * <p> Слот, принимающий сигналы попытки удаления жалобы. </p>
+     * @brief slotRemoveComplaint
+     * @param - Идентификатор удаляемой жалобы.
+     */
+    void slotRemoveComplaint(unsigned long long id);
+
 private:
     QScrollArea *scroll_area_;
+    unsigned long long removed_complaint_id_;
+
+    /**
+     * <p> Удаляет жалобу из отображаемого списка. </p>
+     * @brief removeComplaint
+     * @param complaint_id - Идентификатор удаляемой жалобы.
+     */
+    void removeComplaint(unsigned long long complaint_id);
 };
 
 #endif // COMPLAINTSLISTDIALOG_H

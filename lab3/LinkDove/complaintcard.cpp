@@ -17,7 +17,7 @@ ComplaintCard::ComplaintCard(QWidget *parent, const Complaint& complaint) :
 
     QString text = "ID отправителя: ";
     text += QString::number(complaint.id_);
-    complaint_id_ = complaint.sender_id_;
+    complaint_id_ = complaint.id_;
 
     ui->senderIdLabel->setText(text);
     ui->textLabel->setText(complaint.text_.c_str());
@@ -43,5 +43,7 @@ void ComplaintCard::paintEvent(QPaintEvent *)
 }
 
 void ComplaintCard::setupConnections() {
-    connect(ui->delButton, &QPushButton::clicked, this, [this]() { ClientSingleton::get_client()->async_del_complaint(complaint_id_); });
+    connect(ui->delButton, &QPushButton::clicked, this, [this]() { ClientSingleton::get_client()->async_del_complaint(complaint_id_);
+                                                                   emit removed(complaint_id_);
+                                                                  });
 }

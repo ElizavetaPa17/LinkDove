@@ -53,6 +53,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         usercard.h usercard.cpp usercard.ui
         chatwidget.h chatwidget.cpp chatwidget.ui
         messagecard.h messagecard.cpp messagecard.ui
+        bandialog.h bandialog.cpp bandialog.ui
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET LinkDove APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

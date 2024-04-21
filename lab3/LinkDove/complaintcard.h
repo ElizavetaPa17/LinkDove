@@ -28,6 +28,14 @@ public:
      */
     unsigned long long getComplaintId();
 
+signals:
+    /**
+     * <p> Сигнал генерируется при попытке удалить жалобу. /p>
+     * @brief removed
+     * @param id - Идентификатор удаляемой жалобы.
+     */
+    void removed(unsigned long long id);
+
 protected:
     // Переопределяем метод отрисовки, т.к. иначе с виджетом
     // не работают css-таблицы (проблема самого  Qt)

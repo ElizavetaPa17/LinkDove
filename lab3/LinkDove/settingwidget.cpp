@@ -5,6 +5,7 @@
 #include "complaintdialog.h"
 #include "constants.h"
 #include "clientsingleton.h"
+#include "bandialog.h"
 
 SettingWidget::SettingWidget(QWidget *parent) :
     QWidget(parent),
@@ -29,8 +30,8 @@ void SettingWidget::setPrivilegedMode(bool flag) {
         ui->privateButton->show();
         ui->banButton->hide();
 
+        disconnect(ui->complaintButton, &QPushButton::clicked, this, nullptr);
         connect(ui->complaintButton, &QPushButton::clicked,    this, &SettingWidget::slotDisplayComplaintDialog);
-        connect(ClientSingleton::get_client(), &Client::send_complaint_result, this, &SettingWidget::slotComplaintResult);
     } else {
         privileged_mode_ = PRIVILEGED_MODE;
 
@@ -38,8 +39,8 @@ void SettingWidget::setPrivilegedMode(bool flag) {
         ui->privateButton->hide();
         ui->banButton->show();
 
-        connect(ui->complaintButton, &QPushButton::clicked,    this, [] () { ClientSingleton::get_client()->async_get_complaints(); });
-        connect(ClientSingleton::get_client(), &Client::get_complaints_result, this, &SettingWidget::slotDisplayComplaintList);
+        disconnect(ui->complaintButton, &QPushButton::clicked, this, nullptr);
+        connect(ui->complaintButton, &QPushButton::clicked, this, [] () { ClientSingleton::get_client()->async_get_complaints(); });
     }
 }
 
@@ -88,7 +89,15 @@ void SettingWidget::slotDisplayAboutDialog() {
     dialog_ptr->exec();
 }
 
+void SettingWidget::slotDisplayBanDialog() {
+    std::unique_ptr<BanDialog> dialog_ptr = std::make_unique<BanDialog>();
+    dialog_ptr->exec();
+}
+
 void SettingWidget::setupConnections() {
     connect(ui->quitButton,  &QPushButton::clicked, this, &SettingWidget::slotQuitAccount);
     connect(ui->aboutButton, &QPushButton::clicked, this, &SettingWidget::slotDisplayAboutDialog);
+    connect(ui->banButton,   &QPushButton::clicked, this, &SettingWidget::slotDisplayBanDialog);
+    connect(ClientSingleton::get_client(), &Client::get_complaints_result, this, &SettingWidget::slotDisplayComplaintList);
+    connect(ClientSingleton::get_client(), &Client::send_complaint_result, this, &SettingWidget::slotComplaintResult);
 }

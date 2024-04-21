@@ -10,7 +10,6 @@ ComplaintDialog::ComplaintDialog(QWidget *parent) :
     ui->setupUi(this);
 
     setEnabledSendButton(false);
-
     setupConnection();
 }
 
