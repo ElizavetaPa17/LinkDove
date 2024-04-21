@@ -12,6 +12,7 @@ const char *IMAGE_MSG = "IMAGE_MSG_TYPE";
 const char *LOGIN_REQUEST = "LOGIN";
 const char *LOGIN_SUCCESS = "LOGIN_SUCCESS";
 const char *LOGIN_FAILED  = "LOGIN_FAILED";
+const char *LOGIN_BANNED  = "LOGIN_BANNED";
 
 const char *REGISTER_REQUEST = "REGISTER";
 const char *REGISTER_SUCCESS = "REGISTER_SUCCESS";

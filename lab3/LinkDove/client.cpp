@@ -306,6 +306,8 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
         if (answer_type == LOGIN_SUCCESS) {
             status_info_.deserialize(connection_.in_stream_);
             emit authorization_result(LOGIN_SUCCESS_ANSWER);
+        } else if (answer_type == LOGIN_BANNED) {
+            emit authorization_result(LOGIN_BANNED_ANSWER);
         } else if (answer_type == LOGIN_FAILED) {
             emit authorization_result(LOGIN_FAILED_ANSWER);
         } else if (answer_type == REGISTER_SUCCESS) {

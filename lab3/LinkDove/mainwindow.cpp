@@ -52,6 +52,10 @@ void MainWindow::slotPassAuthorization(int authorization_result) {
             ui->pageRegister->displayFailedInfo("Ошибка. Проверьте ввод и повторите регистрацию снова.");
             break;
         }
+        case LOGIN_BANNED_ANSWER: {
+            ui->pageLogin->displayFailedInfo("Ошибка. Ваш аккаунт заблокирован.");
+            break;
+        }
     }
 }
 

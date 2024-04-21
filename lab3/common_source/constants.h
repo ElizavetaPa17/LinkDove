@@ -24,6 +24,7 @@ enum ResponseTypes {
     REGISTRATION_SUCCESS_ANSWER,
 
     LOGIN_FAILED_ANSWER,
+    LOGIN_BANNED_ANSWER,
     LOGIN_SUCCESS_ANSWER,
 
     SEND_COMPLAINT_SUCCESS_ANSWER,
@@ -113,6 +114,8 @@ extern const char *LOGIN_REQUEST;
 extern const char *LOGIN_SUCCESS;
 // Ответ сервера в случае провала авторизации
 extern const char *LOGIN_FAILED;
+// Ответ сервера в случае, если пользователь
+extern const char *LOGIN_BANNED;
 
 // Запрос клиента на регистрацию
 extern const char *REGISTER_REQUEST;

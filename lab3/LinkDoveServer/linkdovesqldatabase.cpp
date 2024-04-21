@@ -226,6 +226,21 @@ bool LinkDoveSQLDataBase::ban_user(const std::string &username, bool is_ban) {
     }
 }
 
+bool LinkDoveSQLDataBase::get_user_banned_status(const std::string &username) {
+    QSqlQuery query(data_base_);
+    query.prepare(" SELECT * FROM USERS "
+                  " WHERE username=:username; ");
+
+    query.bindValue(":username", username.c_str());
+
+    if (!query.exec() || !query.next()) {
+        std::cerr << query.lastError().text().toStdString() << '\n';
+        throw std::runtime_error("failed to check user banned status");
+    } else {
+        return query.value("is_banned").toBool();
+    }
+}
+
 bool LinkDoveSQLDataBase::add_complaint(const Complaint& complaint) {
     QSqlQuery query(data_base_);
     query.prepare("INSERT INTO COMPLAINTS (sender_id, text) "

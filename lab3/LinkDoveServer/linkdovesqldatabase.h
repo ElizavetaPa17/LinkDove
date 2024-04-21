@@ -48,6 +48,14 @@ public:
     bool ban_user(const std::string &username, bool is_ban);
 
     /**
+     * <p> Проверяет, блокирован ли пользователь. </p>
+     * @brief get_user_banned_status
+     * @param username
+     * @return - True, если пользователь блокирован, иначе - false.
+     */
+    bool get_user_banned_status(const std::string &username);
+
+    /**
      * <p> Добавляет жалобу в БД. </p>
      * @brief add_complaint
      * @param complaint - Информация о жалобе, которая добавляется в БД.

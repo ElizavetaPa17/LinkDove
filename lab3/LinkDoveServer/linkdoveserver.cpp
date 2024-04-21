@@ -162,18 +162,28 @@ void LinkDoveServer::handle_login_request(ConnectionIterator iterator) {
     remove_delimeter(iterator);
 
     if (data_base_.login_user(login_info)) {
-        iterator->out_stream_ << LOGIN_SUCCESS << "\n";
+        try {
+            if (data_base_.get_user_banned_status(login_info.username_)) {
+                std::cerr << "wow\n";
+                iterator->out_stream_ << LOGIN_BANNED << "\n";
+            } else {
 
-        // ДОБАВИТЬ TRY_CATCH (С ОТПРАВКОЙ КЛИЕНТУ INTERNAL_ERROR)
-        StatusInfo status_info = data_base_.get_status_info(login_info.username_);
-        status_info.serialize(iterator->out_stream_);
+                iterator->out_stream_ << LOGIN_SUCCESS << "\n";
 
-        iterator->out_stream_ << END_OF_REQUEST;
-        async_write(iterator);
+                // ДОБАВИТЬ TRY_CATCH (С ОТПРАВКОЙ КЛИЕНТУ INTERNAL_ERROR)
+                StatusInfo status_info = data_base_.get_status_info(login_info.username_);
+                status_info.serialize(iterator->out_stream_);
+            }
+
+        } catch (std::runtime_error &error) {
+            iterator->out_stream_ << LOGIN_FAILED << "\n";
+        }
     } else {
-        iterator->out_stream_ << LOGIN_FAILED << "\n" << END_OF_REQUEST;
-        async_write(iterator);
+        iterator->out_stream_ << LOGIN_FAILED << "\n";
     }
+
+    iterator->out_stream_ << END_OF_REQUEST;
+    async_write(iterator);
 }
 
 void LinkDoveServer::handle_register_request(ConnectionIterator iterator) {
