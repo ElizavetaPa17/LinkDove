@@ -29,6 +29,7 @@ void ChatWidget::slotOpenChatWith(const StatusInfo &status_info) {
     receiver_id_ = status_info.id_;
     ui->label->setText(status_info.username_.c_str());
 
+    slotClear();
     ClientSingleton::get_client()->async_get_ind_messages(receiver_id_);
 }
 
@@ -85,6 +86,7 @@ void ChatWidget::slotHandleGetMessages(int result) {
 void ChatWidget::slotClear() {
     ui->messageEdit->clear();
     QtUtility::clean_complex_layout(ui->verticalLayout);
+    ui->verticalLayout->addStretch();
 }
 
 void ChatWidget::setupConnection() {

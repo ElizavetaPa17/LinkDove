@@ -104,6 +104,12 @@ public:
     void async_get_ind_messages(unsigned long long other_id);
 
     /**
+     * <p> Отправляет запрос на получение информации о всех собеседниках, с которыми у текущего пользователя есть активная переписка. </p>
+     * @brief async_get_interlocutors
+     */
+    void async_get_interlocutors();
+
+    /**
      * <p> Возвращает информацию о пользователе. </p>
      * @brief get_status_info
      * @return - Структура, содержащая информацию о пользователе.
@@ -130,6 +136,13 @@ public:
      * @return - Список сообщений.
      */
     std::vector<std::shared_ptr<IMessage>> get_messages();
+
+    /**
+     * <p> Возвращает вектор собеседников текущего пользователя. Вызывается после щапроса на получение этих собеседников. </p>
+     * @brief get_interlocutors
+     * @return - Список сообщений текущего пользователя.
+     */
+    std::vector<StatusInfo> get_interlocutors();
 
     /**
      * <p> Определяет, установил ли клиент соединение с сервером. </p>
@@ -201,6 +214,13 @@ signals:
      */
     void get_ind_msg_result(int result);
 
+    /**
+     * <p> Генерирует сигнал после получение результата запроса на информацию о собеседниках. </p>
+     * @brief get_interlocutors_result
+     * @param result - Параметр, содержащий результат запроса.
+     */
+    void get_interlocutors_result(int result);
+
 private:
     std::shared_ptr<asio::io_context> io_context_ptr_;
     IStreamConnection<tcp> connection_;
@@ -212,6 +232,7 @@ private:
     StatusInfo found_status_info_;
     std::vector<Complaint> complaints_;
     std::vector<std::shared_ptr<IMessage>> messages_;
+    std::vector<StatusInfo> status_info_vec_;
 
     void create_account() {}
 

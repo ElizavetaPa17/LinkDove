@@ -104,6 +104,14 @@ public:
     std::vector<std::shared_ptr<IMessage>> get_ind_messages(unsigned long long sender_id, unsigned long long receiver_id);
 
     /**
+     * <p> Возвращает информацию о собеседниках пользователя. </p>
+     * @brief get_interlocutors
+     * @param id - Идентификатор пользователя, информация о собеседниках которого извлекается.
+     * @return - Вектор из структур, содержащих информацию по собеседниках.
+     */
+    std::vector<StatusInfo> get_interlocutors(unsigned long long id);
+
+    /**
      * <p> Возвращает информацию о пользователе, который соответствует никнейму. </p>
      * @brief get_user
      * @param username - Никнейм пользователя

@@ -67,13 +67,26 @@ void UsersList::slotsHandleReturnPress() {
 }
 
 void UsersList::slotFindUserResult(int result) {
+    removeUsers();
+
     if (result == FIND_USER_FAILED_ANWSER) {
         std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>("Пользователь не найден.");
         dialog_ptr->exec();
     } else {
         StatusInfo status_info = ClientSingleton::get_client()->get_found_user();
-        removeUsers();
         addUser(status_info);
+    }
+}
+
+void UsersList::slotGetInterlocutorsResult(int result) {
+    if (result == GET_INTERLOCUTORS_SUCCESS_ANSWER) {
+        std::vector<StatusInfo> interlocutors = ClientSingleton::get_client()->get_interlocutors();
+        for (int i = 0; i < interlocutors.size(); ++i) {
+            addUser(interlocutors[i]);
+        }
+    } else {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>("Ошибка получения сообщений.");
+        dialog_ptr->exec();
     }
 }
 
@@ -83,5 +96,6 @@ void UsersList::slotHandleUserCardClicked(const StatusInfo &status_info) {
 
 void UsersList::setupConnection() {
     connect(ClientSingleton::get_client(), &Client::find_user_result, this, &UsersList::slotFindUserResult);
+    connect(ClientSingleton::get_client(), &Client::get_interlocutors_result, this, &UsersList::slotGetInterlocutorsResult);
     connect(ui->searchEdit, &QLineEdit::returnPressed, this, &UsersList::slotsHandleReturnPress);
 }

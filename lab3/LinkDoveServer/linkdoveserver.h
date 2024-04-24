@@ -174,6 +174,13 @@ private:
      */
     void handle_get_msg_request(ConnectionIterator iterator);
 
+    /**
+     * <p> Обрабатывает запрос на получение списка собеседников пользователя. </p>
+     * @brief handle_get_interlocutors_request
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_get_interlocutors_request(ConnectionIterator iterator);
+
     /** <p> Запускает в отдельном потоке контекст для обработки асинхронных функций. </p>
      * @brief run_context
      */

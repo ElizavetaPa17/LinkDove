@@ -161,6 +161,20 @@ void Client::async_get_ind_messages(unsigned long long other_id) {
     run_context();
 }
 
+void Client::async_get_interlocutors() {
+    connection_.out_stream_ << GET_INTERLOCUTORS_REQUEST << "\n";
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, status_info_.id_);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    asio::async_write(connection_.socket_, connection_.buffer_,
+                      boost::bind(&Client::handle_async_write,
+                                  shared_from_this(),
+                                  asio::placeholders::error,
+                                  asio::placeholders::bytes_transferred));
+
+    run_context();
+}
+
 StatusInfo Client::get_status_info() {
     return status_info_;
 }
@@ -175,6 +189,10 @@ std::vector<Complaint> Client::get_complaints() {
 
 std::vector<std::shared_ptr<IMessage>> Client::get_messages() {
     return messages_;
+}
+
+std::vector<StatusInfo> Client::get_interlocutors() {
+    return status_info_vec_;
 }
 
 bool Client::is_connected() noexcept {
@@ -351,6 +369,11 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
             emit get_ind_msg_result(GET_IND_MSG_SUCCESS_ANSWER);
         } else if (answer_type == GET_IND_MSG_FAILED) {
             emit get_ind_msg_result(GET_IND_MSG_FAILED_ANSWER);
+        } else if (answer_type == GET_INTERLOCUTORS_SUCCESS) {
+            status_info_vec_ = UtilitySerializator::deserialize_st_info_vec(connection_.in_stream_).second;
+            emit get_interlocutors_result(GET_INTERLOCUTORS_SUCCESS_ANSWER);
+        } else if (answer_type == GET_INTERLOCUTORS_FAILED) {
+            emit get_interlocutors_result(GET_INTERLOCUTORS_FAILED_ANSWER);
         } else {
             std::cerr << "что-то невнятное: " << answer_type << '\n';
         }

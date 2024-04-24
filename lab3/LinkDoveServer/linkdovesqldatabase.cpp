@@ -4,6 +4,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <mutex>
+#include <algorithm>
 
 #include "constants.h"
 #include "individualmessage.h"
@@ -442,6 +443,51 @@ std::vector<std::shared_ptr<IMessage>> LinkDoveSQLDataBase::get_ind_messages(uns
         return link_dove_database_details__::retrieve_messages(query, content_query);
     }
 
+}
+
+std::vector<StatusInfo> LinkDoveSQLDataBase::get_interlocutors(unsigned long long id) {
+    QSqlQuery query(data_base_);
+
+    query.prepare(" SELECT sender_id FROM INDIVIDUAL_MESSAGES "
+                  " WHERE receiver_id=:id "
+                  " GROUP BY sender_id; ");
+
+    query.bindValue(":id", id);
+
+    std::vector<StatusInfo> interlocutors;
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString() << '\n';
+        throw std::runtime_error("get_interlocutors: cannot get info user interlocutors from theirs messages.\n");
+    } else {
+        while (query.next()) {
+            interlocutors.push_back(get_status_info(query.value("sender_id").toULongLong()));
+        }
+    }
+
+    query.prepare(" SELECT receiver_id FROM INDIVIDUAL_MESSAGES "
+                  " WHERE sender_id=:id "
+                  " GROUP BY receiver_id; ");
+
+    query.bindValue(":id", id);
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString() << '\n';
+        throw std::runtime_error("get_interlocutors: cannot get info user interlocutors from theirs messages.\n");
+    } else {
+        while (query.next()) {
+            interlocutors.push_back(get_status_info(query.value("receiver_id").toULongLong()));
+        }
+    }
+
+    std::sort(interlocutors.begin(), interlocutors.end(), [this] (const StatusInfo &info1, const StatusInfo &info2) {
+        return info1.id_ < info2.id_;
+    });
+    auto it = std::unique(interlocutors.begin(), interlocutors.end(), [this] (const StatusInfo &info1, const StatusInfo &info2) {
+        return info1.id_ == info2.id_;
+    });
+    interlocutors.erase(it, interlocutors.end());
+
+    return interlocutors;
 }
 
 StatusInfo LinkDoveSQLDataBase::get_status_info(const std::string &username) {

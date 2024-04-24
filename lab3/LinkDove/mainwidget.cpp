@@ -39,6 +39,11 @@ void MainWidget::slotRedirectClick(QWidget *sender) {
         ui->stackedWidget->setCurrentIndex(PROFILE_PAGE);
     } else if (sender == ui->chatLabel) {
         ui->stackedWidget->setCurrentIndex(CHAT_PAGE);
+
+        if (ui->tabWidget->currentIndex() == 0) { // FIX MAGIC INT
+            ClientSingleton::get_client()->async_get_interlocutors();
+        }
+
     } else if (sender == ui->settingLabel) {
         ui->stackedWidget->setCurrentIndex(SETTING_PAGE);
     }

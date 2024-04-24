@@ -50,6 +50,9 @@ enum ResponseTypes {
 
     GET_IND_MSG_SUCCESS_ANSWER,
     GET_IND_MSG_FAILED_ANSWER,
+
+    GET_INTERLOCUTORS_SUCCESS_ANSWER,
+    GET_INTERLOCUTORS_FAILED_ANSWER
 };
 
 enum MessageType {
@@ -177,5 +180,12 @@ extern const char *SEND_MSG_FAILED;
 extern const char *GET_IND_MSG_REQUEST;
 // Ответ сервера на успешную отправку списка сообщений из чата с собеседником.
 extern const char *GET_IND_MSG_SUCCESS;
-// Ответ сервера на успешную отправку списка сообщений из чата с собеседником.
+// Ответ сервера на неудачную отправку списка сообщений из чата с собеседником.
 extern const char *GET_IND_MSG_FAILED;
+
+// Запрос на получение информации о собеседниках, с которыми у текущего пользователя есть активный чат
+extern const char *GET_INTERLOCUTORS_REQUEST;
+// Ответ сервера на успешную отправку информации о таких собеседниках
+extern const char *GET_INTERLOCUTORS_SUCCESS;
+// Ответ сервера на неудачную отправку информации о таких собеседниках
+extern const char *GET_INTERLOCUTORS_FAILED;

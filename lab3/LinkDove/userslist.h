@@ -66,6 +66,13 @@ private slots:
     void slotFindUserResult(int result);
 
     /**
+     * <p> Слот, принимающий от клиента результат получения информации о собеседниках текущего пользователя. </p>
+     * @brief slotGetInterlocutorsResult
+     * @param result - Результат получения информации.
+     */
+    void slotGetInterlocutorsResult(int result);
+
+    /**
      * <p> Слот, принимающий события нажатия на виджет результата поиска пользователя. </p>
      * @brief slotHandleUserCardClicked
      * @param status_info

@@ -152,6 +152,8 @@ void LinkDoveServer::handle_type_request(ConnectionIterator iterator) {
         handle_send_msg_request(iterator);
     } else if (request_type == GET_IND_MSG_REQUEST) {
         handle_get_msg_request(iterator);
+    } else if (request_type == GET_INTERLOCUTORS_REQUEST) {
+        handle_get_interlocutors_request(iterator);
     }
 }
 
@@ -164,7 +166,6 @@ void LinkDoveServer::handle_login_request(ConnectionIterator iterator) {
     if (data_base_.login_user(login_info)) {
         try {
             if (data_base_.get_user_banned_status(login_info.username_)) {
-                std::cerr << "wow\n";
                 iterator->out_stream_ << LOGIN_BANNED << "\n";
             } else {
 
@@ -371,6 +372,29 @@ void LinkDoveServer::handle_get_msg_request(ConnectionIterator iterator) {
         answer << GET_IND_MSG_FAILED << "\n" << END_OF_REQUEST;
     }
 
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_get_interlocutors_request(ConnectionIterator iterator) {
+    unsigned long long id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    try {
+        std::vector<StatusInfo> interlocutors = data_base_.get_interlocutors(id);
+
+        answer << GET_INTERLOCUTORS_SUCCESS << "\n";
+        UtilitySerializator::serialize(answer, interlocutors);
+        answer << END_OF_REQUEST;
+
+        std::cerr << interlocutors.size() << '\n';
+    } catch (std::runtime_error &ex) {
+        answer << GET_INTERLOCUTORS_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    std::cerr << "here\n";
     iterator->out_stream_ << answer.str();
     async_write(iterator);
 }
