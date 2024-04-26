@@ -30,6 +30,16 @@ include_directories(${COMMON_SOURCE_PATH})
 link_directories(${COMMON_SOURCE_PATH})
 add_subdirectory(${COMMON_SOURCE_PATH} build)
 
+# Создаем директорию, в которой будут хранится картинки из чата с двумя собеседниками
+add_custom_target(ind-images-directory ALL
+    COMMAND ${CMAKE_COMMAND} -E make_directory ./media/ind_images)
+# Создаем директорию, в которой будут хранится картинки из групп
+add_custom_target(group-images-directory ALL
+    COMMAND ${CMAKE_COMMAND} -E make_directory ./media/group_images)
+# Создаем директорию, в которой будут хранится картинки из каналов
+add_custom_target(channel-images-directory ALL
+    COMMAND ${CMAKE_COMMAND} -E make_directory ./media/channel_images)
+
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(LinkDove
         MANUAL_FINALIZATION

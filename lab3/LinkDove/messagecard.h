@@ -12,10 +12,13 @@ class MessageCard : public QWidget
     Q_OBJECT
 
 public:
-    explicit MessageCard(QWidget *parent = nullptr, QString text="");
+    explicit MessageCard(QWidget *parent, QString text);
+    explicit MessageCard(QWidget *parent, const QPixmap& photo);
     ~MessageCard();
 
 protected:
+    explicit MessageCard(QWidget *parent = nullptr);
+
     // Переопределяем метод отрисовки, т.к. иначе с виджетом
     // не работают css-таблицы (проблема самого  Qt)
     void paintEvent(QPaintEvent *);

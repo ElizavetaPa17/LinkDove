@@ -12,6 +12,10 @@
 #include "imessage.h"
 #include "StatusInfo.h"
 
+#include "individualmessage.h"
+#include "textmessagecontent.h"
+#include "imagemessagecontent.h"
+
 /**
  * @brief The UtilitySerializator class
  * Отвечает за сериализацию и десериализацию объектов
@@ -191,6 +195,41 @@ public:
      * @param layout - Очищаемый компоновщик.
      */
     static void clean_complex_layout(QLayout *layout);
+};
+
+class MessageUtility final {
+public:
+    /**
+     * <p> Создает сообщение чата между двумя собеседниками с текстовым содержимым. </p>
+     * @brief createIndividualTextMessage
+     * @param sender_id - Идентификатор отправителя.
+     * @param receiver_id -  Идентификатор получаталя.
+     * @param text - Текст сообщения.
+     * @return - Умный указатель на сообщение.
+     */
+    static std::shared_ptr<IndividualMessage> create_individual_text_message(unsigned long long sender_id,
+                                                                          unsigned long long receiver_id,
+                                                                          const std::string& text);
+
+    /**
+     * <p> Создает сообщение из чата между двумя собеседниками с содержанием картинки. </p>
+     * @brief createIndividualImageMessage
+     * @param sender_id - Идентификатор отправителя.
+     * @param receiver_id - Идентификатор получателя.
+     * @param image_path - Путь к картинке.
+     * @return - Умный указатель на сообщение.
+     */
+    static std::shared_ptr<IndividualMessage> create_individual_image_message(unsigned long long sender_id,
+                                                                           unsigned long long receiver_id,
+                                                                           const std::string& image_path);
+
+    /**
+     * <p> Копирует сообщение из места, куда указывает image_path, в MEDIA_IND_IMAGE_PATH. </p>
+     * @brief move_image_to_db_folder
+     * @param image_path
+     * @return - Путь к картинке в папке MEDIA_IND_IMAGE_PATH.
+     */
+    static std::string copy_image_to_ind_folder(const QString& image_path);
 };
 
 #endif // UTILITY_H

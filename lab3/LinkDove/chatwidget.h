@@ -55,9 +55,17 @@ private slots:
      */
     void slotHandleGetMessages(int result);
 
+    /**
+     * <p> Слот, который открывает диалоговое окно ддя выбора фотографии с целью его отправления в чат. </p>
+     * @brief slotChooseImage
+     */
+    void slotChooseImage();
+
 private:
-    Ui::ChatWidget *ui;
+    Ui::ChatWidget    *ui;
     unsigned long long receiver_id_;
+    int                send_msg_type_;  // Тип крайнего отправленного сообщения
+    std::string        image_path_;
 
     /**
      * <p> Настраивает соединения c виджетом авторизации (логин-формы). </p>

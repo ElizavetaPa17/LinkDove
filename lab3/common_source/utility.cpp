@@ -4,6 +4,10 @@
 #include <iostream>
 
 #include <QWidget>
+#include <QDir>
+#include <QFileInfo>
+#include <QFile>
+
 #include "individualmessage.h"
 #include "textmessagecontent.h"
 
@@ -140,6 +144,11 @@ std::pair<size_t, std::shared_ptr<IMessage>> UtilitySerializator::deserialize_ms
             msg_ptr->set_msg_content(std::make_shared<TextMessageContent>());
             break;
         }
+
+        case IMAGE_MSG_TYPE: {
+            msg_ptr->set_msg_content(std::make_shared<ImageMessageContent>());
+            break;
+        }
     }
 
     size += msg_ptr->deserialize(is) + 2*sizeof(type);
@@ -232,4 +241,43 @@ void QtUtility::clean_complex_layout(QLayout *layout) {
 
         delete item;
     }
+}
+
+std::shared_ptr<IndividualMessage> MessageUtility::create_individual_text_message(unsigned long long sender_id,
+                                                                               unsigned long long receiver_id,
+                                                                               const std::string& text)
+{
+    std::shared_ptr<IndividualMessage> ind_message = std::make_shared<IndividualMessage>();
+    ind_message->set_msg_edges(sender_id, receiver_id);
+
+    std::shared_ptr<TextMessageContent> text_msg_content_ptr = std::make_shared<TextMessageContent>();
+    text_msg_content_ptr->set_text(text);
+    ind_message->set_msg_content(text_msg_content_ptr);
+
+    return ind_message;
+}
+
+std::shared_ptr<IndividualMessage> MessageUtility::create_individual_image_message(unsigned long long sender_id,
+                                                                                   unsigned long long receiver_id,
+                                                                                   const std::string& image_path)
+{
+    std::shared_ptr<IndividualMessage> ind_message = std::make_shared<IndividualMessage>();
+    ind_message->set_msg_edges(sender_id, receiver_id);
+
+    std::shared_ptr<ImageMessageContent> image_msg_content_ptr = std::make_shared<ImageMessageContent>();
+    image_msg_content_ptr->set_image_path(image_path);
+    ind_message->set_msg_content(image_msg_content_ptr);
+
+    return ind_message;
+}
+
+std::string MessageUtility::copy_image_to_ind_folder(const QString &image_path) {
+    QString new_image_path = QString(MEDIA_IND_IMAGE_PATH) + QFileInfo(image_path).fileName();
+    if (!QFile::exists(new_image_path)) {
+            if (!QFile::copy(image_path, new_image_path)) {
+                std::runtime_error("Unable to copy image into ind_folder\n");
+            }
+    }
+
+    return new_image_path.toStdString();
 }

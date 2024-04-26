@@ -394,7 +394,6 @@ void LinkDoveServer::handle_get_interlocutors_request(ConnectionIterator iterato
         answer << GET_INTERLOCUTORS_FAILED << "\n" << END_OF_REQUEST;
     }
 
-    std::cerr << "here\n";
     iterator->out_stream_ << answer.str();
     async_write(iterator);
 }

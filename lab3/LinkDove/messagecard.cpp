@@ -4,12 +4,25 @@
 #include <QStyleOption>
 #include <QPainter>
 
-MessageCard::MessageCard(QWidget *parent, QString text) :
-    QWidget(parent),
-    ui(new Ui::MessageCard)
+MessageCard::MessageCard(QWidget *parent)
+    : QWidget(parent)
+    , ui(new Ui::MessageCard)
+{
+
+}
+
+MessageCard::MessageCard(QWidget *parent, QString text)
+    : MessageCard(parent)
 {
     ui->setupUi(this);
     ui->label->setText(text);
+}
+
+MessageCard::MessageCard(QWidget *parent, const QPixmap& photo)
+    : MessageCard(parent)
+{
+    ui->setupUi(this);
+    ui->label->setPixmap(photo);
 }
 
 MessageCard::~MessageCard()

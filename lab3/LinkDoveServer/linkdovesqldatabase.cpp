@@ -9,6 +9,7 @@
 #include "constants.h"
 #include "individualmessage.h"
 #include "textmessagecontent.h"
+#include "imagemessagecontent.h"
 
 std::mutex modify_mutex;
 
@@ -94,6 +95,17 @@ bool LinkDoveSQLDataBase::setup_tables() {
 
     if (!is_ok) {
         std::cerr << "Failed to setup IND_TEXT_MESSAGE_CONTENTS table: " << query.lastError().text().toStdString() << '\n';
+        return false;
+    }
+
+    is_ok = query.exec("CREATE TABLE IF NOT EXISTS IND_IMAGE_MESSAGE_CONTENTS "
+                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
+                       " msg_id BIGINT NOT NULL, "
+                       " image_path TEXT NOT NULL, "
+                       " FOREIGN KEY (msg_id) REFERENCES INDIVIDUAL_MESSAGES (ID) ON DELETE CASCADE); ");
+
+    if (!is_ok) {
+        std::cerr << "Failed to setup IND_IMAGE_MESSAGE_CONTENTS table: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
@@ -387,6 +399,38 @@ bool LinkDoveSQLDataBase::add_message(const IMessage& msg) {
                 content_enum = "text";
                 break;
             }
+            case IMAGE_MSG_TYPE: {
+                query.prepare(" INSERT INTO IND_IMAGE_MESSAGE_CONTENTS "
+                              " (msg_id, image_path) "
+                              " VALUES (:msg_id, :image_path); ");
+                query.bindValue(":msg_id", msg_id);
+                query.bindValue(":image_path", msg.get_msg_content()->get_raw_data());
+
+                // ПОВТОР КОДА!!!
+                if (!query.exec()) {
+                    std::cerr << query.lastError().text().toStdString() << '\n';
+                    return false;
+                }
+
+                query.prepare(" SELECT * FROM IND_IMAGE_MESSAGE_CONTENTS "
+                              " WHERE msg_id = :msg_id; ");
+                query.bindValue(":msg_id", msg_id);
+
+                if (!query.exec()) {
+                    std::cerr << query.lastError().text().toStdString() << '\n';
+                    return false;
+                } else {
+                    if (!query.next()) {
+                        return false;
+                    } else {
+                        content_id = query.value("ID").toULongLong();
+                    }
+                }
+
+                content_enum = "image";
+                break;
+
+            }
         }
 
         switch (msg.get_msg_type()) {
@@ -592,11 +636,22 @@ namespace link_dove_database_details__ {
                 std::shared_ptr<TextMessageContent> text_msg_content_ptr = std::make_shared<TextMessageContent>();
                 text_msg_content_ptr->set_text(content_query.value("text_data").toString().toStdString());
                 message_ptr->set_msg_content(text_msg_content_ptr);
-
+            //  ПОВТОР КОДА! УБРАТЬ!
             } else if (msg_type == "audio") {
-                // TODO
+
             } else if (msg_type == "image") {
-                // TODO
+                content_query.prepare("SELECT * FROM IND_IMAGE_MESSAGE_CONTENTS "
+                                      "WHERE msg_id=:msg_id; ");
+                content_query.bindValue(":msg_id", message_ptr->get_id());
+
+                if (!content_query.exec() || !content_query.next()) {
+                    std::cerr << content_query.lastError().text().toStdString() << '\n';
+                    continue;
+                }
+
+                std::shared_ptr<ImageMessageContent> text_msg_content_ptr = std::make_shared<ImageMessageContent>();
+                text_msg_content_ptr->set_image_path(content_query.value("image_path").toString().toStdString());
+                message_ptr->set_msg_content(text_msg_content_ptr);
             }
 
             messages.push_back(message_ptr);
