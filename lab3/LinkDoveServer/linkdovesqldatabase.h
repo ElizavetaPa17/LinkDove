@@ -5,6 +5,7 @@
 
 #include "UserInfo.h"
 #include "logininfo.h"
+#include "channelinfo.h"
 #include "complaint.h"
 #include "imessage.h"
 
@@ -110,6 +111,14 @@ public:
      * @return - Вектор из структур, содержащих информацию по собеседниках.
      */
     std::vector<StatusInfo> get_interlocutors(unsigned long long id);
+
+    /**
+     * <p> Добавляет канал в БД. </p>
+     * @brief add_channel
+     * @param channel_info - Добавляемый канал.
+     * @return - - В случае успеха возвращает true, иначе - false.
+     */
+    bool add_channel(const ChannelInfo &channel_info);
 
     /**
      * <p> Возвращает информацию о пользователе, который соответствует никнейму. </p>

@@ -22,7 +22,7 @@ signals:
     /**
      * <p> Сигнал, который генерируется при нажатии на виджет результата поиска пользователя. </p.
      * @brief userCardClicked
-     * @param status_info
+     * @param status_info - Структура с информацией о пользователе, который содержится в данном виджете.
      */
     void userCardClicked(const StatusInfo &status_info);
 

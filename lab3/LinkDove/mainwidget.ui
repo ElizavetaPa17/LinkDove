@@ -302,7 +302,7 @@ QTabBar::tab:selected {
 }</string>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>2</number>
          </property>
          <widget class="QWidget" name="tabChats">
           <property name="styleSheet">
@@ -375,6 +375,14 @@ QTabBar::tab:selected {
           <attribute name="title">
            <string>Каналы</string>
           </attribute>
+          <layout class="QGridLayout" name="gridLayout_8">
+           <item row="0" column="0">
+            <widget class="ChannelList" name="channelList" native="true"/>
+           </item>
+           <item row="0" column="1">
+            <widget class="QWidget" name="widget_2" native="true"/>
+           </item>
+          </layout>
          </widget>
         </widget>
        </item>
@@ -437,6 +445,12 @@ QTabBar::tab:selected {
    <class>ChatWidget</class>
    <extends>QWidget</extends>
    <header>chatwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ChannelList</class>
+   <extends>QWidget</extends>
+   <header>channellist.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -3,7 +3,7 @@
 #include "constants.h"
 
 IMessage::IMessage()
-    : id_(CREATED_MSG_ID)
+    : id_(CREATED_ENTITY_ID)
     , send_datetime_(QDateTime::currentDateTime())
 {
 

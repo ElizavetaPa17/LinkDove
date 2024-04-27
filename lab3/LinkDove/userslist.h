@@ -46,11 +46,6 @@ public slots:
      */
     void slotClear();
 
-protected:
-    // Переопределяем метод отрисовки, т.к. иначе с виджетом
-    // не работают css-таблицы (проблема самого  Qt)
-    void paintEvent(QPaintEvent *);
-
 private slots:
     /**
      * <p> Слот, обратабывающий событие нажатия клавиши Enter. </p>
@@ -78,6 +73,11 @@ private slots:
      * @param status_info
      */
     void slotHandleUserCardClicked(const StatusInfo &status_info);
+
+protected:
+    // Переопределяем метод отрисовки, т.к. иначе с виджетом
+    // не работают css-таблицы (проблема самого  Qt)
+    void paintEvent(QPaintEvent *);
 
 private:
     Ui::UsersList *ui;

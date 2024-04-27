@@ -52,7 +52,10 @@ enum ResponseTypes {
     GET_IND_MSG_FAILED_ANSWER,
 
     GET_INTERLOCUTORS_SUCCESS_ANSWER,
-    GET_INTERLOCUTORS_FAILED_ANSWER
+    GET_INTERLOCUTORS_FAILED_ANSWER,
+
+    CREATE_CHANNEL_SUCCESS_ANSWER,
+    CREATE_CHANNEL_FAILED_ANSWER,
 };
 
 enum MessageType {
@@ -97,8 +100,8 @@ const int GET_COMPLAINTS_LIMIT = 100;
 
 #define MEDIA_IND_IMAGE_PATH "media/ind_images/"
 
-// Идентификатор для сообщения, которое создано, но еще не инициализировано или не сохранено в БД.
-const int CREATED_MSG_ID = 0;
+// Идентификатор для идентификатора сущности, которая создана, но еще не инициализирована или не сохранена в БД.
+const int CREATED_ENTITY_ID = 0;
 
 
 // Информация о приложении LinkDove
@@ -191,3 +194,10 @@ extern const char *GET_INTERLOCUTORS_REQUEST;
 extern const char *GET_INTERLOCUTORS_SUCCESS;
 // Ответ сервера на неудачную отправку информации о таких собеседниках
 extern const char *GET_INTERLOCUTORS_FAILED;
+
+// Запрос на создание канала
+extern const char *CREATE_CHANNEL_REQUEST;
+// Ответ сервера на успешное создание канала
+extern const char *CREATE_CHANNEL_SUCCESS;
+// Ответ сервера на неудачное создание канала
+extern const char *CREATE_CHANNEL_FAILED;

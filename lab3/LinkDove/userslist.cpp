@@ -33,8 +33,7 @@ void UsersList::slotClear() {
     removeUsers();
 }
 
-void UsersList::paintEvent(QPaintEvent *)
-{
+void UsersList::paintEvent(QPaintEvent *) {
     QStyleOption opt;
     opt.initFrom(this);
     QPainter p(this);

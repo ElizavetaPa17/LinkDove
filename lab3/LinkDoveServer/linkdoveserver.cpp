@@ -10,6 +10,7 @@
 #include <QDebug>
 
 #include "UserInfo.h"
+#include "channelinfo.h"
 #include "utility.h"
 
 std::mutex connection_mutex;
@@ -154,6 +155,8 @@ void LinkDoveServer::handle_type_request(ConnectionIterator iterator) {
         handle_get_msg_request(iterator);
     } else if (request_type == GET_INTERLOCUTORS_REQUEST) {
         handle_get_interlocutors_request(iterator);
+    } else if (request_type == CREATE_CHANNEL_REQUEST) {
+        handle_channel_create_request(iterator);
     }
 }
 
@@ -390,6 +393,23 @@ void LinkDoveServer::handle_get_interlocutors_request(ConnectionIterator iterato
         answer << END_OF_REQUEST;
     } catch (std::runtime_error &ex) {
         answer << GET_INTERLOCUTORS_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_channel_create_request(ConnectionIterator iterator) {
+    ChannelInfo channel_info;
+    channel_info.deserialize(iterator->in_stream_);
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    if (data_base_.add_channel(channel_info)) {
+        answer << CREATE_CHANNEL_SUCCESS << "\n" << END_OF_REQUEST;
+    } else {
+        answer << CREATE_CHANNEL_FAILED << "\n" << END_OF_REQUEST;
     }
 
     iterator->out_stream_ << answer.str();

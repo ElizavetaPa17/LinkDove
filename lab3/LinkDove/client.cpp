@@ -175,6 +175,25 @@ void Client::async_get_interlocutors() {
     run_context();
 }
 
+void Client::async_create_channel(const std::string &channel_name) {
+    connection_.out_stream_ << CREATE_CHANNEL_REQUEST << "\n";
+    ChannelInfo channel_info;
+    channel_info.name_ = channel_name;
+    channel_info.owner_id_ = status_info_.id_;
+
+    channel_info.serialize(connection_.out_stream_);
+
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    asio::async_write(connection_.socket_, connection_.buffer_,
+                      boost::bind(&Client::handle_async_write,
+                                  shared_from_this(),
+                                  asio::placeholders::error,
+                                  asio::placeholders::bytes_transferred));
+
+    run_context();
+}
+
 StatusInfo Client::get_status_info() {
     return status_info_;
 }
@@ -374,6 +393,12 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
             emit get_interlocutors_result(GET_INTERLOCUTORS_SUCCESS_ANSWER);
         } else if (answer_type == GET_INTERLOCUTORS_FAILED) {
             emit get_interlocutors_result(GET_INTERLOCUTORS_FAILED_ANSWER);
+        } else if (answer_type == CREATE_CHANNEL_SUCCESS) {
+            emit get_create_channel_result(CREATE_CHANNEL_SUCCESS_ANSWER);
+            std::cerr << "Канал успешно создан\n";
+        } else if (answer_type == CREATE_CHANNEL_FAILED) {
+            emit get_create_channel_result(CREATE_CHANNEL_FAILED_ANSWER);
+            std::cerr << "Канал не создан\n";
         } else {
             std::cerr << "что-то невнятное: " << answer_type << '\n';
         }

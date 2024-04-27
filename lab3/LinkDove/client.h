@@ -10,6 +10,7 @@
 #include "IStreamConnection.h"
 #include "logininfo.h"
 #include "UserInfo.h"
+#include "channelinfo.h"
 #include "complaint.h"
 #include "constants.h"
 #include "imessage.h"
@@ -108,6 +109,13 @@ public:
      * @brief async_get_interlocutors
      */
     void async_get_interlocutors();
+
+    /**
+     * <p> Отправляет запрос на создание канала. </p>
+     * @brief async_create_channel
+     * @param channel_name - Название создаваемого канала.
+     */
+    void async_create_channel(const std::string &channel_info);
 
     /**
      * <p> Возвращает информацию о пользователе. </p>
@@ -220,6 +228,13 @@ signals:
      * @param result - Параметр, содержащий результат запроса.
      */
     void get_interlocutors_result(int result);
+
+    /**
+     * <p> Генерирует сигнал после получения результата запроса на создание канала. </p>
+     * @brief get_create_channel_result
+     * @param result - Параметр, содержащий результат запроса.
+     */
+    void get_create_channel_result(int result);
 
 private:
     std::shared_ptr<asio::io_context> io_context_ptr_;

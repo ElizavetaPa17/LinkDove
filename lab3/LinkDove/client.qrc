@@ -16,5 +16,8 @@
     <file alias="search_icon.png">../resources/search_icon.png</file>
     <file alias="media_icon.png">../resources/media_icon.png</file>
     <file alias="send_icon.png">../resources/send_icon.png</file>
+    <file alias="camera_icon.png">../resources/camera_icon.png</file>
+    <file alias="microphone_icon.png">../resources/microphone_icon.png</file>
+    <file alias="add_icon.png">../resources/add_icon.png</file>
 </qresource>
 </RCC>

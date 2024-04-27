@@ -109,6 +109,18 @@ bool LinkDoveSQLDataBase::setup_tables() {
         return false;
     }
 
+    is_ok = query.exec("CREATE TABLE IF NOT EXISTS CHANNELS "
+                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
+                       " owner_id MEDIUMINT NOT NULL, "
+                       " name VARCHAR(64) UNIQUE NOT NULL, "
+                       " is_banned TINYINT DEFAULT 0, "
+                       " FOREIGN KEY (owner_id) REFERENCES USERS(ID) ON DELETE CASCADE); ");
+
+    if (!is_ok) {
+        std::cerr << "Failed to setup CHANNELS table: " << query.lastError().text().toStdString() << '\n';
+        return false;
+    }
+
     return true;
 }
 
@@ -532,6 +544,24 @@ std::vector<StatusInfo> LinkDoveSQLDataBase::get_interlocutors(unsigned long lon
     interlocutors.erase(it, interlocutors.end());
 
     return interlocutors;
+}
+
+bool LinkDoveSQLDataBase::add_channel(const ChannelInfo &channel_info) {
+    QSqlQuery query(data_base_);
+    query.prepare(" INSERT INTO CHANNELS "
+                  " (owner_id, name, is_banned) "
+                  " VALUES (:owner_id, :name, 0); ");
+
+    query.bindValue(":owner_id", channel_info.owner_id_);
+    query.bindValue(":name", channel_info.name_.c_str());
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString();
+
+        return false;
+    } else {
+        // если вставка была успешна, то row affected > 0, иначе row affected == 0 (false).
+        return query.numRowsAffected();
+    }
 }
 
 StatusInfo LinkDoveSQLDataBase::get_status_info(const std::string &username) {

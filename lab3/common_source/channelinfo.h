@@ -1,19 +1,15 @@
-#ifndef STATUSINFO_H
-#define STATUSINFO_H
+#ifndef CHANNELINFO_H
+#define CHANNELINFO_H
 
 #include <string>
-#include <vector>
-#include <QDate>
 
 #include "constants.h"
 
-struct StatusInfo final {
+struct ChannelInfo final {
+public:
     unsigned long long id_ = CREATED_ENTITY_ID;
-    std::string username_;
-    std::string email_;
-    QDate       birthday_;
-    std::string text_status_;
-    std::vector<char> image_bytes_;
+    unsigned long long owner_id_ = CREATED_ENTITY_ID;
+    std::string name_;
     bool is_banned_ = false;
 
     /**
@@ -33,4 +29,4 @@ struct StatusInfo final {
     size_t deserialize(std::istream& is);
 };
 
-#endif // STATUSINFO_H
+#endif // CHANNELINFO_H

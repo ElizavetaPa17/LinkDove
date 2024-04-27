@@ -29,7 +29,7 @@ ChatWidget::~ChatWidget() {
 
 void ChatWidget::slotOpenChatWith(const StatusInfo &status_info) {
     interlocutor_ = status_info;
-    ui->interlocutorLabel->setText(status_info.username_.c_str());
+    ui->infoLabel->setText(status_info.username_.c_str());
 
     slotClear();
     ClientSingleton::get_client()->async_get_ind_messages(interlocutor_.id_);
@@ -142,7 +142,7 @@ void ChatWidget::slotChooseImage() {
 }
 
 void ChatWidget::slotDisplayInterlocutorProfile() {
-    if (!ui->interlocutorLabel->text().isEmpty()) {
+    if (!ui->infoLabel->text().isEmpty()) {
         std::unique_ptr<InterlocutorProfileDialog> dialog_ptr = std::make_unique<InterlocutorProfileDialog>(nullptr, interlocutor_);
         dialog_ptr->exec();
     }
@@ -157,8 +157,8 @@ void ChatWidget::slotClear() {
 void ChatWidget::setupConnection() {
     connect(ui->messageEdit,       &QLineEdit::returnPressed, this, &ChatWidget::slotSendMessage);
     connect(ui->sendButton,        &QPushButton::clicked,     this, &ChatWidget::slotSendMessage);
-    connect(ui->mediaButton,       &QPushButton::clicked,     this, &ChatWidget::slotChooseImage);
-    connect(ui->interlocutorLabel, &ClickableLabel::clicked,  this, &ChatWidget::slotDisplayInterlocutorProfile);
+    connect(ui->cameraButton,       &QPushButton::clicked,     this, &ChatWidget::slotChooseImage);
+    connect(ui->infoLabel, &ClickableLabel::clicked,  this, &ChatWidget::slotDisplayInterlocutorProfile);
 
     connect(ClientSingleton::get_client(), &Client::send_msg_result, this, &ChatWidget::slotHandleSendMessage);
     connect(ClientSingleton::get_client(), &Client::get_ind_msg_result, this, &ChatWidget::slotHandleGetMessages);
