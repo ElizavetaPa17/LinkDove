@@ -16,7 +16,7 @@ class InfoDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit InfoDialog(const std::string &text, QWidget *parent = nullptr);
+    explicit InfoDialog(QWidget *parent, const std::string &text);
     ~InfoDialog();
 
 private:

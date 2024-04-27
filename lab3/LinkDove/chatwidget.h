@@ -61,9 +61,16 @@ private slots:
      */
     void slotChooseImage();
 
+    /**
+     * <p> Отображает профиль собеседника. </p>
+     * @brief slotDisplayInterlocutorProfile
+     */
+    void slotDisplayInterlocutorProfile();
+
 private:
     Ui::ChatWidget    *ui;
-    unsigned long long receiver_id_;
+    StatusInfo interlocutor_;
+
     int                send_msg_type_;  // Тип крайнего отправленного сообщения
     std::string        image_path_;
 

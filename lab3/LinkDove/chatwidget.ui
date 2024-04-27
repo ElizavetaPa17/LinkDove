@@ -108,7 +108,7 @@
         <x>0</x>
         <y>0</y>
         <width>565</width>
-        <height>410</height>
+        <height>411</height>
        </rect>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1">
@@ -165,13 +165,16 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="0">
-    <widget class="QLabel" name="label">
+   <item row="0" column="0" colspan="3">
+    <widget class="ClickableLabel" name="interlocutorLabel">
      <property name="font">
       <font>
        <pointsize>17</pointsize>
        <bold>true</bold>
       </font>
+     </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
      </property>
      <property name="styleSheet">
       <string notr="true">QLabel {
@@ -185,6 +188,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ClickableLabel</class>
+   <extends>QLabel</extends>
+   <header>clickablelabel.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="client.qrc"/>
  </resources>

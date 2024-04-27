@@ -39,6 +39,11 @@ void ProfileWidget::setPrivelegedMode(bool flag) {
     }
 }
 
+void ProfileWidget::disableEditingMode() {
+    ui->editIconLabel->setDisabled(true);
+    ui->editIconLabel->hide();
+}
+
 void ProfileWidget::setupConnection() {
     connect(ui->editIconLabel, &ClickableLabel::clicked, [this]() { emit editProfile(); });
 }

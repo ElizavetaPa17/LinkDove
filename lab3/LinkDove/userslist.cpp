@@ -60,7 +60,7 @@ void UsersList::slotsHandleReturnPress() {
         if (ui->searchEdit->text().toStdString() != ClientSingleton::get_client()->get_status_info().username_) {
             ClientSingleton::get_client()->async_find_user(ui->searchEdit->text().toStdString());
         } else {
-            std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>("Имя пользователя не может совпадать с Вашим.");
+            std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Имя пользователя не может совпадать с Вашим.");
             dialog_ptr->exec();
         }
     }
@@ -70,7 +70,7 @@ void UsersList::slotFindUserResult(int result) {
     removeUsers();
 
     if (result == FIND_USER_FAILED_ANWSER) {
-        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>("Пользователь не найден.");
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Пользователь не найден.");
         dialog_ptr->exec();
     } else {
         StatusInfo status_info = ClientSingleton::get_client()->get_found_user();
@@ -85,7 +85,7 @@ void UsersList::slotGetInterlocutorsResult(int result) {
             addUser(interlocutors[i]);
         }
     } else {
-        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>("Ошибка получения сообщений.");
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Ошибка получения сообщений.");
         dialog_ptr->exec();
     }
 }

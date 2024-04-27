@@ -1,7 +1,7 @@
 #include "infodialog.h"
 #include "ui_infodialog.h"
 
-InfoDialog::InfoDialog(const std::string& text, QWidget *parent) :
+InfoDialog::InfoDialog(QWidget *parent, const std::string& text) :
     QDialog(parent),
     ui(new Ui::InfoDialog)
 {

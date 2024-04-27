@@ -39,7 +39,7 @@ void EditProfileWidget::slotEditFinished() {
     if (ui->usernameEdit->text().isEmpty() ||
         ui->emailEdit->text().isEmpty())
     {
-        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>("Поле имени и почты не должны быть пустыми.");
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Поле имени и почты не должны быть пустыми.");
         dialog_ptr->exec();
         return;
     }

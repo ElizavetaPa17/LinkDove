@@ -60,7 +60,7 @@ void ComplaintsListDialog::slotDeleteComplaintResult(int result) {
         text = "Ошибка удаления жалобы. Попытайтесь снова.";
     }
 
-    std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(text);
+    std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, text);
     dialog_ptr->exec();
 }
 

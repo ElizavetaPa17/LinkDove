@@ -388,8 +388,6 @@ void LinkDoveServer::handle_get_interlocutors_request(ConnectionIterator iterato
         answer << GET_INTERLOCUTORS_SUCCESS << "\n";
         UtilitySerializator::serialize(answer, interlocutors);
         answer << END_OF_REQUEST;
-
-        std::cerr << interlocutors.size() << '\n';
     } catch (std::runtime_error &ex) {
         answer << GET_INTERLOCUTORS_FAILED << "\n" << END_OF_REQUEST;
     }

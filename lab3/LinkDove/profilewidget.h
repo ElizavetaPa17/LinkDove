@@ -10,7 +10,7 @@ class ProfileWidget;
 }
 
 /**
- * Виджет-страница, которая отображает профиль пользователя.
+ * Виджет-страница, которая отображает профиль текущего пользователя или его собеседника.
  * @brief The ProfileWidget class
  */
 class ProfileWidget : public QWidget
@@ -40,6 +40,12 @@ public:
      * @param flag - Если flag = true, то режим привилегированный, иначе - обычный.
      */
     void setPrivelegedMode(bool flag);
+
+    /**
+     * <p> Выключает режим редактирования. Полезно при отображении профиля собеседника в классе InterlocutorProfileDialog. </p>
+     * @brief disableEditingMode
+     */
+    void disableEditingMode();
 
 signals:
     /**

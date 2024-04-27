@@ -56,7 +56,7 @@ void SettingWidget::slotComplaintResult(int complaint_result) {
         text = "Ошибка отправки. Повторите попытку позже.";
     }
 
-    std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(text);
+    std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, text);
     dialog_ptr->exec();
 }
 
@@ -69,7 +69,7 @@ void SettingWidget::slotDisplayComplaintDialog() {
 
 void SettingWidget::slotDisplayComplaintList(int get_complaints_result) {
     if (get_complaints_result == GET_COMPLAINTS_FAILED_ANSWER) {
-        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>("Ошибка получения списка жалоб. Попытайтесь позже.");
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Ошибка получения списка жалоб. Попытайтесь позже.");
         dialog_ptr->exec();
         return;
     }
@@ -85,7 +85,7 @@ void SettingWidget::slotDisplayComplaintList(int get_complaints_result) {
 }
 
 void SettingWidget::slotDisplayAboutDialog() {
-    std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(APPLICATION_DESCRIPTION);
+    std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, APPLICATION_DESCRIPTION);
     dialog_ptr->exec();
 }
 

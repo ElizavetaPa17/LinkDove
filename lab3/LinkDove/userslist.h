@@ -18,6 +18,19 @@ public:
     explicit UsersList(QWidget *parent = nullptr);
     ~UsersList();
 
+    /**
+     * <p> Добавляет информацию о пользователе в список. </p>
+     * @brief addUser
+     * @param status_info - Структура, содержащая информацию о пользователе.
+     */
+    void addUser(const StatusInfo &status_info);
+
+    /**
+     * <p> Удаляет всех пользователей из списка. </p>
+     * @brief removeUsers
+     */
+    void removeUsers();
+
 signals:
     /**
      * <p> Сигнал, который генерируется при нажатии на виджет результата поиска пользователя. </p.
@@ -37,19 +50,6 @@ protected:
     // Переопределяем метод отрисовки, т.к. иначе с виджетом
     // не работают css-таблицы (проблема самого  Qt)
     void paintEvent(QPaintEvent *);
-
-    /**
-     * <p> Добавляет информацию о пользователе в список. </p>
-     * @brief addUser
-     * @param status_info - Структура, содержащая информацию о пользователе.
-     */
-    void addUser(const StatusInfo &status_info);
-
-    /**
-     * <p> Удаляет всех пользователей из списка. </p>
-     * @brief removeUsers
-     */
-    void removeUsers();
 
 private slots:
     /**

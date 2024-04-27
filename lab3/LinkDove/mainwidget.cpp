@@ -41,6 +41,7 @@ void MainWidget::slotRedirectClick(QWidget *sender) {
         ui->stackedWidget->setCurrentIndex(CHAT_PAGE);
 
         if (ui->tabWidget->currentIndex() == 0) { // FIX MAGIC INT
+            ui->usersList->removeUsers();
             ClientSingleton::get_client()->async_get_interlocutors();
         }
 
@@ -84,7 +85,7 @@ void MainWidget::slotUpdateUserResult(int update_result) {
         text = "Ошибка обновления профиля. Проверьте корректность введенных данных и попытайтесь позже. ";
     }
 
-    std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(text);
+    std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, text);
     dialog_ptr->exec();
 
     ui->profileStackedWidget->setCurrentIndex(SIMPLE_PROFILE_PAGE);
