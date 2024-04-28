@@ -129,6 +129,15 @@ public:
     ChannelInfo get_channel(const std::string &channel_name);
 
     /**
+     * <p> Добавляет пользователя в канал. </p>
+     * @brief add_participant_to_channel
+     * @param participant_id - Идентификатор добавляемого пользователя.
+     * @param channel_id - Идентификатор канала, в который добавляется пользователь.
+     * @return -  В случае успеха возвращает true, иначе - false.
+     */
+    bool add_participant_to_channel(unsigned long long participant_id, unsigned long long channel_id);
+
+    /**
      * <p> Возвращает информацию о пользователе, который соответствует никнейму. </p>
      * @brief get_user
      * @param username - Никнейм пользователя

@@ -124,6 +124,7 @@ public:
      */
     void async_find_channel(const std::string &channel_name);
 
+
     /**
      * <p> Возвращает информацию о пользователе. </p>
      * @brief get_status_info

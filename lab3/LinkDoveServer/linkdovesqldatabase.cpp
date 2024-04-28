@@ -121,6 +121,18 @@ bool LinkDoveSQLDataBase::setup_tables() {
         return false;
     }
 
+    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS CHANNEL_PARTICIPANTS "
+                       " (ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
+                       " channel_id BIGINT NOT NULL, "
+                       " participant_id MEDIUMINT NOT NULL, "
+                       " FOREIGN KEY (channel_id) REFERENCES CHANNELS(ID) ON DELETE CASCADE, "
+                       " FOREIGN KEY (participant_id) REFERENCES USERS(ID) ON DELETE CASCADE); ");
+
+    if (!is_ok) {
+        std::cerr << "Failed to setup CHANNEL_PARTICIPANTS table: " << query.lastError().text().toStdString() << '\n';
+        return false;
+    }
+
     return true;
 }
 
@@ -554,13 +566,36 @@ bool LinkDoveSQLDataBase::add_channel(const ChannelInfo &channel_info) {
 
     query.bindValue(":owner_id", channel_info.owner_id_);
     query.bindValue(":name", channel_info.name_.c_str());
-    if (!query.exec()) {
-        std::cerr << query.lastError().text().toStdString();
-
-        return false;
+    if (data_base_.transaction()) {
+        if (!query.exec()) {
+            std::cerr << query.lastError().text().toStdString();
+            return false;
+        } else {
+            // если вставка была успешна, то row affected > 0, иначе row affected == 0 (false).
+            if (query.numRowsAffected()) {
+                try {
+                    ChannelInfo updated_channel_info = get_channel(channel_info.name_);
+                    if (add_participant_to_channel(updated_channel_info.owner_id_, updated_channel_info.id_)) {
+                        if (!data_base_.commit()) {
+                            std::cerr << "Failed to commit\n";
+                            return false;
+                        } else {
+                            return true;
+                        }
+                    } else {
+                        return false;
+                    }
+                } catch (std::runtime_error &ex) {
+                    std::cerr << ex.what() << '\n';
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
     } else {
-        // если вставка была успешна, то row affected > 0, иначе row affected == 0 (false).
-        return query.numRowsAffected();
+        std::cerr << "Failed to start transaction\n";
+        return false;
     }
 }
 
@@ -578,6 +613,24 @@ ChannelInfo LinkDoveSQLDataBase::get_channel(const std::string &channel_name) {
         } else {
             return link_dove_database_details__::retrieve_channel_info(query);
         }
+    }
+}
+
+bool LinkDoveSQLDataBase::add_participant_to_channel(unsigned long long participant_id, unsigned long long channel_id) {
+    QSqlQuery query(data_base_);
+    query.prepare(" INSERT INTO CHANNEL_PARTICIPANTS "
+                  " (channel_id, participant_id) "
+                  " VALUES (:channel_id, :participant_id); ");
+
+    query.bindValue(":channel_id", channel_id);
+    query.bindValue(":participant_id", participant_id);
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString();
+        return false;
+    } else {
+        // если вставка была успешна, то row affected > 0, иначе row affected == 0 (false).
+        return query.numRowsAffected();
     }
 }
 
