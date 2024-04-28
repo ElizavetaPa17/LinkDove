@@ -208,6 +208,21 @@ void Client::async_find_channel(const std::string &channel_name) {
     run_context();
 }
 
+void Client::async_get_channels() {
+    connection_.out_stream_ << GET_CHANNELS_REQUEST << "\n";
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, status_info_.id_);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+
+    asio::async_write(connection_.socket_, connection_.buffer_,
+                       boost::bind(&Client::handle_async_write,
+                                   shared_from_this(),
+                                   asio::placeholders::error,
+                                   asio::placeholders::bytes_transferred));
+
+     run_context();
+}
+
 StatusInfo Client::get_status_info() {
     return status_info_;
 }
@@ -230,6 +245,10 @@ std::vector<StatusInfo> Client::get_interlocutors() {
 
 ChannelInfo Client::get_found_channel() {
     return found_channel_info_;
+}
+
+std::vector<ChannelInfo> Client::get_channels() {
+    return channels_;
 }
 
 bool Client::is_connected() noexcept {
@@ -420,6 +439,11 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
             found_channel_info_.deserialize(connection_.in_stream_);
         } else if (answer_type == FIND_CHANNEL_FAILED){
             emit find_channel_result(FIND_CHANNEL_FAILED_ANSWER);
+        } else if (answer_type == GET_CHANNELS_SUCCESS) {
+            emit get_channels_result(GET_CHANNELS_SUCCESS_ANSWER);
+            channels_ = UtilitySerializator::deserialize_ch_info_vec(connection_.in_stream_).second;
+        } else if (answer_type == GET_CHANNELS_FAILED) {
+            emit get_channels_result(GET_CHANNELS_FAILED_ANSWER);
         } else {
             std::cerr << "что-то невнятное: " << answer_type << '\n';
         }

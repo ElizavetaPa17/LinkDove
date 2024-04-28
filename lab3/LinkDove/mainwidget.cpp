@@ -41,8 +41,9 @@ void MainWidget::slotRedirectClick(QWidget *sender) {
         ui->stackedWidget->setCurrentIndex(CHAT_PAGE);
 
         if (ui->tabWidget->currentIndex() == 0) { // FIX MAGIC INT
-            ui->usersList->removeUsers();
             ClientSingleton::get_client()->async_get_interlocutors();
+        } else if (ui->tabWidget->currentIndex() == 2) { // FIX MAGIN INT
+            ClientSingleton::get_client()->async_get_channels();
         }
 
     } else if (sender == ui->settingLabel) {

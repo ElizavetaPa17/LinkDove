@@ -195,6 +195,13 @@ private:
      */
     void handle_find_channel_request(ConnectionIterator iterator);
 
+    /**
+     * <p> Обрабатывает запрос на получение каналов, в которых состоит пользователь. </p>
+     * @brief handle_get_channels_request
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_get_channels_request(ConnectionIterator iterator);
+
     /** <p> Запускает в отдельном потоке контекст для обработки асинхронных функций. </p>
      * @brief run_context
      */

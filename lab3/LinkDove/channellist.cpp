@@ -63,6 +63,20 @@ void ChannelList::slotFindChannelResult(int result) {
     }
 }
 
+void ChannelList::slotGetChannelsResult(int result) {
+    removeChannels();
+
+    if (result == GET_CHANNELS_SUCCESS_ANSWER) {
+        std::vector<ChannelInfo> channels = ClientSingleton::get_client()->get_channels();
+        for (int i = 0; i < channels.size(); ++i) {
+            addChannel(channels[i]);
+        }
+    } else {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Ошибка получения каналов.");
+        dialog_ptr->exec();
+    }
+}
+
 void ChannelList::slotHandleChannelCardClicked(const ChannelInfo &channel_info) {
 
 }
@@ -78,6 +92,7 @@ void ChannelList::slotCreateChannelResult(int result) {
     std::string text;
     if (result == CREATE_CHANNEL_SUCCESS_ANSWER) {
         text = "Канал успешно создан.";
+        ClientSingleton::get_client()->async_get_channels();
     } else {
         text = "Ошибка создания канала. Попытайтесь позже.";
     }
@@ -98,4 +113,5 @@ void ChannelList::setupConnection() {
     connect(ui->createChannelButton, &QPushButton::clicked, this, &ChannelList::slotCreateChannel);
     connect(ClientSingleton::get_client(), &Client::get_create_channel_result, this, &ChannelList::slotCreateChannelResult);
     connect(ClientSingleton::get_client(), &Client::find_channel_result, this, &ChannelList::slotFindChannelResult);
+    connect(ClientSingleton::get_client(), &Client::get_channels_result, this, &ChannelList::slotGetChannelsResult);
 }

@@ -124,6 +124,11 @@ public:
      */
     void async_find_channel(const std::string &channel_name);
 
+    /**
+     * <p> Отправляет запрос на получение информации о всех каналах, в которых состоит пользователь. </p>
+     * @brief async_get_channels
+     */
+    void async_get_channels();
 
     /**
      * <p> Возвращает информацию о пользователе. </p>
@@ -149,14 +154,14 @@ public:
     /**
      * <p> Возвращает вектор сообщений. Вызывается после запроса на получение списка жалоб. </p>
      * @brief get_messages
-     * @return - Список сообщений.
+     * @return - Вектор сообщений.
      */
     std::vector<std::shared_ptr<IMessage>> get_messages();
 
     /**
-     * <p> Возвращает вектор собеседников текущего пользователя. Вызывается после щапроса на получение этих собеседников. </p>
+     * <p> Возвращает вектор собеседников текущего пользователя. Вызывается после запроса на получение этих собеседников. </p>
      * @brief get_interlocutors
-     * @return - Список сообщений текущего пользователя.
+     * @return - Вектор собеседников текущего пользователя.
      */
     std::vector<StatusInfo> get_interlocutors();
 
@@ -166,6 +171,13 @@ public:
      * @return - Структура, содержащая информацию о найденном канале.
      */
     ChannelInfo get_found_channel();
+
+    /**
+     * <p> Возвращает вектор каналов, в которых состоит текущий пользователь. Вызывается после запроса на получение этих каналов. </p>
+     * @brief get_channels
+     * @return - Вектор каналов, в которых состоит текущий пользователь.
+     */
+    std::vector<ChannelInfo> get_channels();
 
     /**
      * <p> Определяет, установил ли клиент соединение с сервером. </p>
@@ -258,6 +270,13 @@ signals:
      */
     void find_channel_result(int result);
 
+    /**
+     * <p> Генерирует сигнал после получения результата запроса информации о каналах, в которых состоит текущий пользователь. </p>
+     * @brief get_channels_result
+     * @param result - Параметр, содержащий результат запроса.
+     */
+    void get_channels_result(int result);
+
 private:
     std::shared_ptr<asio::io_context> io_context_ptr_;
     IStreamConnection<tcp> connection_;
@@ -268,9 +287,11 @@ private:
     StatusInfo updated_status_info_;
     StatusInfo found_status_info_;
     ChannelInfo found_channel_info_;
+
     std::vector<Complaint> complaints_;
     std::vector<std::shared_ptr<IMessage>> messages_;
     std::vector<StatusInfo> status_info_vec_;
+    std::vector<ChannelInfo> channels_;
 
     void create_account() {}
 

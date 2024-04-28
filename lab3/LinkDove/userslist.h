@@ -1,4 +1,4 @@
-#ifndef USERSLIST_H
+ #ifndef USERSLIST_H
 #define USERSLIST_H
 
 #include <QWidget>

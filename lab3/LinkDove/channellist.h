@@ -58,6 +58,13 @@ private slots:
     void slotFindChannelResult(int result);
 
     /**
+     * <p> Слот, принимающий от клиента результат получения информации о каналах, в которых состоит текущий пользователь. </p>
+     * @brief slotGetChannelsResult
+     * @param result - Результат получения информации о таких каналах.
+     */
+    void slotGetChannelsResult(int result);
+
+    /**
      * <p> Слот, принимающий события нажатия на виджет результата поиска канала. </p>
      * @brief slotHandleChannelCardClicked
      * @param channel_info
@@ -84,6 +91,7 @@ protected:
 
 private:
     Ui::ChannelList *ui;
+    ChannelInfo created_channel_info_;
 
     /**
      * <p> Настраивает соединения с классом. </p>

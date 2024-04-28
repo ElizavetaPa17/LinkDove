@@ -108,7 +108,7 @@ public:
      * <p> Возвращает информацию о собеседниках пользователя. </p>
      * @brief get_interlocutors
      * @param id - Идентификатор пользователя, информация о собеседниках которого извлекается.
-     * @return - Вектор из структур, содержащих информацию по собеседниках.
+     * @return - Вектор из структур, содержащих информацию о собеседниках.
      */
     std::vector<StatusInfo> get_interlocutors(unsigned long long id);
 
@@ -121,12 +121,28 @@ public:
     bool add_channel(const ChannelInfo &channel_info);
 
     /**
+     * <p> Возвращает информацию о каналах, в которых состоит пользователь. </p>
+     * @brief get_channels
+     * @param id - Идентификатор пользователя, информация о каналах которого извлекается.
+     * @return  - Вектор из структур, содержащих информацию о каналах.
+     */
+    std::vector<ChannelInfo> get_channels(unsigned long long id);
+
+    /**
      * <p> Возвращает информацию о канале, который соответствует заданному названию. </p>
      * @brief get_channel
      * @param channel_name - Название канала.
      * @return  - Структура, содержащая информацию о канале.
      */
     ChannelInfo get_channel(const std::string &channel_name);
+
+    /**
+     * <p> Возвращает информацию о канале, который соответствует заданному идентификатору. </p>
+     * @brief get_channel
+     * @param channel_id - Идентификатор канала.
+     * @return - Структура, содержащая информацию о канале.
+     */
+    ChannelInfo get_channel(unsigned long long channel_id);
 
     /**
      * <p> Добавляет пользователя в канал. </p>

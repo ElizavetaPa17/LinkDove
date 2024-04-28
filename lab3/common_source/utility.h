@@ -11,6 +11,7 @@
 #include "complaint.h"
 #include "imessage.h"
 #include "StatusInfo.h"
+#include "channelinfo.h"
 
 #include "individualmessage.h"
 #include "textmessagecontent.h"
@@ -123,9 +124,26 @@ public:
      * <p> Десериализует вектор структур с информацией о пользователях из потока. </p>
      * @brief deserialize_st_info_vec
      * @param is - Поток, из которого осуществляется десериализация
-     * @return - Пара - <размер десериализованных данных, вектор структур с информацией о пользователях.
+     * @return - Пара - <размер десериализованных данных, вектор структур с информацией о пользователях>.
      */
     static std::pair<size_t, std::vector<StatusInfo>> deserialize_st_info_vec(std::istream& is);
+
+    /**
+     * <p> Сериализует вектор из структур с информацией о каналах. </p>
+     * @brief serialize
+     * @param os - Поток, в который осуществляется сериализация.
+     * @param value - Сериализуемый вектор структур.
+     * @return  - Размер сериализованных данных.
+     */
+    static size_t serialize(std::ostream &os, const std::vector<ChannelInfo> &value);
+
+    /**
+     * <p> Десериализует вектор структур с информацией о каналах из потока. </p>
+     * @brief deserialize_ch_info_vec
+     * @param is - Поток, из которого осуществляется десериализация
+     * @return - Пара - <размер десериализованных данных, вектор структур с информацией о каналах>.
+     */
+    static std::pair<size_t, std::vector<ChannelInfo>> deserialize_ch_info_vec(std::istream& is);
 
     /**
      * <p> Сериализует фундаментальное значение в поток. </p>

@@ -599,12 +599,49 @@ bool LinkDoveSQLDataBase::add_channel(const ChannelInfo &channel_info) {
     }
 }
 
+std::vector<ChannelInfo> LinkDoveSQLDataBase::get_channels(unsigned long long id) {
+    QSqlQuery query(data_base_);
+    query.prepare(" SELECT * FROM CHANNEL_PARTICIPANTS "
+                  " WHERE participant_id=:id; ");
+
+    query.bindValue(":id", id);
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString() << '\n';
+        throw std::runtime_error("get_interlocutors: cannot get info user interlocutors from theirs messages.\n");
+    }
+
+    std::vector<ChannelInfo> channels;
+    while (query.next()) {
+        channels.push_back(get_channel(query.value("channel_id").toULongLong()));
+    }
+
+    return channels;
+}
+
 ChannelInfo LinkDoveSQLDataBase::get_channel(const std::string &channel_name) {
     QSqlQuery query(data_base_);
     query.prepare(" SELECT * FROM CHANNELS "
                   " WHERE name=:name; ");
 
     query.bindValue(":name", channel_name.c_str());
+    if (!query.exec()) {
+        throw std::runtime_error(query.lastError().text().toStdString());
+    } else {
+        if (!query.next()) {
+            throw std::runtime_error("No such object in DataBase");
+        } else {
+            return link_dove_database_details__::retrieve_channel_info(query);
+        }
+    }
+}
+
+ChannelInfo LinkDoveSQLDataBase::get_channel(unsigned long long channel_id) {
+    QSqlQuery query(data_base_);
+    query.prepare(" SELECT * FROM CHANNELS "
+                  " WHERE ID=:id; ");
+
+    query.bindValue(":id", channel_id);
     if (!query.exec()) {
         throw std::runtime_error(query.lastError().text().toStdString());
     } else {
