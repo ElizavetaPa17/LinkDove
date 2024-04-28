@@ -118,6 +118,13 @@ public:
     void async_create_channel(const std::string &channel_info);
 
     /**
+     * <p> Отправляет запрос на получение информации о канале с названием channel_name. </p>
+     * @brief async_find_channel
+     * @param channel_name - Название канала.
+     */
+    void async_find_channel(const std::string &channel_name);
+
+    /**
      * <p> Возвращает информацию о пользователе. </p>
      * @brief get_status_info
      * @return - Структура, содержащая информацию о пользователе.
@@ -151,6 +158,13 @@ public:
      * @return - Список сообщений текущего пользователя.
      */
     std::vector<StatusInfo> get_interlocutors();
+
+    /**
+     * <p> Возвращает информацию о найденном канале. Вызывает после запроса на поиск канала. </p>
+     * @brief get_found_channel
+     * @return - Структура, содержащая информацию о найденном канале.
+     */
+    ChannelInfo get_found_channel();
 
     /**
      * <p> Определяет, установил ли клиент соединение с сервером. </p>
@@ -236,6 +250,13 @@ signals:
      */
     void get_create_channel_result(int result);
 
+    /**
+     * <p> Генерирует сигнал после получения результата запроса на поиск информации о пользователе. </p>
+     * @brief find_channel_result
+     * @param result - Параметр, содержащий результат запроса.
+     */
+    void find_channel_result(int result);
+
 private:
     std::shared_ptr<asio::io_context> io_context_ptr_;
     IStreamConnection<tcp> connection_;
@@ -245,6 +266,7 @@ private:
     StatusInfo status_info_;
     StatusInfo updated_status_info_;
     StatusInfo found_status_info_;
+    ChannelInfo found_channel_info_;
     std::vector<Complaint> complaints_;
     std::vector<std::shared_ptr<IMessage>> messages_;
     std::vector<StatusInfo> status_info_vec_;

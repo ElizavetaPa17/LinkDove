@@ -194,6 +194,20 @@ void Client::async_create_channel(const std::string &channel_name) {
     run_context();
 }
 
+void Client::async_find_channel(const std::string &channel_name) {
+    connection_.out_stream_ << FIND_CHANNEL_REQUEST << "\n";
+    UtilitySerializator::serialize(connection_.out_stream_, channel_name);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    asio::async_write(connection_.socket_, connection_.buffer_,
+                      boost::bind(&Client::handle_async_write,
+                                  shared_from_this(),
+                                  asio::placeholders::error,
+                                  asio::placeholders::bytes_transferred));
+
+    run_context();
+}
+
 StatusInfo Client::get_status_info() {
     return status_info_;
 }
@@ -212,6 +226,10 @@ std::vector<std::shared_ptr<IMessage>> Client::get_messages() {
 
 std::vector<StatusInfo> Client::get_interlocutors() {
     return status_info_vec_;
+}
+
+ChannelInfo Client::get_found_channel() {
+    return found_channel_info_;
 }
 
 bool Client::is_connected() noexcept {
@@ -395,10 +413,13 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
             emit get_interlocutors_result(GET_INTERLOCUTORS_FAILED_ANSWER);
         } else if (answer_type == CREATE_CHANNEL_SUCCESS) {
             emit get_create_channel_result(CREATE_CHANNEL_SUCCESS_ANSWER);
-            std::cerr << "Канал успешно создан\n";
         } else if (answer_type == CREATE_CHANNEL_FAILED) {
             emit get_create_channel_result(CREATE_CHANNEL_FAILED_ANSWER);
-            std::cerr << "Канал не создан\n";
+        } else if (answer_type == FIND_CHANNEL_SUCCESS) {
+            emit find_channel_result(FIND_CHANNEL_SUCCESS_ANSWER);
+            found_channel_info_.deserialize(connection_.in_stream_);
+        } else if (answer_type == FIND_CHANNEL_FAILED){
+            emit find_channel_result(FIND_CHANNEL_FAILED_ANSWER);
         } else {
             std::cerr << "что-то невнятное: " << answer_type << '\n';
         }

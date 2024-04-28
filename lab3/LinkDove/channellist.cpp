@@ -7,6 +7,7 @@
 #include "channelcard.h"
 #include "createchanneldialog.h"
 #include "clientsingleton.h"
+#include "infodialog.h"
 #include "utility.h"
 
 ChannelList::ChannelList(QWidget *parent) :
@@ -47,24 +48,19 @@ void ChannelList::slotsHandleReturnPress() {
     if (ui->searchEdit->text().isEmpty()) {
         // search for all the channels
     } else {
-       /* if (ui->searchEdit->text().toStdString() != ClientSingleton::get_client()->get_status_info().username_) {
-            ClientSingleton::get_client()->async_find_user(ui->searchEdit->text().toStdString());
-        } else {
-            std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Имя пользователя не может совпадать с Вашим.");
-            dialog_ptr->exec();
-        }*/
+        ClientSingleton::get_client()->async_find_channel(ui->searchEdit->text().toStdString());
     }
 }
 
 void ChannelList::slotFindChannelResult(int result) {
     removeChannels();
-    /*    if (result == FIND_USER_FAILED_ANWSER) {
-        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Пользователь не найден.");
+    if (result == FIND_CHANNEL_FAILED_ANSWER) {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Канал не найден.");
         dialog_ptr->exec();
     } else {
-        StatusInfo status_info = ClientSingleton::get_client()->get_found_user();
-        addUser(status_info);
-    }*/
+        ChannelInfo channel_info = ClientSingleton::get_client()->get_found_channel();
+        addChannel(channel_info);
+    }
 }
 
 void ChannelList::slotHandleChannelCardClicked(const ChannelInfo &channel_info) {
@@ -78,6 +74,18 @@ void ChannelList::slotCreateChannel() {
     }
 }
 
+void ChannelList::slotCreateChannelResult(int result) {
+    std::string text;
+    if (result == CREATE_CHANNEL_SUCCESS_ANSWER) {
+        text = "Канал успешно создан.";
+    } else {
+        text = "Ошибка создания канала. Попытайтесь позже.";
+    }
+
+    std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, text);
+    dialog_ptr->exec();
+}
+
 void ChannelList::paintEvent(QPaintEvent *) {
     QStyleOption opt;
     opt.initFrom(this);
@@ -88,4 +96,6 @@ void ChannelList::paintEvent(QPaintEvent *) {
 void ChannelList::setupConnection() {
     connect(ui->searchEdit, &QLineEdit::returnPressed, this, &ChannelList::slotsHandleReturnPress);
     connect(ui->createChannelButton, &QPushButton::clicked, this, &ChannelList::slotCreateChannel);
+    connect(ClientSingleton::get_client(), &Client::get_create_channel_result, this, &ChannelList::slotCreateChannelResult);
+    connect(ClientSingleton::get_client(), &Client::find_channel_result, this, &ChannelList::slotFindChannelResult);
 }

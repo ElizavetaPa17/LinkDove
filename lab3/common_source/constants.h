@@ -56,6 +56,9 @@ enum ResponseTypes {
 
     CREATE_CHANNEL_SUCCESS_ANSWER,
     CREATE_CHANNEL_FAILED_ANSWER,
+
+    FIND_CHANNEL_SUCCESS_ANSWER,
+    FIND_CHANNEL_FAILED_ANSWER,
 };
 
 enum MessageType {
@@ -201,3 +204,10 @@ extern const char *CREATE_CHANNEL_REQUEST;
 extern const char *CREATE_CHANNEL_SUCCESS;
 // Ответ сервера на неудачное создание канала
 extern const char *CREATE_CHANNEL_FAILED;
+
+// Запрос на поиск информации о канале
+extern const char *FIND_CHANNEL_REQUEST;
+// Ответ сервера на успешный поиск информации о канале
+extern const char *FIND_CHANNEL_SUCCESS;
+// Ответ сервера на неудачный поиск информации о канале
+extern const char *FIND_CHANNEL_FAILED;

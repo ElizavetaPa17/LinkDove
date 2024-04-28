@@ -51,7 +51,7 @@ private slots:
     void slotsHandleReturnPress();
 
     /**
-     * <p> Слот, принимающий от клиента результата поиска данных о канале. </p>
+     * <p> Слот, принимающий от клиента результат поиска данных о канале. </p>
      * @brief slotDisplayFindChannelResult
      * @param result - Результат поиска данных о канале.
      */
@@ -69,6 +69,13 @@ private slots:
      * @brief slotCreateChannel
      */
     void slotCreateChannel();
+
+    /**
+     * <p> Слот, принимающий от клиента результат создания канала. </p>
+     * @brief slotCreateChannelResult
+     * @param result - Результат создания канала.
+     */
+    void slotCreateChannelResult(int result);
 
 protected:
     // Переопределяем метод отрисовки, т.к. иначе с виджетом

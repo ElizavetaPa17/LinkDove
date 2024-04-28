@@ -157,6 +157,8 @@ void LinkDoveServer::handle_type_request(ConnectionIterator iterator) {
         handle_get_interlocutors_request(iterator);
     } else if (request_type == CREATE_CHANNEL_REQUEST) {
         handle_channel_create_request(iterator);
+    } else if (request_type == FIND_CHANNEL_REQUEST) {
+        handle_find_channel_request(iterator);
     }
 }
 
@@ -410,6 +412,28 @@ void LinkDoveServer::handle_channel_create_request(ConnectionIterator iterator) 
         answer << CREATE_CHANNEL_SUCCESS << "\n" << END_OF_REQUEST;
     } else {
         answer << CREATE_CHANNEL_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_find_channel_request(ConnectionIterator iterator) {
+    std::string channel_name = UtilitySerializator::deserialize_string(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    try {
+        ChannelInfo channel_info;
+        channel_info = data_base_.get_channel(channel_name);
+
+        answer << FIND_CHANNEL_SUCCESS << "\n";
+        channel_info.serialize(answer);
+        answer << END_OF_REQUEST;
+    } catch (std::runtime_error& ex) {
+        std::cerr << ex.what() << '\n';
+        answer << FIND_CHANNEL_FAILED << "\n" << END_OF_REQUEST;
     }
 
     iterator->out_stream_ << answer.str();

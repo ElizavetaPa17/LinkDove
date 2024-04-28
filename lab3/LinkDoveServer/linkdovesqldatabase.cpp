@@ -564,6 +564,23 @@ bool LinkDoveSQLDataBase::add_channel(const ChannelInfo &channel_info) {
     }
 }
 
+ChannelInfo LinkDoveSQLDataBase::get_channel(const std::string &channel_name) {
+    QSqlQuery query(data_base_);
+    query.prepare(" SELECT * FROM CHANNELS "
+                  " WHERE name=:name; ");
+
+    query.bindValue(":name", channel_name.c_str());
+    if (!query.exec()) {
+        throw std::runtime_error(query.lastError().text().toStdString());
+    } else {
+        if (!query.next()) {
+            throw std::runtime_error("No such object in DataBase");
+        } else {
+            return link_dove_database_details__::retrieve_channel_info(query);
+        }
+    }
+}
+
 StatusInfo LinkDoveSQLDataBase::get_status_info(const std::string &username) {
     QSqlQuery query(data_base_);
     query.prepare("SELECT * FROM USERS "
@@ -603,6 +620,16 @@ StatusInfo LinkDoveSQLDataBase::get_status_info(unsigned long long id) {
 }
 
 namespace link_dove_database_details__ {
+    ChannelInfo retrieve_channel_info(const QSqlQuery& query) {
+        ChannelInfo channel_info;
+        channel_info.id_        = query.value("ID").toULongLong();
+        channel_info.owner_id_  = query.value("owner_id").toULongLong();
+        channel_info.name_      = query.value("name").toString().toStdString();
+        channel_info.is_banned_ = query.value("is_banned").toBool();
+
+        return channel_info;
+    }
+
     StatusInfo retrieve_status_info(const QSqlQuery& query) {
         StatusInfo status_info;
         status_info.id_          = query.value("ID").toULongLong();

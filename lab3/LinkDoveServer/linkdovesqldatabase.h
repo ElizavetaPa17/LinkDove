@@ -121,6 +121,14 @@ public:
     bool add_channel(const ChannelInfo &channel_info);
 
     /**
+     * <p> Возвращает информацию о канале, который соответствует заданному названию. </p>
+     * @brief get_channel
+     * @param channel_name - Название канала.
+     * @return  - Структура, содержащая информацию о канале.
+     */
+    ChannelInfo get_channel(const std::string &channel_name);
+
+    /**
      * <p> Возвращает информацию о пользователе, который соответствует никнейму. </p>
      * @brief get_user
      * @param username - Никнейм пользователя
@@ -155,10 +163,17 @@ private:
 };
 
 namespace link_dove_database_details__ {
+    /**
+     * <p> Извлекает данные о группе, которые возвращает объект query. </p>
+     * @brief retrieve_channel_info
+     * @param query - Запрос, содержащий данные о пользователе.
+     * @return - Структура. содержащая данные о канале.
+     */
+    ChannelInfo retrieve_channel_info(const QSqlQuery& query);
 
     /**
      * <p> Извлекает данные о пользователе, которые возвращает объект query. </p>
-     * @brief LinkDoveSQLDataBase::retrieve_status_info
+     * @brief retrieve_status_info
      * @param query - Запрос, содержащий данные о пользователе.
      * @return - Структура. содержащая данные о пользователе.
      */
