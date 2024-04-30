@@ -255,6 +255,10 @@ void QtUtility::clean_layout(QLayout *layout) {
     QLayoutItem *widget_item = nullptr;
 
     while ((widget_item = layout->takeAt(0)) != nullptr) {
+        if (widget_item->widget()) {
+            widget_item->widget()->deleteLater();
+        }
+
         delete widget_item;
     }
 }

@@ -223,6 +223,37 @@ void Client::async_get_channels() {
      run_context();
 }
 
+// ПОВТОРЕНИЕ КОДА С ФУНКЦИЕЙ НИЖЕ
+void Client::async_is_channel_participant_request(unsigned long long channel_id) {
+    connection_.out_stream_ << IS_CHANNEL_PARTICIPANT_REQUEST << "\n";
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, status_info_.id_);
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, channel_id);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    asio::async_write(connection_.socket_, connection_.buffer_,
+                       boost::bind(&Client::handle_async_write,
+                                   shared_from_this(),
+                                   asio::placeholders::error,
+                                   asio::placeholders::bytes_transferred));
+
+     run_context();
+}
+
+void Client::async_add_channel_participant_request(unsigned long long channel_id) {
+    connection_.out_stream_ << ADD_PARTICIPANT_TO_CHANNEL_REQUEST << "\n";
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, status_info_.id_);
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, channel_id);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    asio::async_write(connection_.socket_, connection_.buffer_,
+                       boost::bind(&Client::handle_async_write,
+                                   shared_from_this(),
+                                   asio::placeholders::error,
+                                   asio::placeholders::bytes_transferred));
+
+    run_context();
+}
+
 StatusInfo Client::get_status_info() {
     return status_info_;
 }
@@ -444,6 +475,17 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
             channels_ = UtilitySerializator::deserialize_ch_info_vec(connection_.in_stream_).second;
         } else if (answer_type == GET_CHANNELS_FAILED) {
             emit get_channels_result(GET_CHANNELS_FAILED_ANSWER);
+        } else if (answer_type == IS_CHANNEL_PARTICIPANT_SUCCESS) {
+            bool is_participant = UtilitySerializator::deserialize_fundamental<bool>(connection_.in_stream_).second;
+            emit is_channel_participant_result(IS_CHANNEL_PARTICIPANT_SUCCESS_ANSWER, is_participant);
+        } else if (answer_type == IS_CHANNEL_PARTICIPANT_FAILED) {
+            emit is_channel_participant_result(IS_CHANNEL_PARTICIPANT_FAILED_ANSWER, false);
+        } else if (answer_type == ADD_PARTICIPANT_TO_CHANNEL_SUCCESS) {
+            std::cerr << "success add\n";
+            emit add_participant_to_channel_result(ADD_PARTICIPANT_TO_CHANNEL_SUCCESS_ANSWER);
+        } else if (answer_type == ADD_PARTICIPANT_TO_CHANNEL_FAILED) {
+            std::cerr << "failed add\n";
+            emit add_participant_to_channel_result(ADD_PARTICIPANT_TO_CHANNEL_FAILED_ANSWER);
         } else {
             std::cerr << "что-то невнятное: " << answer_type << '\n';
         }

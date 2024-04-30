@@ -131,6 +131,20 @@ public:
     void async_get_channels();
 
     /**
+     * <p> Отправляет запрос на получение информации о том, является ли текущий пользователь участником канала. </p>
+     * @brief is_channel_participant_request
+     * @param channel_id - Идентификатор канала.
+     */
+    void async_is_channel_participant_request(unsigned long long channel_id);
+
+    /**
+     * <p> Отправляет запрос на добавление текущего пользователя в канал с идентификатором channel_id.</p>
+     * @brief async_add_channel_participant_request
+     * @param channel_id - Идентификатор канала, в который добавляется текущий пользователь.
+     */
+    void async_add_channel_participant_request(unsigned long long channel_id);
+
+    /**
      * <p> Возвращает информацию о пользователе. </p>
      * @brief get_status_info
      * @return - Структура, содержащая информацию о пользователе.
@@ -276,6 +290,21 @@ signals:
      * @param result - Параметр, содержащий результат запроса.
      */
     void get_channels_result(int result);
+
+    /**
+     * <p> Генерирует сигнал после получения результата запроса информации о том, является ли текущий пользователь участником канала. </p>
+     * @brief is_channel_participant_result
+     * @param result - Парамет, содеращий результат запроса.
+     * @param is_participant - В случае успеха содержит является ответом на запрос, иначе - всегда false.
+     */
+    void is_channel_participant_result(int result, bool is_participant);
+
+    /**
+     * <p> Генерирует сигнал после получения результата запроса на добавление текущего пользователя в канал. </p>
+     * @brief add_participant_to_channel_result
+     * @param result - Парамет, содеращий результат запроса.
+     */
+    void add_participant_to_channel_result(int result);
 
 private:
     std::shared_ptr<asio::io_context> io_context_ptr_;

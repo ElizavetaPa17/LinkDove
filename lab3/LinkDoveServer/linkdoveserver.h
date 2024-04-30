@@ -202,6 +202,20 @@ private:
      */
     void handle_get_channels_request(ConnectionIterator iterator);
 
+    /**
+     * <p> Обрабатывает запрос на получение информации о том, является ли пользователь участником канала. </p>
+     * @brief handle_is_channel_participant
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_is_channel_participant(ConnectionIterator iterator);
+
+    /**
+     * <p> Обрабатывает запрос на добавление пользователя в канал. </p>
+     * @brief handle_add_channel_participant
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_add_channel_participant(ConnectionIterator iterator);
+
     /** <p> Запускает в отдельном потоке контекст для обработки асинхронных функций. </p>
      * @brief run_context
      */

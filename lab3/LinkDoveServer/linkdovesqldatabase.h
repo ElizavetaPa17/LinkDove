@@ -154,6 +154,15 @@ public:
     bool add_participant_to_channel(unsigned long long participant_id, unsigned long long channel_id);
 
     /**
+     * <p> Проверяет, является ли пользователь участником канала. </p>
+     * @brief is_channel_participant
+     * @param participant_id - Идентификатор пользователя.
+     * @param channel_id - Идентификатор канала.
+     * @return - В случае положительного ответа возвращает true, иначе - false.
+     */
+    bool is_channel_participant(unsigned long long participant_id, unsigned long long channel_id);
+
+    /**
      * <p> Возвращает информацию о пользователе, который соответствует никнейму. </p>
      * @brief get_user
      * @param username - Никнейм пользователя

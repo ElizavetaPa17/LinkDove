@@ -161,6 +161,10 @@ void LinkDoveServer::handle_type_request(ConnectionIterator iterator) {
         handle_find_channel_request(iterator);
     } else if (request_type == GET_CHANNELS_REQUEST) {
         handle_get_channels_request(iterator);
+    } else if (request_type == IS_CHANNEL_PARTICIPANT_REQUEST) {
+        handle_is_channel_participant(iterator);
+    } else if (request_type == ADD_PARTICIPANT_TO_CHANNEL_REQUEST) {
+        handle_add_channel_participant(iterator);
     }
 }
 
@@ -457,6 +461,45 @@ void LinkDoveServer::handle_get_channels_request(ConnectionIterator iterator) {
     } catch (std::runtime_error &ex) {
         std::cerr << ex.what();
         answer << GET_CHANNELS_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_is_channel_participant(ConnectionIterator iterator) {
+    unsigned long long user_id    = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second,
+                       channel_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    try {
+        bool is_participant = data_base_.is_channel_participant(user_id, channel_id);
+
+        answer << IS_CHANNEL_PARTICIPANT_SUCCESS << "\n";
+        UtilitySerializator::serialize_fundamental<bool>(answer, is_participant);
+        answer << END_OF_REQUEST;
+    } catch (std::runtime_error &ex) {
+        std::cerr << ex.what();
+        answer << IS_CHANNEL_PARTICIPANT_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_add_channel_participant(ConnectionIterator iterator) {
+    unsigned long long user_id    = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second,
+                       channel_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    if (data_base_.add_participant_to_channel(user_id, channel_id)) {
+        answer << ADD_PARTICIPANT_TO_CHANNEL_SUCCESS << "\n" << END_OF_REQUEST;
+    } else {
+        answer << ADD_PARTICIPANT_TO_CHANNEL_FAILED << "\n" << END_OF_REQUEST;
     }
 
     iterator->out_stream_ << answer.str();

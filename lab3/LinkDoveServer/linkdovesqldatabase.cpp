@@ -671,6 +671,27 @@ bool LinkDoveSQLDataBase::add_participant_to_channel(unsigned long long particip
     }
 }
 
+bool LinkDoveSQLDataBase::is_channel_participant(unsigned long long participant_id, unsigned long long channel_id) {
+    QSqlQuery query(data_base_);
+    query.prepare(" SELECT * FROM CHANNEL_PARTICIPANTS "
+                  " WHERE "
+                  " channel_id=:channel_id AND participant_id=:participant_id; ");
+
+    query.bindValue(":channel_id", channel_id);
+    query.bindValue(":participant_id", participant_id);
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString();
+        throw std::runtime_error("Cannot retrieve info about channel participants");
+    } else {
+        if (query.next()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
+
 StatusInfo LinkDoveSQLDataBase::get_status_info(const std::string &username) {
     QSqlQuery query(data_base_);
     query.prepare("SELECT * FROM USERS "

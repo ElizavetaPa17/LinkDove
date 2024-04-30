@@ -29,6 +29,14 @@ public slots:
     void slotOpenChannel(const ChannelInfo &channel_info);
 
     /**
+     * <p> Слот, обрабатывающий результат получения информации о том, является ли пользователь участником канала. </p>
+     * @brief slotHandleIsChannelParticipantResult
+     * @param result - Параметр, содержащий результат получения информации.
+     * @param is_participant - Флаг, содержащий информацию в случае ее успешного получения.
+     */
+    void slotHandleIsChannelParticipantResult(int result, bool is_participant);
+
+    /**
      * <p> Полностью очищает виджет от сообщений. </p>
      * @brief slotClear
      */
@@ -54,6 +62,13 @@ private slots:
      * @param result - Параметр, содержащий результат получения сообщений.
      */
     void slotHandleGetMessages(int result);
+
+    /**
+     * <p> Слот, обрабатывающий результат добавление текущего пользователя в канал. </p>
+     * @brief slotHandleAddParticipandChannelResult
+     * @param result - Параметр, содержащий результат добавление пользователя.
+     */
+    void slotHandleAddParticipandChannelResult(int result);
 
     /**
      * <p> Слот, который открывает диалоговое окно ддя выбора фотографии с целью его отправления в чат. </p>

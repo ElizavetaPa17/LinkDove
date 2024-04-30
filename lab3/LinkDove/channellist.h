@@ -34,7 +34,12 @@ public:
     void removeChannels();
 
 signals:
-    void channelCardClicked();
+    /**
+     * <p> Генерирует сигнал при нажатии на виджет результата поиска каналов. </p>
+     * @brief channelCardClicked
+     * @param channel_info - Структура, содержащая информацию о канале.
+     */
+    void channelCardClicked(const ChannelInfo &channel_info);
 
 public slots:
     /**

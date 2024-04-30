@@ -62,6 +62,12 @@ enum ResponseTypes {
 
     GET_CHANNELS_SUCCESS_ANSWER,
     GET_CHANNELS_FAILED_ANSWER,
+
+    IS_CHANNEL_PARTICIPANT_SUCCESS_ANSWER,
+    IS_CHANNEL_PARTICIPANT_FAILED_ANSWER,
+
+    ADD_PARTICIPANT_TO_CHANNEL_SUCCESS_ANSWER,
+    ADD_PARTICIPANT_TO_CHANNEL_FAILED_ANSWER
 };
 
 enum MessageType {
@@ -221,3 +227,17 @@ extern const char *GET_CHANNELS_REQUEST;
 extern const char *GET_CHANNELS_SUCCESS;
 // Ответ сервера на неудачную отправку информации о таких каналах
 extern const char *GET_CHANNELS_FAILED;
+
+// Запрос на получение информации о том, является ли пользователь участником канала
+extern const char *IS_CHANNEL_PARTICIPANT_REQUEST;
+// Ответ сервера на успешную отправку информации
+extern const char *IS_CHANNEL_PARTICIPANT_SUCCESS;
+// Ответ сервера на неудачную отправку информации
+extern const char *IS_CHANNEL_PARTICIPANT_FAILED;
+
+// Запрос на добавление текущего пользователя в канал
+extern const char *ADD_PARTICIPANT_TO_CHANNEL_REQUEST;
+// Ответ сервера на успешное добавление текущего пользователя в канал
+extern const char *ADD_PARTICIPANT_TO_CHANNEL_SUCCESS;
+// Ответ сервера на неудачное добавление текущего пользователя в канал
+extern const char *ADD_PARTICIPANT_TO_CHANNEL_FAILED;

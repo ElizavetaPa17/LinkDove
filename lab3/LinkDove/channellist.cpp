@@ -41,6 +41,7 @@ void ChannelList::removeChannels() {
 }
 
 void ChannelList::slotClear() {
+    std::cerr << "clear channels list\n";
     removeChannels();
 }
 
@@ -78,7 +79,7 @@ void ChannelList::slotGetChannelsResult(int result) {
 }
 
 void ChannelList::slotHandleChannelCardClicked(const ChannelInfo &channel_info) {
-
+    emit channelCardClicked(channel_info);
 }
 
 void ChannelList::slotCreateChannel() {

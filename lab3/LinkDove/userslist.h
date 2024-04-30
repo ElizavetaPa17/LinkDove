@@ -35,7 +35,7 @@ signals:
     /**
      * <p> Сигнал, который генерируется при нажатии на виджет результата поиска пользователя. </p.
      * @brief userCardClicked
-     * @param status_info
+     * @param status_info - Структура, содержащая информацию о пользователе.
      */
     void userCardClicked(const StatusInfo &status_info);
 
