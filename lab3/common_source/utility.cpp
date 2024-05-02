@@ -132,7 +132,8 @@ std::pair<size_t, std::shared_ptr<IMessage>> UtilitySerializator::deserialize_ms
             msg_ptr = std::make_shared<IndividualMessage>();
             break;
         }
-        case BROAD_MSG_TYPE: {
+        case CHANNEL_MSG_TYPE: {
+            msg_ptr = std::make_shared<ChannelMessage>();
             break;
         }
     }
@@ -178,6 +179,8 @@ std::pair<size_t, std::vector<std::shared_ptr<IMessage>>> UtilitySerializator::d
     is.read(reinterpret_cast<char*>(&len), sizeof(len));
     if (len > 0) {
         vec.resize(len);
+
+        std::cerr << len << '\n';
 
         for (int i = 0; i < len; ++i) {
             vec[i] = UtilitySerializator::deserialize_msg(is).second;
@@ -302,6 +305,32 @@ std::shared_ptr<IndividualMessage> MessageUtility::create_individual_image_messa
     std::shared_ptr<ImageMessageContent> image_msg_content_ptr = std::make_shared<ImageMessageContent>();
     image_msg_content_ptr->set_image_path(image_path);
     ind_message->set_msg_content(image_msg_content_ptr);
+
+    return ind_message;
+}
+
+std::shared_ptr<ChannelMessage> MessageUtility::create_channel_text_message(unsigned long long channel_id,
+                                                                                   const std::string &text)
+{
+    std::shared_ptr<ChannelMessage> ind_message = std::make_shared<ChannelMessage>();
+    ind_message->set_channel_id(channel_id);
+
+    std::shared_ptr<TextMessageContent> text_msg_content_ptr = std::make_shared<TextMessageContent>();
+    text_msg_content_ptr->set_text(text);
+    ind_message->set_msg_content(text_msg_content_ptr);
+
+    return ind_message;
+}
+
+std::shared_ptr<ChannelMessage> MessageUtility::create_channel_image_message(unsigned long long channel_id,
+                                                                             const std::string &image_path)
+{
+    std::shared_ptr<ChannelMessage> ind_message = std::make_shared<ChannelMessage>();
+    ind_message->set_channel_id(channel_id);
+
+    std::shared_ptr<ImageMessageContent> text_msg_content_ptr = std::make_shared<ImageMessageContent>();
+    text_msg_content_ptr->set_image_path(image_path);
+    ind_message->set_msg_content(text_msg_content_ptr);
 
     return ind_message;
 }

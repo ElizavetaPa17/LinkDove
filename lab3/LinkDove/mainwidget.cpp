@@ -101,9 +101,9 @@ void MainWidget::setupConnection() {
     // При выходе из аккаунта сбрасываем все содержимое виджетов
     connect(ui->settingWidget,   &SettingWidget::quitAccount,  this, &MainWidget::slotQuit);
     connect(ui->settingWidget,   &SettingWidget::quitAccount,  ui->chatWidget, &ChatWidget::slotClear);
-    connect(ui->settingWidget,   &SettingWidget::quitAccount, ui->usersList,   &UsersList::slotClear);
-    connect(ui->settingWidget,   &SettingWidget::quitAccount, ui->channelList, &ChannelList::slotClear);
-    connect(ui->settingWidget,   &SettingWidget::quitAccount, ui->channelWidget, &ChannelWidget::slotClear);
+    connect(ui->settingWidget,   &SettingWidget::quitAccount,  ui->usersList,   &UsersList::slotClear);
+    connect(ui->settingWidget,   &SettingWidget::quitAccount,  ui->channelList, &ChannelList::slotClear);
+    connect(ui->settingWidget,   &SettingWidget::quitAccount,  ui->channelWidget, &ChannelWidget::slotClear);
 
     connect(ui->profileWidget,     &ProfileWidget::editProfile, [this] () {
                                                                     ui->profileStackedWidget->setCurrentIndex(EDITED_PROFILE_PAGE);
@@ -114,5 +114,4 @@ void MainWidget::setupConnection() {
 
     connect(ui->usersList, &UsersList::userCardClicked, ui->chatWidget, &ChatWidget::slotOpenChatWith);
     connect(ui->channelList, &ChannelList::channelCardClicked, ui->channelWidget, &ChannelWidget::slotOpenChannel);
-    connect(ClientSingleton::get_client(), &Client::is_channel_participant_result, ui->channelWidget, &ChannelWidget::slotHandleIsChannelParticipantResult);
 }

@@ -88,12 +88,20 @@ public:
     std::vector<Complaint> get_complaints(int count);
 
     /**
-     * <p> Добавляет сообщение в БД. </p>
-     * @brief add_msg
+     * <p> Добавляет сообщение между двумя собеседниками в БД. </p>
+     * @brief add_ind_msg
      * @param msg - Добавляемое сообщение.
      * @return - В случае успеха возвращает true, иначе - false.
      */
-    bool add_message(const IMessage& msg);
+    bool add_ind_message(const IMessage& msg);
+
+    /**
+     * <p> Добавляет сообщение в канал. </p>
+     * @brief add_chnnl_message
+     * @param msg - Добавляемое сообщение.
+     * @return - В случае успеха возвращает true, иначе - false.
+     */
+    bool add_chnnl_message(const IMessage& msg);
 
     /**
      * <p> Возвращает сообщения между двумя собеседниками. </p>
@@ -163,6 +171,14 @@ public:
     bool is_channel_participant(unsigned long long participant_id, unsigned long long channel_id);
 
     /**
+     * <p> Извлекает сообщения канала из БД. </p>
+     * @brief get_channel_messages
+     * @param channel_id - Идентификатор канала, из которого извлекаются сообщения.
+     * @return - Вектор сообщений.
+     */
+    std::vector<std::shared_ptr<IMessage> > get_channel_messages(unsigned long long channel_id);
+
+    /**
      * <p> Возвращает информацию о пользователе, который соответствует никнейму. </p>
      * @brief get_user
      * @param username - Никнейм пользователя
@@ -223,13 +239,22 @@ namespace link_dove_database_details__ {
     std::vector<Complaint> retrieve_complaints(QSqlQuery& query, int count);
 
     /**
-     * <p> Извлекает список сообщений, котороый возвращает объект query. </p>
-     * @brief retrieve_messages
+     * <p> Извлекает список сообщений между двумя пользователями, котороый возвращает объект query. </p>
+     * @brief retrieve_ind_messages
      * @param query - Запрос, содержащий список сообщений
+     * @param content_query - Вспомогательный запрос для извлечения содержимого
      * @return - Список сообщений.
      */
-    std::vector<std::shared_ptr<IMessage>> retrieve_messages(QSqlQuery &query, QSqlQuery &content_query);
+    std::vector<std::shared_ptr<IMessage>> retrieve_ind_messages(QSqlQuery &query, QSqlQuery &content_query);
 
+    /**
+     * <p> Извлекает список сообщений из канала. </p>
+     * @brief retrieve_channel_messages
+     * @param query - Запрос, содержащий список сообщений
+     * @param content_query - Вспомогательный запрос для извлечения содержимого
+     * @return - Список сообщений.
+     */
+    std::vector<std::shared_ptr<IMessage>> retrieve_channel_messages(QSqlQuery &query, QSqlQuery &content_query);
 }
 
 #endif // LINKDOVESQLDATABASE_H

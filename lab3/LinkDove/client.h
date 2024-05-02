@@ -145,6 +145,13 @@ public:
     void async_add_channel_participant_request(unsigned long long channel_id);
 
     /**
+     * <p> Отправляет запрос на получение всех сообщений из канала. </p>
+     * @brief async_get_channel_messages
+     * @param channel_id - Идентификатор канала, из которого извлекаются сообщения.
+     */
+    void async_get_channel_messages(unsigned long long channel_id);
+
+    /**
      * <p> Возвращает информацию о пользователе. </p>
      * @brief get_status_info
      * @return - Структура, содержащая информацию о пользователе.
@@ -166,7 +173,7 @@ public:
     std::vector<Complaint> get_complaints();
 
     /**
-     * <p> Возвращает вектор сообщений. Вызывается после запроса на получение списка жалоб. </p>
+     * <p> Возвращает вектор сообщений. Вызывается после запроса на получение сообщений какого-либо типа. </p>
      * @brief get_messages
      * @return - Вектор сообщений.
      */
@@ -305,6 +312,13 @@ signals:
      * @param result - Парамет, содеращий результат запроса.
      */
     void add_participant_to_channel_result(int result);
+
+    /**
+     * <p> Генерирует сигнал после получение результата запроса на получение из канала. </p>
+     * @brief get_chnnl_messages_result
+     * @param result - Парамет, содеращий результат запроса.
+     */
+    void get_channel_msg_result(int result);
 
 private:
     std::shared_ptr<asio::io_context> io_context_ptr_;

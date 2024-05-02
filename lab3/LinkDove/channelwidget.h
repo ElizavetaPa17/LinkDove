@@ -65,10 +65,10 @@ private slots:
 
     /**
      * <p> Слот, обрабатывающий результат добавление текущего пользователя в канал. </p>
-     * @brief slotHandleAddParticipandChannelResult
+     * @brief slotHandleAddParticipantChannelResult
      * @param result - Параметр, содержащий результат добавление пользователя.
      */
-    void slotHandleAddParticipandChannelResult(int result);
+    void slotHandleAddParticipantChannelResult(int result);
 
     /**
      * <p> Слот, который открывает диалоговое окно ддя выбора фотографии с целью его отправления в чат. </p>

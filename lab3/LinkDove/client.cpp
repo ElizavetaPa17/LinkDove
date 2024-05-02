@@ -236,12 +236,26 @@ void Client::async_is_channel_participant_request(unsigned long long channel_id)
                                    asio::placeholders::error,
                                    asio::placeholders::bytes_transferred));
 
-     run_context();
+    run_context();
 }
 
 void Client::async_add_channel_participant_request(unsigned long long channel_id) {
     connection_.out_stream_ << ADD_PARTICIPANT_TO_CHANNEL_REQUEST << "\n";
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, status_info_.id_);
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, channel_id);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    asio::async_write(connection_.socket_, connection_.buffer_,
+                       boost::bind(&Client::handle_async_write,
+                                   shared_from_this(),
+                                   asio::placeholders::error,
+                                   asio::placeholders::bytes_transferred));
+
+    run_context();
+}
+
+void Client::async_get_channel_messages(unsigned long long channel_id) {
+    connection_.out_stream_ << GET_CHNNL_MSG_REQUEST << "\n";
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, channel_id);
     connection_.out_stream_ << END_OF_REQUEST;
 
@@ -402,9 +416,12 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
         // ЗАКРЫВАТЬ СОЕДИНЕНИЕ?
     }
 
+
     if (bytes_transferred > 0) {
         std::string answer_type;
         std::getline(connection_.in_stream_, answer_type);
+
+        std::cerr << "answer: " << answer_type << '\n';
 
         // вместо гигантского else if прикрути MAP!!!1!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -447,10 +464,10 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
             emit ban_user_result(BAN_USER_SUCCESS_ANSWER);
         } else if (answer_type == BAN_USER_FAILED){
             emit ban_user_result(BAN_USER_FAILED_ANSWER);
-        } else if (answer_type == SEND_MSG_SUCCESS) {
-            emit send_msg_result(SEND_MSG_SUCCESS_ANSWER);
-        } else if (answer_type == SEND_MSG_FAILED) {
-            emit send_msg_result(SEND_MSG_FAILED_ANSWER);
+        } else if (answer_type == SEND_IND_MSG_SUCCESS) {
+            emit send_msg_result(SEND_IND_MSG_SUCCESS_ANSWER);
+        } else if (answer_type == SEND_IND_MSG_FAILED) {
+            emit send_msg_result(SEND_IND_MSG_FAILED_ANSWER);
         } else if (answer_type ==  GET_IND_MSG_SUCCESS) {
             messages_ = UtilitySerializator::deserialize_msg_vec(connection_.in_stream_).second;
             emit get_ind_msg_result(GET_IND_MSG_SUCCESS_ANSWER);
@@ -481,11 +498,19 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
         } else if (answer_type == IS_CHANNEL_PARTICIPANT_FAILED) {
             emit is_channel_participant_result(IS_CHANNEL_PARTICIPANT_FAILED_ANSWER, false);
         } else if (answer_type == ADD_PARTICIPANT_TO_CHANNEL_SUCCESS) {
-            std::cerr << "success add\n";
             emit add_participant_to_channel_result(ADD_PARTICIPANT_TO_CHANNEL_SUCCESS_ANSWER);
         } else if (answer_type == ADD_PARTICIPANT_TO_CHANNEL_FAILED) {
-            std::cerr << "failed add\n";
             emit add_participant_to_channel_result(ADD_PARTICIPANT_TO_CHANNEL_FAILED_ANSWER);
+        } else if (answer_type == SEND_CHNNL_MSG_SUCCESS) {
+            emit send_msg_result(SEND_CHNNL_MSG_SUCCESS_ANSWER);
+        } else if (answer_type == SEND_CHNNL_MSG_FAILED) {
+            emit send_msg_result(SEND_CHNNL_MSG_FAILED_ANSWER);
+        } else if (answer_type == GET_CHNNL_MSG_SUCCESS) {
+            std::cerr << "get\n";
+            messages_ = UtilitySerializator::deserialize_msg_vec(connection_.in_stream_).second;
+            emit get_channel_msg_result(GET_CHNNL_MSG_SUCCESS_ANSWER);
+        } else if (answer_type == GET_CHNNL_MSG_FAILED){
+            emit get_channel_msg_result(GET_CHNNL_MSG_FAILED_ANSWER);
         } else {
             std::cerr << "что-то невнятное: " << answer_type << '\n';
         }

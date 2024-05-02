@@ -30,5 +30,6 @@ set(LIB_FILES
 
 add_library(common_library ${LIB_FILES}
     imagemessagecontent.h imagemessagecontent.cpp
-    channelinfo.h channelinfo.cpp)
+    channelinfo.h channelinfo.cpp
+    channelmessage.h channelmessage.cpp)
 target_link_libraries(common_library PRIVATE Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Widgets)

@@ -45,8 +45,11 @@ enum ResponseTypes {
     BAN_USER_SUCCESS_ANSWER,
     BAN_USER_FAILED_ANSWER,
 
-    SEND_MSG_SUCCESS_ANSWER,
-    SEND_MSG_FAILED_ANSWER,
+    SEND_IND_MSG_SUCCESS_ANSWER,
+    SEND_IND_MSG_FAILED_ANSWER,
+
+    SEND_CHNNL_MSG_SUCCESS_ANSWER,
+    SEND_CHNNL_MSG_FAILED_ANSWER,
 
     GET_IND_MSG_SUCCESS_ANSWER,
     GET_IND_MSG_FAILED_ANSWER,
@@ -67,12 +70,15 @@ enum ResponseTypes {
     IS_CHANNEL_PARTICIPANT_FAILED_ANSWER,
 
     ADD_PARTICIPANT_TO_CHANNEL_SUCCESS_ANSWER,
-    ADD_PARTICIPANT_TO_CHANNEL_FAILED_ANSWER
+    ADD_PARTICIPANT_TO_CHANNEL_FAILED_ANSWER,
+
+    GET_CHNNL_MSG_SUCCESS_ANSWER,
+    GET_CHNNL_MSG_FAILED_ANSWER,
 };
 
 enum MessageType {
     INDIVIDUAL_MSG_TYPE,
-    BROAD_MSG_TYPE
+    CHANNEL_MSG_TYPE
 };
 
 enum MessageContentType {
@@ -188,10 +194,14 @@ extern const char *BAN_USER_FAILED;
 
 // Запрос на отправку сообщения
 extern const char *SEND_MSG_REQUEST;
-// Ответ сервера на успешную отправку сообщения от пользователя
-extern const char *SEND_MSG_SUCCESS;
-// Ответ сервера на неудачную отправку сообщения от пользователя
-extern const char *SEND_MSG_FAILED;
+// Ответ сервера на успешную отправку сообщения от пользователя в беседе между двумя участниками
+extern const char *SEND_IND_MSG_SUCCESS;
+// Ответ сервера на неудачную отправку сообщения от пользователя в беседе между двумя участниками
+extern const char *SEND_IND_MSG_FAILED;
+// Ответ сервера на успешную отправку сообщения в канал
+extern const char *SEND_CHNNL_MSG_SUCCESS;
+// Ответ сервера на неудачную отправку сообщения в канал
+extern const char *SEND_CHNNL_MSG_FAILED;
 
 // Запрос на получение сообщений в чате с собеседником
 extern const char *GET_IND_MSG_REQUEST;
@@ -241,3 +251,10 @@ extern const char *ADD_PARTICIPANT_TO_CHANNEL_REQUEST;
 extern const char *ADD_PARTICIPANT_TO_CHANNEL_SUCCESS;
 // Ответ сервера на неудачное добавление текущего пользователя в канал
 extern const char *ADD_PARTICIPANT_TO_CHANNEL_FAILED;
+
+// Запрос на получение сообщений из канала
+extern const char *GET_CHNNL_MSG_REQUEST;
+// Ответ сервера на успешное получение сообщений из канала
+extern const char *GET_CHNNL_MSG_SUCCESS;
+// Ответ сервера на неудачное получение сообщений из канала
+extern const char *GET_CHNNL_MSG_FAILED;

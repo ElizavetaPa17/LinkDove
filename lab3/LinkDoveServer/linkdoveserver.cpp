@@ -162,9 +162,12 @@ void LinkDoveServer::handle_type_request(ConnectionIterator iterator) {
     } else if (request_type == GET_CHANNELS_REQUEST) {
         handle_get_channels_request(iterator);
     } else if (request_type == IS_CHANNEL_PARTICIPANT_REQUEST) {
-        handle_is_channel_participant(iterator);
+        handle_is_channel_participant_request(iterator);
     } else if (request_type == ADD_PARTICIPANT_TO_CHANNEL_REQUEST) {
-        handle_add_channel_participant(iterator);
+        handle_add_channel_participant_request(iterator);
+    } else if (request_type == GET_CHNNL_MSG_REQUEST) {
+        std::cerr << "get channel messages\n";
+        handle_get_channel_messages_request(iterator);
     }
 }
 
@@ -342,10 +345,26 @@ void LinkDoveServer::handle_send_msg_request(ConnectionIterator iterator) {
     remove_delimeter(iterator);
 
     std::stringstream answer;
-    if (data_base_.add_message(*msg_ptr)) {
-        answer << SEND_MSG_SUCCESS << "\n" << END_OF_REQUEST;
-    } else {
-        answer << SEND_MSG_FAILED << "\n" << END_OF_REQUEST;
+    switch (msg_ptr->get_msg_type()) {
+        case INDIVIDUAL_MSG_TYPE: {
+            if (data_base_.add_ind_message(*msg_ptr)) {
+                answer << SEND_IND_MSG_SUCCESS << "\n" << END_OF_REQUEST;
+            } else {
+                answer << SEND_IND_MSG_FAILED << "\n" << END_OF_REQUEST;
+            }
+
+            break;
+        }
+
+        case CHANNEL_MSG_TYPE: {
+            if (data_base_.add_chnnl_message(*msg_ptr)) {
+                answer << SEND_CHNNL_MSG_SUCCESS << "\n" << END_OF_REQUEST;
+            } else {
+                answer << SEND_CHNNL_MSG_FAILED << "\n" << END_OF_REQUEST;
+            }
+
+            break;
+        }
     }
 
     iterator->out_stream_ << answer.str();
@@ -467,7 +486,7 @@ void LinkDoveServer::handle_get_channels_request(ConnectionIterator iterator) {
     async_write(iterator);
 }
 
-void LinkDoveServer::handle_is_channel_participant(ConnectionIterator iterator) {
+void LinkDoveServer::handle_is_channel_participant_request(ConnectionIterator iterator) {
     unsigned long long user_id    = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second,
                        channel_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
 
@@ -489,7 +508,7 @@ void LinkDoveServer::handle_is_channel_participant(ConnectionIterator iterator) 
     async_write(iterator);
 }
 
-void LinkDoveServer::handle_add_channel_participant(ConnectionIterator iterator) {
+void LinkDoveServer::handle_add_channel_participant_request(ConnectionIterator iterator) {
     unsigned long long user_id    = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second,
                        channel_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
 
@@ -500,6 +519,31 @@ void LinkDoveServer::handle_add_channel_participant(ConnectionIterator iterator)
         answer << ADD_PARTICIPANT_TO_CHANNEL_SUCCESS << "\n" << END_OF_REQUEST;
     } else {
         answer << ADD_PARTICIPANT_TO_CHANNEL_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_get_channel_messages_request(ConnectionIterator iterator) {
+    unsigned long long channel_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    try {
+        std::vector<std::shared_ptr<IMessage>> messages = data_base_.get_channel_messages(channel_id);
+
+        // сортируем сообщения по дате
+        std::sort(messages.begin(), messages.end(), message_ptr_less_comparator());
+
+        answer << GET_CHNNL_MSG_SUCCESS << "\n";
+        UtilitySerializator::serialize(answer, messages);
+        answer << END_OF_REQUEST;
+
+    } catch (std::runtime_error& ex) {
+        std::cerr << ex.what() << '\n';
+        answer << GET_CHNNL_MSG_FAILED << "\n" << END_OF_REQUEST;
     }
 
     iterator->out_stream_ << answer.str();

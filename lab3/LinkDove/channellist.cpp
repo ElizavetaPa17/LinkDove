@@ -79,6 +79,7 @@ void ChannelList::slotGetChannelsResult(int result) {
 }
 
 void ChannelList::slotHandleChannelCardClicked(const ChannelInfo &channel_info) {
+    std::cerr << "handle: " << channel_info.name_ << '\n';
     emit channelCardClicked(channel_info);
 }
 

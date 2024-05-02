@@ -1,10 +1,11 @@
 #include "individualmessage.h"
 
 #include "utility.h"
+#include "constants.h"
 
 IndividualMessage::IndividualMessage()
-    : sender_id_(0)
-    , receiver_id_(0)
+    : sender_id_(CREATED_ENTITY_ID)
+    , receiver_id_(CREATED_ENTITY_ID)
 {
 
 }

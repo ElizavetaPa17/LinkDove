@@ -14,6 +14,7 @@
 #include "channelinfo.h"
 
 #include "individualmessage.h"
+#include "channelmessage.h"
 #include "textmessagecontent.h"
 #include "imagemessagecontent.h"
 
@@ -227,7 +228,7 @@ public:
      */
     static std::shared_ptr<IndividualMessage> create_individual_text_message(unsigned long long sender_id,
                                                                           unsigned long long receiver_id,
-                                                                          const std::string& text);
+                                                                          const std::string &text);
 
     /**
      * <p> Создает сообщение из чата между двумя собеседниками с содержанием картинки. </p>
@@ -239,7 +240,27 @@ public:
      */
     static std::shared_ptr<IndividualMessage> create_individual_image_message(unsigned long long sender_id,
                                                                            unsigned long long receiver_id,
-                                                                           const std::string& image_path);
+                                                                           const std::string &image_path);
+
+    /**
+     * <p> Создает сообщение канала с текстовым содержимым. </p>
+     * @brief create_channel_text_message
+     * @param channel_id - Идентификатор канала.
+     * @param text - Текст сообщения.
+     * @return - Умный указатель на сообщение.
+     */
+    static std::shared_ptr<ChannelMessage> create_channel_text_message(unsigned long long channel_id,
+                                                                       const std::string &text);
+
+    /**
+     * <p> Создает сообщение канала с содержанием картинки. </p>
+     * @brief cerate_channel_image_message
+     * @param channel_id - Идентификатор канала.
+     * @param image_path - Путь к картинке.
+     * @return  - Умный указатель на сообщение.
+     */
+    static std::shared_ptr<ChannelMessage> create_channel_image_message(unsigned long long channel_id,
+                                                                        const std::string &image_path);
 
     /**
      * <p> Копирует сообщение из места, куда указывает image_path, в MEDIA_IND_IMAGE_PATH. </p>

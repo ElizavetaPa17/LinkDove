@@ -45,8 +45,9 @@ void ChatWidget::slotSendMessage() {
     }
 }
 
+// ПОВТОР КОДА С КОДОМ ИЗ CHAT_WIDGET! ПЕРЕДЕЛАТЬ!
 void ChatWidget::slotHandleSendMessage(int result) {
-    if (result == SEND_MSG_SUCCESS_ANSWER) {
+    if (result == SEND_IND_MSG_SUCCESS_ANSWER) {
         switch (send_msg_type_) {
             case TEXT_MSG_TYPE: {
                 QHBoxLayout *phboxLayout = new QHBoxLayout();
@@ -56,6 +57,7 @@ void ChatWidget::slotHandleSendMessage(int result) {
                 ui->verticalLayout->addLayout(phboxLayout);
                 ui->verticalLayout->addStretch();
                 ui->messageEdit->setText("");
+                break;
             }
             case IMAGE_MSG_TYPE: {
                 QPixmap pix;
@@ -67,10 +69,11 @@ void ChatWidget::slotHandleSendMessage(int result) {
                 phboxLayout->addWidget(new MessageCard(nullptr, pix));
 
                 ui->verticalLayout->addLayout(phboxLayout);
+                break;
             }
         }
-    } else {
-        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Ошибка отправки сообщения. Попытайтесь снова. ");
+    } else if (result == SEND_IND_MSG_FAILED_ANSWER){
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Ошибка отправки сообщения собеседнику. Попытайтесь снова. ");
         dialog_ptr->exec();
     }
 }
@@ -113,7 +116,7 @@ void ChatWidget::slotHandleGetMessages(int result) {
         }
 
         ui->verticalLayout->addStretch();
-    } else {
+    } else if (result == GET_IND_MSG_FAILED_ANSWER) {
         std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Что-то пошло не так при получении сообщений. ");
         dialog_ptr->exec();
     }
@@ -136,7 +139,6 @@ void ChatWidget::slotChooseImage() {
 
             std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Что-то пошло не так при попытке отправить сообщение. ");
             dialog_ptr->exec();
-            return;
         }
     }
 }

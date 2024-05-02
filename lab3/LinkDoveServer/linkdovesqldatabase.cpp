@@ -10,6 +10,7 @@
 #include "individualmessage.h"
 #include "textmessagecontent.h"
 #include "imagemessagecontent.h"
+#include "channelmessage.h"
 
 std::mutex modify_mutex;
 
@@ -130,6 +131,41 @@ bool LinkDoveSQLDataBase::setup_tables() {
 
     if (!is_ok) {
         std::cerr << "Failed to setup CHANNEL_PARTICIPANTS table: " << query.lastError().text().toStdString() << '\n';
+        return false;
+    }
+
+    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS CHANNEL_MESSAGES "
+                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
+                       " channel_id BIGINT NOT NULL, "
+                       " send_datetime DATETIME NOT NULL, "
+                       " content_id BIGINT DEFAULT 0, "
+                       " content_type ENUM('text', 'audio', 'image'), "
+                       " FOREIGN KEY (channel_id) REFERENCES CHANNELS (ID) ON DELETE CASCADE); ");
+
+    if (!is_ok) {
+        std::cerr << "Failed to setup CHANNEL_MESSAGES table: " << query.lastError().text().toStdString() << '\n';
+        return false;
+    }
+
+    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS CHANNEL_TEXT_MESSAGE_CONTENTS "
+                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
+                       " msg_id BIGINT NOT NULL, "
+                       " text_data TEXT NOT NULL, "
+                       " FOREIGN KEY (msg_id) REFERENCES CHANNEL_MESSAGES (ID) ON DELETE CASCADE); ");
+
+    if (!is_ok) {
+        std::cerr << "Failed to setup CHANNEL_TEXT_MESSAGE_CONTENTS table: " << query.lastError().text().toStdString() << '\n';
+        return false;
+    }
+
+    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS CHANNEL_IMAGE_MESSAGE_CONTENTS "
+                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
+                       " msg_id BIGINT NOT NULL, "
+                       " image_path TEXT NOT NULL, "
+                       " FOREIGN KEY (msg_id) REFERENCES CHANNEL_MESSAGES (ID) ON DELETE CASCADE); ");
+
+    if (!is_ok) {
+        std::cerr << "Failed to setup CHANNEL_TEXT_MESSAGE_CONTENTS table: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
@@ -346,7 +382,7 @@ std::vector<Complaint> LinkDoveSQLDataBase::get_complaints(int count) {
     }
 }
 
-bool LinkDoveSQLDataBase::add_message(const IMessage& msg) {
+bool LinkDoveSQLDataBase::add_ind_message(const IMessage& msg) {
     QSqlQuery query(data_base_);
     unsigned long long msg_id = 0;
 
@@ -356,37 +392,33 @@ bool LinkDoveSQLDataBase::add_message(const IMessage& msg) {
     // используем транзакцию, чтобы в случае ошибки добавления сообщения данные в БД были
     // в согласованном состоянии
     if (data_base_.transaction()) {
-        switch (msg.get_msg_type()) {
-            case INDIVIDUAL_MSG_TYPE:  {
-                query.prepare(" INSERT INTO INDIVIDUAL_MESSAGES "
-                              " (sender_id, send_datetime, receiver_id) "
-                              " VALUES (:sender_id, NOW(), :receiver_id); ");
+        query.prepare(" INSERT INTO INDIVIDUAL_MESSAGES "
+                      " (sender_id, send_datetime, receiver_id) "
+                      " VALUES (:sender_id, NOW(), :receiver_id); ");
 
-                query.bindValue(":sender_id", static_cast<const IndividualMessage&>(msg).get_msg_edges().first);
-                query.bindValue(":receiver_id", static_cast<const IndividualMessage&>(msg).get_msg_edges().second);
+        query.bindValue(":sender_id", static_cast<const IndividualMessage&>(msg).get_msg_edges().first);
+        query.bindValue(":receiver_id", static_cast<const IndividualMessage&>(msg).get_msg_edges().second);
 
-                if (!query.exec()) {
-                    std::cerr << query.lastError().text().toStdString() << '\n';
-                    return false;
-                }
+        if (!query.exec()) {
+            std::cerr << query.lastError().text().toStdString() << '\n';
+            return false;
+        }
 
-                query.prepare("SELECT * FROM INDIVIDUAL_MESSAGES "
-                              "WHERE "
-                              " sender_id=:sender_id AND receiver_id=:receiver_id AND content_id=0; ");
-                query.bindValue(":sender_id", static_cast<const IndividualMessage&>(msg).get_msg_edges().first);
-                query.bindValue(":receiver_id", static_cast<const IndividualMessage&>(msg).get_msg_edges().second);
+        query.prepare("SELECT * FROM INDIVIDUAL_MESSAGES "
+                      "WHERE "
+                      " sender_id=:sender_id AND receiver_id=:receiver_id AND content_id=0; ");
+        query.bindValue(":sender_id", static_cast<const IndividualMessage&>(msg).get_msg_edges().first);
+        query.bindValue(":receiver_id", static_cast<const IndividualMessage&>(msg).get_msg_edges().second);
 
-                if (!query.exec()) {
-                    std::cerr << query.lastError().text().toStdString() << '\n';
-                    return false;
-                } else {
-                    if (!query.next()) {
-                        std::cerr << "Can't retrieve message\n";
-                        return false;
-                    } else {
-                        msg_id = query.value("ID").toULongLong();
-                    }
-                }
+        if (!query.exec()) {
+            std::cerr << query.lastError().text().toStdString() << '\n';
+            return false;
+        } else {
+            if (!query.next()) {
+                std::cerr << "Can't retrieve message\n";
+                return false;
+            } else {
+                msg_id = query.value("ID").toULongLong();
             }
         }
 
@@ -457,20 +489,150 @@ bool LinkDoveSQLDataBase::add_message(const IMessage& msg) {
             }
         }
 
-        switch (msg.get_msg_type()) {
-            case INDIVIDUAL_MSG_TYPE:  {
-                query.prepare(" UPDATE INDIVIDUAL_MESSAGES "
-                              " SET content_id   = :content_id,"
-                              "     content_type = :content_type "
-                              " WHERE ID = :msg_id; ");
+        query.prepare(" UPDATE INDIVIDUAL_MESSAGES "
+                      " SET content_id   = :content_id,"
+                      "     content_type = :content_type "
+                      " WHERE ID = :msg_id; ");
 
-                query.bindValue(":content_id", content_id);
-                query.bindValue(":content_type", content_enum.c_str());
-                query.bindValue(":msg_id", msg_id);
+        query.bindValue(":content_id", content_id);
+        query.bindValue(":content_type", content_enum.c_str());
+        query.bindValue(":msg_id", msg_id);
 
-                break;
+        if (!query.exec()) {
+            std::cerr << query.lastError().text().toStdString() << '\n';
+            return false;
+        }
+
+        if (!data_base_.commit()) {
+            std::cerr << "Failed to commit\n";
+            return false;
+        }
+    } else {
+        std::cerr << "Failed to start transaction\n";
+        return false;
+    }
+
+    query.exec(" COMMIT; ");
+    return true;
+}
+
+bool LinkDoveSQLDataBase::add_chnnl_message(const IMessage& msg) {
+    QSqlQuery query(data_base_);
+    unsigned long long msg_id = 0;
+
+    // используем мьютекс для того, чтобы во время транзакции не было модификации данных
+    std::unique_lock<std::mutex> unique_mtx(modify_mutex);
+
+    // используем транзакцию, чтобы в случае ошибки добавления сообщения данные в БД были
+    // в согласованном состоянии
+    if (data_base_.transaction()) {
+        query.prepare(" INSERT INTO CHANNEL_MESSAGES "
+                      " (channel_id, send_datetime) "
+                      " VALUES (:channel_id, NOW()); ");
+
+        query.bindValue(":channel_id", static_cast<const ChannelMessage&>(msg).get_channel_id());
+
+        if (!query.exec()) {
+            std::cerr << query.lastError().text().toStdString() << '\n';
+            return false;
+        }
+
+        std::cerr << "insert_into msgs\n";
+
+        query.prepare("SELECT * FROM CHANNEL_MESSAGES "
+                      "WHERE "
+                      " channel_id=:channel_id AND content_id=0; ");
+        query.bindValue(":channel_id", static_cast<const ChannelMessage&>(msg).get_channel_id());
+
+        if (!query.exec()) {
+            std::cerr << query.lastError().text().toStdString() << '\n';
+            return false;
+        } else {
+            if (!query.next()) {
+                std::cerr << "Can't retrieve message\n";
+                return false;
+            } else {
+                msg_id = query.value("ID").toULongLong();
             }
         }
+
+        std::cerr << "get from msgs\n";
+
+        std::string content_enum;
+        unsigned long long content_id = 0;
+        switch (msg.get_msg_content()->get_msg_content_type()) {
+            case TEXT_MSG_TYPE: {
+                query.prepare(" INSERT INTO CHANNEL_TEXT_MESSAGE_CONTENTS "
+                              " (msg_id, text_data) "
+                              " VALUES (:msg_id, :text_data); ");
+                query.bindValue(":msg_id", msg_id);
+                query.bindValue(":text_data", msg.get_msg_content()->get_raw_data());
+
+                if (!query.exec()) {
+                    std::cerr << query.lastError().text().toStdString() << '\n';
+                    return false;
+                }
+
+                query.prepare(" SELECT * FROM CHANNEL_TEXT_MESSAGE_CONTENTS "
+                              " WHERE msg_id = :msg_id; ");
+                query.bindValue(":msg_id", msg_id);
+
+                if (!query.exec()) {
+                    std::cerr << query.lastError().text().toStdString() << '\n';
+                    return false;
+                } else {
+                    if (!query.next()) {
+                        return false;
+                    } else {
+                        content_id = query.value("ID").toULongLong();
+                    }
+                }
+
+                content_enum = "text";
+                break;
+            }
+            case IMAGE_MSG_TYPE: {
+                query.prepare(" INSERT INTO CHANNEL_IMAGE_MESSAGE_CONTENTS "
+                              " (msg_id, image_path) "
+                              " VALUES (:msg_id, :image_path); ");
+                query.bindValue(":msg_id", msg_id);
+                query.bindValue(":image_path", msg.get_msg_content()->get_raw_data());
+
+                // ПОВТОР КОДА!!!
+                if (!query.exec()) {
+                    std::cerr << query.lastError().text().toStdString() << '\n';
+                    return false;
+                }
+
+                query.prepare(" SELECT * FROM CHANNEL_IMAGE_MESSAGE_CONTENTS "
+                              " WHERE msg_id = :msg_id; ");
+                query.bindValue(":msg_id", msg_id);
+
+                if (!query.exec()) {
+                    std::cerr << query.lastError().text().toStdString() << '\n';
+                    return false;
+                } else {
+                    if (!query.next()) {
+                        return false;
+                    } else {
+                        content_id = query.value("ID").toULongLong();
+                    }
+                }
+
+                content_enum = "image";
+                break;
+
+            }
+        }
+
+        query.prepare(" UPDATE CHANNEL_MESSAGES "
+                      " SET content_id   = :content_id,"
+                      "     content_type = :content_type "
+                      " WHERE ID = :msg_id; ");
+
+        query.bindValue(":content_id", content_id);
+        query.bindValue(":content_type", content_enum.c_str());
+        query.bindValue(":msg_id", msg_id);
 
         if (!query.exec()) {
             std::cerr << query.lastError().text().toStdString() << '\n';
@@ -508,9 +670,8 @@ std::vector<std::shared_ptr<IMessage>> LinkDoveSQLDataBase::get_ind_messages(uns
         return std::vector<std::shared_ptr<IMessage>>(); // в БД нет сообщений с указанными требованиями
     } else {
         QSqlQuery content_query(data_base_);
-        return link_dove_database_details__::retrieve_messages(query, content_query);
+        return link_dove_database_details__::retrieve_ind_messages(query, content_query);
     }
-
 }
 
 std::vector<StatusInfo> LinkDoveSQLDataBase::get_interlocutors(unsigned long long id) {
@@ -692,6 +853,27 @@ bool LinkDoveSQLDataBase::is_channel_participant(unsigned long long participant_
     }
 }
 
+std::vector<std::shared_ptr<IMessage>> LinkDoveSQLDataBase::get_channel_messages(unsigned long long channel_id) {
+    QSqlQuery query(data_base_);
+
+    query.prepare("SELECT * FROM CHANNEL_MESSAGES "
+                  " WHERE channel_id=:channel_id; ");
+
+    query.bindValue(":channel_id", channel_id);
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString() << '\n';
+        throw std::runtime_error("get_channel_messages failed: cannot get channel messages\n");
+    }
+
+    if (!query.next()) {
+        return std::vector<std::shared_ptr<IMessage>>(); // в БД нет сообщений с указанными требованиями
+    } else {
+        QSqlQuery content_query(data_base_);
+        return link_dove_database_details__::retrieve_channel_messages(query, content_query);
+    }
+}
+
 StatusInfo LinkDoveSQLDataBase::get_status_info(const std::string &username) {
     QSqlQuery query(data_base_);
     query.prepare("SELECT * FROM USERS "
@@ -772,9 +954,9 @@ namespace link_dove_database_details__ {
         return complaints;
     }
 
-    std::vector<std::shared_ptr<IMessage>> retrieve_messages(QSqlQuery &query, QSqlQuery &content_query) {
+    std::vector<std::shared_ptr<IMessage>> retrieve_ind_messages(QSqlQuery &query, QSqlQuery &content_query) {
         if (query.size() < 0) {
-            throw std::runtime_error("retrieve_messages failed: query size is negative.\n");
+            throw std::runtime_error("retrieve_ind_messages failed: query size is negative.\n");
         }
 
         std::vector<std::shared_ptr<IMessage>> messages;
@@ -809,6 +991,61 @@ namespace link_dove_database_details__ {
 
             } else if (msg_type == "image") {
                 content_query.prepare("SELECT * FROM IND_IMAGE_MESSAGE_CONTENTS "
+                                      "WHERE msg_id=:msg_id; ");
+                content_query.bindValue(":msg_id", message_ptr->get_id());
+
+                if (!content_query.exec() || !content_query.next()) {
+                    std::cerr << content_query.lastError().text().toStdString() << '\n';
+                    continue;
+                }
+
+                std::shared_ptr<ImageMessageContent> text_msg_content_ptr = std::make_shared<ImageMessageContent>();
+                text_msg_content_ptr->set_image_path(content_query.value("image_path").toString().toStdString());
+                message_ptr->set_msg_content(text_msg_content_ptr);
+            }
+
+            messages.push_back(message_ptr);
+        } while (query.next());
+
+        return messages;
+    }
+
+    std::vector<std::shared_ptr<IMessage>> retrieve_channel_messages(QSqlQuery &query, QSqlQuery &content_query) {
+        if (query.size() < 0) {
+            throw std::runtime_error("retrieve_channel_messages failed: query size is negative.\n");
+        }
+
+        std::vector<std::shared_ptr<IMessage>> messages;
+        std::string msg_type;
+        unsigned long long channel_id = query.value("channel_id").toULongLong();
+
+
+        do {
+            std::shared_ptr<ChannelMessage> message_ptr = std::make_shared<ChannelMessage>();
+            message_ptr->set_id(query.value("ID").toULongLong());
+            message_ptr->set_send_datetime(query.value("send_datetime").toDateTime());
+            message_ptr->set_channel_id(channel_id);
+
+            msg_type = query.value("content_type").toString().toStdString();
+            if (msg_type == "text") {
+                content_query.prepare("SELECT * FROM CHANNEL_TEXT_MESSAGE_CONTENTS "
+                                      "WHERE msg_id=:msg_id; ");
+
+                content_query.bindValue(":msg_id", message_ptr->get_id());
+
+                if (!content_query.exec() || !content_query.next()) {
+                    std::cerr << content_query.lastError().text().toStdString() << '\n';
+                    continue;
+                }
+
+                std::shared_ptr<TextMessageContent> text_msg_content_ptr = std::make_shared<TextMessageContent>();
+                text_msg_content_ptr->set_text(content_query.value("text_data").toString().toStdString());
+                message_ptr->set_msg_content(text_msg_content_ptr);
+            //  ПОВТОР КОДА! УБРАТЬ!
+            } else if (msg_type == "audio") {
+
+            } else if (msg_type == "image") {
+                content_query.prepare("SELECT * FROM CHANNEL_IMAGE_MESSAGE_CONTENTS "
                                       "WHERE msg_id=:msg_id; ");
                 content_query.bindValue(":msg_id", message_ptr->get_id());
 
