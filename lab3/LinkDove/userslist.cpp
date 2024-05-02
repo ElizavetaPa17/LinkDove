@@ -54,7 +54,7 @@ void UsersList::removeUsers() {
 
 void UsersList::slotsHandleReturnPress() {
     if (ui->searchEdit->text().isEmpty()) {
-        // search for all the users
+        ClientSingleton::get_client()->async_get_interlocutors();
     } else {
         if (ui->searchEdit->text().toStdString() != ClientSingleton::get_client()->get_status_info().username_) {
             ClientSingleton::get_client()->async_find_user(ui->searchEdit->text().toStdString());
@@ -66,13 +66,12 @@ void UsersList::slotsHandleReturnPress() {
 }
 
 void UsersList::slotFindUserResult(int result) {
-    removeUsers();
-
     if (result == FIND_USER_FAILED_ANWSER) {
         std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Пользователь не найден.");
         dialog_ptr->exec();
     } else {
         StatusInfo status_info = ClientSingleton::get_client()->get_found_user();
+        removeUsers();
         addUser(status_info);
     }
 }

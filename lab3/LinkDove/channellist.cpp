@@ -47,7 +47,7 @@ void ChannelList::slotClear() {
 
 void ChannelList::slotsHandleReturnPress() {
     if (ui->searchEdit->text().isEmpty()) {
-        // search for all the channels
+        ClientSingleton::get_client()->async_get_channels();
     } else {
         ClientSingleton::get_client()->async_find_channel(ui->searchEdit->text().toStdString());
     }
@@ -65,9 +65,9 @@ void ChannelList::slotFindChannelResult(int result) {
 }
 
 void ChannelList::slotGetChannelsResult(int result) {
-    removeChannels();
-
     if (result == GET_CHANNELS_SUCCESS_ANSWER) {
+        removeChannels();
+
         std::vector<ChannelInfo> channels = ClientSingleton::get_client()->get_channels();
         for (int i = 0; i < channels.size(); ++i) {
             addChannel(channels[i]);
@@ -79,7 +79,6 @@ void ChannelList::slotGetChannelsResult(int result) {
 }
 
 void ChannelList::slotHandleChannelCardClicked(const ChannelInfo &channel_info) {
-    std::cerr << "handle: " << channel_info.name_ << '\n';
     emit channelCardClicked(channel_info);
 }
 

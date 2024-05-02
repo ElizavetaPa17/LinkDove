@@ -89,7 +89,7 @@ void ChannelWidget::slotHandleSendMessage(int result) {
                 pix = pix.scaledToWidth(450);
 
                 QHBoxLayout *phboxLayout = new QHBoxLayout();
-                phboxLayout->addWidget(new MessageCard(nullptr, pix));
+                phboxLayout->addWidget(new MessageCard(nullptr, pix, image_path_.c_str()));
                 phboxLayout->addStretch();
 
                 ui->verticalLayout->addLayout(phboxLayout);
@@ -121,7 +121,7 @@ void ChannelWidget::slotHandleGetMessages(int result) {
                     pix.load(elem->get_msg_content()->get_raw_data());
                     pix = pix.scaledToWidth(450);
 
-                    phboxLayout->addWidget(new MessageCard(nullptr, pix));
+                    phboxLayout->addWidget(new MessageCard(nullptr, pix, elem->get_msg_content()->get_raw_data()));
                     phboxLayout->addStretch();
 
                     break;

@@ -537,8 +537,6 @@ bool LinkDoveSQLDataBase::add_chnnl_message(const IMessage& msg) {
             return false;
         }
 
-        std::cerr << "insert_into msgs\n";
-
         query.prepare("SELECT * FROM CHANNEL_MESSAGES "
                       "WHERE "
                       " channel_id=:channel_id AND content_id=0; ");
@@ -556,7 +554,6 @@ bool LinkDoveSQLDataBase::add_chnnl_message(const IMessage& msg) {
             }
         }
 
-        std::cerr << "get from msgs\n";
 
         std::string content_enum;
         unsigned long long content_id = 0;

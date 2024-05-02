@@ -66,7 +66,7 @@ void ChatWidget::slotHandleSendMessage(int result) {
 
                 QHBoxLayout *phboxLayout = new QHBoxLayout();
                 phboxLayout->addStretch();
-                phboxLayout->addWidget(new MessageCard(nullptr, pix));
+                phboxLayout->addWidget(new MessageCard(nullptr, pix, image_path_.c_str()));
 
                 ui->verticalLayout->addLayout(phboxLayout);
                 break;
@@ -102,9 +102,9 @@ void ChatWidget::slotHandleGetMessages(int result) {
 
                     if (std::dynamic_pointer_cast<IndividualMessage>(elem)->get_msg_edges().second == interlocutor_.id_) { // убрать dynamic_cast, расширив базовый класс!!!! TODO!!!!
                         phboxLayout->addStretch();
-                        phboxLayout->addWidget(new MessageCard(nullptr, pix));
+                        phboxLayout->addWidget(new MessageCard(nullptr, pix, elem->get_msg_content()->get_raw_data()));
                     } else {
-                        phboxLayout->addWidget(new MessageCard(nullptr, pix));
+                        phboxLayout->addWidget(new MessageCard(nullptr, pix, elem->get_msg_content()->get_raw_data()));
                         phboxLayout->addStretch();
                     }
 
