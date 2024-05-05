@@ -77,8 +77,8 @@ void ChannelWidget::slotHandleSendMessage(int result) {
         switch (send_msg_type_) {
             case TEXT_MSG_TYPE: {
                 QHBoxLayout *phboxLayout = new QHBoxLayout();
-                phboxLayout->addStretch();
                 phboxLayout->addWidget(new MessageCard(nullptr, ui->messageEdit->text()));
+                phboxLayout->addStretch();
 
                 ui->verticalLayout->addLayout(phboxLayout);
                 ui->verticalLayout->addStretch();

@@ -991,7 +991,7 @@ ChatInfo LinkDoveSQLDataBase::get_chat(const std::string &chat_name) {
         throw std::runtime_error(query.lastError().text().toStdString());
     } else {
         if (!query.next()) {
-            throw std::runtime_error("No such object in DataBase");
+            throw std::runtime_error("No such CHAT by name in DataBase");
         } else {
             return link_dove_database_details__::retrieve_chat_info(query);
         }
@@ -1008,7 +1008,7 @@ ChatInfo LinkDoveSQLDataBase::get_chat(unsigned long long id) {
         throw std::runtime_error(query.lastError().text().toStdString());
     } else {
         if (!query.next()) {
-            throw std::runtime_error("No such object in DataBase");
+            throw std::runtime_error("No such CHAT by id in DataBase");
         } else {
             return link_dove_database_details__::retrieve_chat_info(query);
         }
@@ -1214,7 +1214,7 @@ bool LinkDoveSQLDataBase::add_chat_message(const IMessage& msg) {
 std::vector<std::shared_ptr<IMessage>> LinkDoveSQLDataBase::get_chat_messages(unsigned long long chat_id) {
     QSqlQuery query(data_base_);
 
-    query.prepare("SELECT * FROM CHAT_MESSAGES "
+    query.prepare(" SELECT * FROM CHAT_MESSAGES "
                   " WHERE chat_id=:chat_id; ");
 
     query.bindValue(":chat_id", chat_id);
@@ -1228,7 +1228,60 @@ std::vector<std::shared_ptr<IMessage>> LinkDoveSQLDataBase::get_chat_messages(un
         return std::vector<std::shared_ptr<IMessage>>(); // в БД нет сообщений с указанными требованиями
     } else {
         QSqlQuery content_query(data_base_);
-        return link_dove_database_details__::retrieve_chat_messages(query, content_query);
+        StatusInfo user_info;
+
+        std::vector<std::shared_ptr<IMessage>> messages;
+        std::string msg_type;
+        unsigned long long chat_id = query.value("chat_id").toULongLong();
+
+        do {
+            user_info = get_status_info(query.value("owner_id").toULongLong());
+            std::cerr << user_info.username_ << '\n';
+
+            std::shared_ptr<GroupMessage> message_ptr = std::make_shared<GroupMessage>();
+            message_ptr->set_id(query.value("ID").toULongLong());
+            message_ptr->set_send_datetime(query.value("send_datetime").toDateTime());
+            message_ptr->set_group_id(chat_id);
+            message_ptr->set_owner_id(query.value("owner_id").toULongLong());
+            message_ptr->set_owner_name(user_info.username_);
+
+            msg_type = query.value("content_type").toString().toStdString();
+            if (msg_type == "text") {
+                content_query.prepare("SELECT * FROM CHAT_TEXT_MESSAGE_CONTENTS "
+                                      "WHERE msg_id=:msg_id; ");
+
+                content_query.bindValue(":msg_id", message_ptr->get_id());
+
+                if (!content_query.exec() || !content_query.next()) {
+                    std::cerr << content_query.lastError().text().toStdString() << '\n';
+                    continue;
+                }
+
+                std::shared_ptr<TextMessageContent> text_msg_content_ptr = std::make_shared<TextMessageContent>();
+                text_msg_content_ptr->set_text(content_query.value("text_data").toString().toStdString());
+                message_ptr->set_msg_content(text_msg_content_ptr);
+            //  ПОВТОР КОДА! УБРАТЬ!
+            } else if (msg_type == "audio") {
+
+            } else if (msg_type == "image") {
+                content_query.prepare("SELECT * FROM CHAT_IMAGE_MESSAGE_CONTENTS "
+                                      "WHERE msg_id=:msg_id; ");
+                content_query.bindValue(":msg_id", message_ptr->get_id());
+
+                if (!content_query.exec() || !content_query.next()) {
+                    std::cerr << content_query.lastError().text().toStdString() << '\n';
+                    continue;
+                }
+
+                std::shared_ptr<ImageMessageContent> text_msg_content_ptr = std::make_shared<ImageMessageContent>();
+                text_msg_content_ptr->set_image_path(content_query.value("image_path").toString().toStdString());
+                message_ptr->set_msg_content(text_msg_content_ptr);
+            }
+
+            messages.push_back(message_ptr);
+        } while (query.next());
+
+        return messages;
     }
 }
 
@@ -1412,62 +1465,6 @@ namespace link_dove_database_details__ {
 
             } else if (msg_type == "image") {
                 content_query.prepare("SELECT * FROM CHANNEL_IMAGE_MESSAGE_CONTENTS "
-                                      "WHERE msg_id=:msg_id; ");
-                content_query.bindValue(":msg_id", message_ptr->get_id());
-
-                if (!content_query.exec() || !content_query.next()) {
-                    std::cerr << content_query.lastError().text().toStdString() << '\n';
-                    continue;
-                }
-
-                std::shared_ptr<ImageMessageContent> text_msg_content_ptr = std::make_shared<ImageMessageContent>();
-                text_msg_content_ptr->set_image_path(content_query.value("image_path").toString().toStdString());
-                message_ptr->set_msg_content(text_msg_content_ptr);
-            }
-
-            messages.push_back(message_ptr);
-        } while (query.next());
-
-        return messages;
-    }
-
-    std::vector<std::shared_ptr<IMessage>> retrieve_chat_messages(QSqlQuery &query, QSqlQuery &content_query) {
-        if (query.size() < 0) {
-            throw std::runtime_error("retrieve_chat_messages failed: query size is negative.\n");
-        }
-
-        std::vector<std::shared_ptr<IMessage>> messages;
-        std::string msg_type;
-        unsigned long long chat_id = query.value("chat_id").toULongLong();
-
-
-        do {
-            std::shared_ptr<GroupMessage> message_ptr = std::make_shared<GroupMessage>();
-            message_ptr->set_id(query.value("ID").toULongLong());
-            message_ptr->set_send_datetime(query.value("send_datetime").toDateTime());
-            message_ptr->set_group_id(chat_id);
-            message_ptr->set_owner_id(query.value("owner_id").toULongLong());
-
-            msg_type = query.value("content_type").toString().toStdString();
-            if (msg_type == "text") {
-                content_query.prepare("SELECT * FROM CHAT_TEXT_MESSAGE_CONTENTS "
-                                      "WHERE msg_id=:msg_id; ");
-
-                content_query.bindValue(":msg_id", message_ptr->get_id());
-
-                if (!content_query.exec() || !content_query.next()) {
-                    std::cerr << content_query.lastError().text().toStdString() << '\n';
-                    continue;
-                }
-
-                std::shared_ptr<TextMessageContent> text_msg_content_ptr = std::make_shared<TextMessageContent>();
-                text_msg_content_ptr->set_text(content_query.value("text_data").toString().toStdString());
-                message_ptr->set_msg_content(text_msg_content_ptr);
-            //  ПОВТОР КОДА! УБРАТЬ!
-            } else if (msg_type == "audio") {
-
-            } else if (msg_type == "image") {
-                content_query.prepare("SELECT * FROM CHAT_IMAGE_MESSAGE_CONTENTS "
                                       "WHERE msg_id=:msg_id; ");
                 content_query.bindValue(":msg_id", message_ptr->get_id());
 

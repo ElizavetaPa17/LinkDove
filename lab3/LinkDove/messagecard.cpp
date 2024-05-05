@@ -21,6 +21,8 @@ MessageCard::MessageCard(QWidget *parent, const QString &text)
     ui->label->setText(text);
 
     image_displaying_ = false;
+    ui->ownerLabel->hide();
+    ui->line->hide();
 }
 
 MessageCard::MessageCard(QWidget *parent, const QPixmap &pixmap, const QString &pixmap_path)
@@ -30,6 +32,24 @@ MessageCard::MessageCard(QWidget *parent, const QPixmap &pixmap, const QString &
 
     image_displaying_ = true;
     pixmap_path_ = pixmap_path;
+    ui->ownerLabel->hide();
+    ui->line->hide();
+}
+
+MessageCard::MessageCard(QWidget *parent, const QString &text, const std::string &owner_name)
+    : MessageCard(parent, text)
+{
+    ui->ownerLabel->setText(owner_name.c_str());
+    ui->ownerLabel->show();
+    ui->line->show();
+}
+
+MessageCard::MessageCard(QWidget *parent, const QPixmap &pixmap, const QString &pixmap_path, const std::string &owner_name)
+    : MessageCard(parent, pixmap, pixmap_path)
+{
+    ui->ownerLabel->setText(owner_name.c_str());
+    ui->ownerLabel->show();
+    ui->line->show();
 }
 
 MessageCard::~MessageCard()

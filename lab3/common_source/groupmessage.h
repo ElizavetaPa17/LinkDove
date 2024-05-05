@@ -41,15 +41,30 @@ public:
     void set_owner_id(unsigned long long owner_id);
 
     /**
-     * <p> Возваращает идентификатор владельца сообщения. </p>
+     * <p> Возвращает идентификатор владельца сообщения. </p>
      * @brief get_owner_id
      * @return - Идентификатор владельца сообщения.
      */
     unsigned long long get_owner_id() const;
 
+    /**
+     * <p> Устанавливает никнейм отправителя. </p>
+     * @brief set_owner_name
+     * @param owner_name - Никнейм отправителя.
+     */
+    void set_owner_name(const std::string &owner_name);
+
+    /**
+     * <p> Возвращает никнейм отправителя. </p>
+     * @brief get_owner_name
+     * @return - Никнейм отправителя.
+     */
+    std::string get_owner_name() const;
+
 private:
     unsigned long long group_id_;
     unsigned long long owner_id_;
+    std::string owner_name_; // Устанавливается в БД
 };
 
 #endif // GROUPMESSAGE_H

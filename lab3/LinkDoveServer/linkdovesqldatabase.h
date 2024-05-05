@@ -330,15 +330,6 @@ namespace link_dove_database_details__ {
      * @return - Список сообщений.
      */
     std::vector<std::shared_ptr<IMessage>> retrieve_channel_messages(QSqlQuery &query, QSqlQuery &content_query);
-
-    /**
-     * <p> Извлекает список сообщений из чата. </p>
-     * @brief retrieve_chat_messages
-     * @param query - Запрос, содержащий список сообщений
-     * @param content_query - Вспомогательный запрос для извлечения содержимого
-     * @return - Список сообщений.
-     */
-    std::vector<std::shared_ptr<IMessage>> retrieve_chat_messages(QSqlQuery &query, QSqlQuery &content_query);
 }
 
 #endif // LINKDOVESQLDATABASE_H

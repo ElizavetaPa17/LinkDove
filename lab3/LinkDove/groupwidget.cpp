@@ -71,7 +71,7 @@ void GroupWidget::slotHandleSendMessage(int result) {
             case TEXT_MSG_TYPE: {
                 QHBoxLayout *phboxLayout = new QHBoxLayout();
                 phboxLayout->addStretch();
-                phboxLayout->addWidget(new MessageCard(nullptr, ui->messageEdit->text()));
+                phboxLayout->addWidget(new MessageCard(nullptr, ui->messageEdit->text(), ClientSingleton::get_client()->get_status_info().username_));
 
                 ui->verticalLayout->addLayout(phboxLayout);
                 ui->verticalLayout->addStretch();
@@ -85,7 +85,7 @@ void GroupWidget::slotHandleSendMessage(int result) {
 
                 QHBoxLayout *phboxLayout = new QHBoxLayout();
                 phboxLayout->addStretch();
-                phboxLayout->addWidget(new MessageCard(nullptr, pix, image_path_.c_str()));
+                phboxLayout->addWidget(new MessageCard(nullptr, pix, image_path_.c_str(), ClientSingleton::get_client()->get_status_info().username_));
 
                 ui->verticalLayout->addLayout(phboxLayout);
                 ui->verticalLayout->addStretch();
@@ -104,16 +104,20 @@ void GroupWidget::slotHandleGetMessages(int result) {
     if (result == GET_CHAT_MSG_SUCCESS_ANSWER){
         std::vector<std::shared_ptr<IMessage>> messages = ClientSingleton::get_client()->get_messages();
         unsigned long long user_id = ClientSingleton::get_client()->get_status_info().id_;
+        std::string user_name;
+
         for (auto& elem : messages) {
             QHBoxLayout *phboxLayout = new QHBoxLayout();
+            user_name = std::dynamic_pointer_cast<GroupMessage>(elem)->get_owner_name();
+
             switch(elem->get_msg_content()->get_msg_content_type()) {
                 case TEXT_MSG_TYPE: {
                     std::cerr << std::dynamic_pointer_cast<GroupMessage>(elem)->get_owner_id() << '\n';
                     if (std::dynamic_pointer_cast<GroupMessage>(elem)->get_owner_id() == user_id) {
                         phboxLayout->addStretch();
-                        phboxLayout->addWidget(new MessageCard(nullptr, elem->get_msg_content()->get_raw_data()));
+                        phboxLayout->addWidget(new MessageCard(nullptr, elem->get_msg_content()->get_raw_data(), user_name));
                     } else {
-                        phboxLayout->addWidget(new MessageCard(nullptr, elem->get_msg_content()->get_raw_data()));
+                        phboxLayout->addWidget(new MessageCard(nullptr, elem->get_msg_content()->get_raw_data(), user_name));
                         phboxLayout->addStretch();
                     }
                     break;
@@ -125,9 +129,9 @@ void GroupWidget::slotHandleGetMessages(int result) {
 
                     if (std::dynamic_pointer_cast<GroupMessage>(elem)->get_owner_id() == user_id) {
                         phboxLayout->addStretch();
-                        phboxLayout->addWidget(new MessageCard(nullptr, pix, elem->get_msg_content()->get_raw_data()));
+                        phboxLayout->addWidget(new MessageCard(nullptr, pix, elem->get_msg_content()->get_raw_data(), user_name));
                     } else {
-                        phboxLayout->addWidget(new MessageCard(nullptr, pix, elem->get_msg_content()->get_raw_data()));
+                        phboxLayout->addWidget(new MessageCard(nullptr, pix, elem->get_msg_content()->get_raw_data(), user_name));
                         phboxLayout->addStretch();
                     }
 

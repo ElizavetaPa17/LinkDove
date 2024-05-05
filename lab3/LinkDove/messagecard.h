@@ -14,6 +14,9 @@ class MessageCard : public QWidget
 public:
     explicit MessageCard(QWidget *parent, const QString &text);
     explicit MessageCard(QWidget *parent, const QPixmap &pixmap, const QString &pixmap_path);
+    explicit MessageCard(QWidget *parent, const QString &text, const std::string &owner_name);
+    explicit MessageCard(QWidget *parent, const QPixmap &pixmap, const QString &pixmap_path, const std::string &owner_name);
+
     ~MessageCard();
 
 protected:
