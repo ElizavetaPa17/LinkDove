@@ -22,7 +22,7 @@ signals:
     /**
      * <p> Сигнал, который генерируется при нажатии на виджет результата поиска канала. </p.
      * @brief channelCardClicked
-     * @param channel_info -  Структура с информацией о канале, который содержится в данном виджете.
+     * @param channel_info - Структура с информацией о канале, который содержится в данном виджете.
      */
     void channelCardClicked(const ChannelInfo &channel_info);
 

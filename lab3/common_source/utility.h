@@ -12,9 +12,11 @@
 #include "imessage.h"
 #include "StatusInfo.h"
 #include "channelinfo.h"
+#include "chatinfo.h"
 
 #include "individualmessage.h"
 #include "channelmessage.h"
+#include "groupmessage.h"
 #include "textmessagecontent.h"
 #include "imagemessagecontent.h"
 
@@ -147,6 +149,23 @@ public:
     static std::pair<size_t, std::vector<ChannelInfo>> deserialize_ch_info_vec(std::istream& is);
 
     /**
+     * <p> Сериализует вектор из структур с информацией о чатах. </p>
+     * @brief serialize
+     * @param os - Поток, в который осуществляется сериализация.
+     * @param value - Сериализуемый вектор структур.
+     * @return  - Размер сериализованных данных.
+     */
+    static size_t serialize(std::ostream &os, const std::vector<ChatInfo> &value);
+
+    /**
+     * <p> Десериализует вектор структур с информацией о чатах из потока. </p>
+     * @brief deserialize_chat_info_vec
+     * @param is - Поток, из которого осуществляется десериализация
+     * @return - Пара - <размер десериализованных данных, вектор структур с информацией о каналах>.
+     */
+    static std::pair<size_t, std::vector<ChatInfo>> deserialize_chat_info_vec(std::istream& is);
+
+    /**
      * <p> Сериализует фундаментальное значение в поток. </p>
      * @brief serialize_fundamental
      * @param os - Поток, в который осуществляется сериализация
@@ -263,12 +282,52 @@ public:
                                                                         const std::string &image_path);
 
     /**
-     * <p> Копирует сообщение из места, куда указывает image_path, в MEDIA_IND_IMAGE_PATH. </p>
+     * <p> Создает сообщение группы с текстовым содержимым. </p>
+     * @brief create_group_text_message
+     * @param group_id - Идентификатор группы.
+     * @param group_id - Идентификатор владельца сообщения.
+     * @param text - Текст сообщения.
+     * @return - Умный указатель на сообщение.
+     */
+    static std::shared_ptr<GroupMessage> create_group_text_message(unsigned long long group_id,
+                                                                     unsigned long long owner_id,
+                                                                     const std::string &text);
+
+    /**
+     * <p> Создает сообщение группы с содержанием картинки. </p>
+     * @brief cerate_group_image_message
+     * @param group_id - Идентификатор группы.
+     * @param group_id - Идентификатор владельца сообщения.
+     * @param image_path - Путь к картинке.
+     * @return  - Умный указатель на сообщение.
+     */
+    static std::shared_ptr<GroupMessage> create_group_image_message(unsigned long long group_id,
+                                                                      unsigned long long owner_id,
+                                                                      const std::string &image_path);
+
+    /**
+     * <p> Копирует изображение из места, куда указывает image_path, в MEDIA_IND_IMAGE_PATH. </p>
      * @brief move_image_to_db_folder
-     * @param image_path
-     * @return - Путь к картинке в папке MEDIA_IND_IMAGE_PATH.
+     * @param image_path - Старый путь к изображению.
+     * @return - Путь к изображению в папке MEDIA_IND_IMAGE_PATH.
      */
     static std::string copy_image_to_ind_folder(const QString& image_path);
+
+    /**
+     * <p> Копирует изображение из места, куда указывает image_path, в MEDIA_CHANNEL_IMAGE_PATH. </p>
+     * @brief copy_image_to_channel_folder
+     * @param image_path - Старый путь к изображению.
+     * @return - Путь к изображению в папке MEDIA_CHANNEL_IMAGE_PATH.
+     */
+    static std::string copy_image_to_channel_folder(const QString& image_path);
+
+    /**
+     * <p> Копирует изображение из места, куда указывает image_path, в MEDIA_CHAT_IMAGE_PATH. </p>
+     * @brief copy_image_to_chat_folder
+     * @param image_path - Старый путь к изображению.
+     * @return - Путь к изображению в папке MEDIA_CHAT_IMAGE_PATH.
+     */
+    static std::string copy_image_to_chat_folder(const QString& image_path);
 };
 
 #endif // UTILITY_H

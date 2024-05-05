@@ -177,10 +177,10 @@ void Client::async_get_interlocutors() {
 
 void Client::async_create_channel(const std::string &channel_name) {
     connection_.out_stream_ << CREATE_CHANNEL_REQUEST << "\n";
+
     ChannelInfo channel_info;
     channel_info.name_ = channel_name;
     channel_info.owner_id_ = status_info_.id_;
-
     channel_info.serialize(connection_.out_stream_);
 
     connection_.out_stream_ << END_OF_REQUEST;
@@ -268,6 +268,100 @@ void Client::async_get_channel_messages(unsigned long long channel_id) {
     run_context();
 }
 
+void Client::async_create_chat(const std::string &chat_name) {
+    connection_.out_stream_ << CREATE_CHAT_REQUEST << "\n";
+
+    ChatInfo chat_info;
+    chat_info.name_ = chat_name;
+    chat_info.owner_id_ = status_info_.id_;
+    chat_info.serialize(connection_.out_stream_);
+
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    asio::async_write(connection_.socket_, connection_.buffer_,
+                      boost::bind(&Client::handle_async_write,
+                                  shared_from_this(),
+                                  asio::placeholders::error,
+                                  asio::placeholders::bytes_transferred));
+
+    run_context();
+}
+
+void Client::async_get_chats() {
+    connection_.out_stream_ << GET_CHATS_REQUEST << "\n";
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, status_info_.id_);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+
+    asio::async_write(connection_.socket_, connection_.buffer_,
+                       boost::bind(&Client::handle_async_write,
+                                   shared_from_this(),
+                                   asio::placeholders::error,
+                                   asio::placeholders::bytes_transferred));
+
+     run_context();
+}
+
+void Client::async_find_chat(const std::string &chat_name) {
+    connection_.out_stream_ << FIND_CHAT_REQUEST << "\n";
+    UtilitySerializator::serialize(connection_.out_stream_, chat_name);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    asio::async_write(connection_.socket_, connection_.buffer_,
+                      boost::bind(&Client::handle_async_write,
+                                  shared_from_this(),
+                                  asio::placeholders::error,
+                                  asio::placeholders::bytes_transferred));
+
+    run_context();
+}
+
+void Client::   async_is_chat_participant_request(unsigned long long chat_id) {
+    connection_.out_stream_ << IS_CHAT_PARTICIPANT_REQUEST << "\n";
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, status_info_.id_);
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, chat_id);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    asio::async_write(connection_.socket_, connection_.buffer_,
+                       boost::bind(&Client::handle_async_write,
+                                   shared_from_this(),
+                                   asio::placeholders::error,
+                                   asio::placeholders::bytes_transferred));
+
+    run_context();
+}
+
+void Client::async_add_chat_participant_request(unsigned long long chat_id) {
+    connection_.out_stream_ << ADD_PARTICIPANT_TO_CHAT_REQUEST << "\n";
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, status_info_.id_);
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, chat_id);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    asio::async_write(connection_.socket_, connection_.buffer_,
+                       boost::bind(&Client::handle_async_write,
+                                   shared_from_this(),
+                                   asio::placeholders::error,
+                                   asio::placeholders::bytes_transferred));
+
+    run_context();
+}
+
+void Client::async_get_chat_messages(unsigned long long chat_id) {
+    connection_.out_stream_ << GET_CHAT_MSG_REQUEST << "\n";
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, chat_id);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    asio::async_write(connection_.socket_, connection_.buffer_,
+                       boost::bind(&Client::handle_async_write,
+                                   shared_from_this(),
+                                   asio::placeholders::error,
+                                   asio::placeholders::bytes_transferred));
+
+    run_context();
+
+    std::cerr << "send\n";
+}
+
 StatusInfo Client::get_status_info() {
     return status_info_;
 }
@@ -294,6 +388,14 @@ ChannelInfo Client::get_found_channel() {
 
 std::vector<ChannelInfo> Client::get_channels() {
     return channels_;
+}
+
+std::vector<ChatInfo> Client::get_chats() {
+    return chats_;
+}
+
+ChatInfo Client::get_found_chat() {
+    return found_chat_info_;
 }
 
 bool Client::is_connected() noexcept {
@@ -479,9 +581,9 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
         } else if (answer_type == GET_INTERLOCUTORS_FAILED) {
             emit get_interlocutors_result(GET_INTERLOCUTORS_FAILED_ANSWER);
         } else if (answer_type == CREATE_CHANNEL_SUCCESS) {
-            emit get_create_channel_result(CREATE_CHANNEL_SUCCESS_ANSWER);
+            emit create_channel_result(CREATE_CHANNEL_SUCCESS_ANSWER);
         } else if (answer_type == CREATE_CHANNEL_FAILED) {
-            emit get_create_channel_result(CREATE_CHANNEL_FAILED_ANSWER);
+            emit create_channel_result(CREATE_CHANNEL_FAILED_ANSWER);
         } else if (answer_type == FIND_CHANNEL_SUCCESS) {
             emit find_channel_result(FIND_CHANNEL_SUCCESS_ANSWER);
             found_channel_info_.deserialize(connection_.in_stream_);
@@ -506,11 +608,42 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
         } else if (answer_type == SEND_CHNNL_MSG_FAILED) {
             emit send_msg_result(SEND_CHNNL_MSG_FAILED_ANSWER);
         } else if (answer_type == GET_CHNNL_MSG_SUCCESS) {
-            std::cerr << "get\n";
             messages_ = UtilitySerializator::deserialize_msg_vec(connection_.in_stream_).second;
             emit get_channel_msg_result(GET_CHNNL_MSG_SUCCESS_ANSWER);
         } else if (answer_type == GET_CHNNL_MSG_FAILED){
             emit get_channel_msg_result(GET_CHNNL_MSG_FAILED_ANSWER);
+        } else if (answer_type == CREATE_CHAT_SUCCESS) {
+            emit create_chat_result(CREATE_CHAT_SUCCESS_ANSWER);
+        } else if (answer_type == CREATE_CHAT_FAILED) {
+            emit create_chat_result(CREATE_CHAT_FAILED_ANSWER);
+        } else if (answer_type == GET_CHATS_SUCCESS) {
+            chats_ = UtilitySerializator::deserialize_chat_info_vec(connection_.in_stream_).second;
+            emit get_chats_result(GET_CHATS_SUCCESS_ANSWER);
+        } else if (answer_type == GET_CHATS_FAILED) {
+            emit get_chats_result(GET_CHATS_FAILED_ANSWER);
+        } else if (answer_type == FIND_CHAT_SUCCESS) {
+            found_chat_info_.deserialize(connection_.in_stream_);
+            emit find_chat_result(FIND_CHAT_SUCCESS_ANSWER);
+        } else if (answer_type == FIND_CHAT_FAILED) {
+            emit find_chat_result(FIND_CHAT_FAILED_ANSWER);
+        } else if (answer_type == IS_CHAT_PARTICIPANT_SUCCESS) {
+            bool is_participant = UtilitySerializator::deserialize_fundamental<bool>(connection_.in_stream_).second;
+            emit is_chat_participant_result(IS_CHANNEL_PARTICIPANT_SUCCESS_ANSWER, is_participant);
+        } else if (answer_type == IS_CHANNEL_PARTICIPANT_FAILED) {
+            emit is_chat_participant_result(IS_CHANNEL_PARTICIPANT_SUCCESS_ANSWER, false);
+        } else if (answer_type == ADD_PARTICIPANT_TO_CHAT_SUCCESS) {
+            emit add_participant_to_chat_result(ADD_PARTICIPANT_TO_CHAT_SUCCESS_ANSWER);
+        } else if (answer_type == ADD_PARTICIPANT_TO_CHAT_FAILED){
+            emit add_participant_to_chat_result(ADD_PARTICIPANT_TO_CHAT_FAILED_ANSWER);
+        } else if (answer_type == SEND_CHAT_MSG_SUCCESS) {
+            emit send_msg_result(SEND_CHAT_MSG_SUCCESS_ANSWER);
+        } else if (answer_type == SEND_CHAT_MSG_FAILED) {
+            emit send_msg_result(SEND_CHAT_MSG_FAILED_ANSWER);
+        } else if (answer_type == GET_CHAT_MSG_SUCCESS) {
+            messages_ = UtilitySerializator::deserialize_msg_vec(connection_.in_stream_).second;
+            emit get_chat_msg_result(GET_CHAT_MSG_SUCCESS_ANSWER);
+        } else if (answer_type == GET_CHAT_MSG_FAILED) {
+            emit get_chat_msg_result(GET_CHAT_MSG_FAILED_ANSWER);
         } else {
             std::cerr << "что-то невнятное: " << answer_type << '\n';
         }

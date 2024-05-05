@@ -223,6 +223,48 @@ private:
      */
     void handle_get_channel_messages_request(ConnectionIterator iterator);
 
+    /**
+     * <p> Обрабатывает запрос на создание чата. </p>
+     * @brief handle_create_chat_request
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_create_chat_request(ConnectionIterator iterator);
+
+    /**
+     * <p> Обрабатывает запрос на получение списка чатов, в которых состоит текущий пользователь. </p>
+     * @brief handle_get_chats_request
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_get_chats_request(ConnectionIterator iterator);
+
+    /**
+     * <p> Обрабатывает запрос на поиск информации о чате. </p>
+     * @brief handle_find_chat_request
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_find_chat_request(ConnectionIterator iterator);
+
+    /**
+     * <p> Обрабатывает запрос на получение информации о том, является ли пользователь участником чата. </p>
+     * @brief handle_is_chat_participant_request
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_is_chat_participant_request(ConnectionIterator iterator);
+
+    /**
+     * <p> Обрабатывает запрос на добавление пользователя в чат. </p>
+     * @brief handle_add_chat_participant
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_add_chat_participant_request(ConnectionIterator iterator);
+
+    /**
+     * <p> Обрабатывает запрос на получение сообщений из чата. </p>
+     * @brief handle_get_chat_messages
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_get_chat_messages_request(ConnectionIterator iterator);
+
     /** <p> Запускает в отдельном потоке контекст для обработки асинхронных функций. </p>
      * @brief run_context
      */

@@ -166,8 +166,20 @@ void LinkDoveServer::handle_type_request(ConnectionIterator iterator) {
     } else if (request_type == ADD_PARTICIPANT_TO_CHANNEL_REQUEST) {
         handle_add_channel_participant_request(iterator);
     } else if (request_type == GET_CHNNL_MSG_REQUEST) {
-        std::cerr << "get channel messages\n";
         handle_get_channel_messages_request(iterator);
+    } else if (request_type == CREATE_CHAT_REQUEST) {
+        handle_create_chat_request(iterator);
+    } else if (request_type == IS_CHAT_PARTICIPANT_REQUEST) {
+        handle_is_chat_participant_request(iterator);
+    } else if (request_type == ADD_PARTICIPANT_TO_CHAT_REQUEST) {
+        handle_add_chat_participant_request(iterator);
+    } else if (request_type == GET_CHATS_REQUEST) {
+        handle_get_chats_request(iterator);
+    } else if (request_type == FIND_CHAT_REQUEST) {
+        handle_find_chat_request(iterator);
+    } else if (request_type == GET_CHAT_MSG_REQUEST) {
+        std::cerr << "get\n";
+        handle_get_chat_messages_request(iterator);
     }
 }
 
@@ -340,9 +352,11 @@ void LinkDoveServer::handle_ban_user_request(ConnectionIterator iterator) {
 }
 
 void LinkDoveServer::handle_send_msg_request(ConnectionIterator iterator) {
+    std::cerr << "what?\n";
     std::shared_ptr<IMessage> msg_ptr = UtilitySerializator::deserialize_msg(iterator->in_stream_).second;
 
     remove_delimeter(iterator);
+    std::cerr << "send\n";
 
     std::stringstream answer;
     switch (msg_ptr->get_msg_type()) {
@@ -361,6 +375,17 @@ void LinkDoveServer::handle_send_msg_request(ConnectionIterator iterator) {
                 answer << SEND_CHNNL_MSG_SUCCESS << "\n" << END_OF_REQUEST;
             } else {
                 answer << SEND_CHNNL_MSG_FAILED << "\n" << END_OF_REQUEST;
+            }
+
+            break;
+        }
+
+        case GROUP_MSG_TYPE: {
+            std::cerr << "here\n";
+            if (data_base_.add_chat_message(*msg_ptr)) {
+                answer << SEND_CHAT_MSG_SUCCESS << "\n" << END_OF_REQUEST;
+            } else {
+                answer << SEND_CHAT_MSG_FAILED << "\n" << END_OF_REQUEST;
             }
 
             break;
@@ -544,6 +569,133 @@ void LinkDoveServer::handle_get_channel_messages_request(ConnectionIterator iter
     } catch (std::runtime_error& ex) {
         std::cerr << ex.what() << '\n';
         answer << GET_CHNNL_MSG_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_create_chat_request(ConnectionIterator iterator) {
+    ChatInfo chat_info;
+    chat_info.deserialize(iterator->in_stream_);
+
+    std::cerr << chat_info.id_ << '\n';
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    if (data_base_.add_chat(chat_info)) {
+        answer << CREATE_CHAT_SUCCESS << "\n" << END_OF_REQUEST;
+    } else {
+        answer << CREATE_CHAT_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_get_chats_request(ConnectionIterator iterator) {
+    unsigned long long id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    try {
+        std::vector<ChatInfo> channels = data_base_.get_chats(id);
+
+        answer << GET_CHATS_SUCCESS << "\n";
+        UtilitySerializator::serialize(answer, channels);
+        answer << END_OF_REQUEST;
+    } catch (std::runtime_error &ex) {
+        std::cerr << ex.what();
+        answer << GET_CHATS_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_find_chat_request(ConnectionIterator iterator) {
+    std::string chat_name = UtilitySerializator::deserialize_string(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    try {
+        ChatInfo chat_info;
+        chat_info = data_base_.get_chat(chat_name);
+
+        answer << FIND_CHAT_SUCCESS << "\n";
+        chat_info.serialize(answer);
+        answer << END_OF_REQUEST;
+    } catch (std::runtime_error& ex) {
+        std::cerr << ex.what() << '\n';
+        answer << FIND_CHAT_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_is_chat_participant_request(ConnectionIterator iterator) {
+    unsigned long long user_id    = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second,
+                       chat_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    try {
+        bool is_participant = data_base_.is_chat_participant(user_id, chat_id);
+
+        answer << IS_CHAT_PARTICIPANT_SUCCESS << "\n";
+        UtilitySerializator::serialize_fundamental<bool>(answer, is_participant);
+        answer << END_OF_REQUEST;
+    } catch (std::runtime_error &ex) {
+        std::cerr << ex.what();
+        answer << IS_CHAT_PARTICIPANT_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_add_chat_participant_request(ConnectionIterator iterator) {
+    unsigned long long user_id    = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second,
+                       chat_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    if (data_base_.add_participant_to_chat(user_id, chat_id)) {
+        answer << ADD_PARTICIPANT_TO_CHAT_SUCCESS << "\n" << END_OF_REQUEST;
+    } else {
+        answer << ADD_PARTICIPANT_TO_CHAT_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_get_chat_messages_request(ConnectionIterator iterator) {
+    unsigned long long chat_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+    std::cerr << "here\n";
+
+    std::stringstream answer;
+    try {
+        std::vector<std::shared_ptr<IMessage>> messages = data_base_.get_chat_messages(chat_id);
+
+        // сортируем сообщения по дате
+        std::sort(messages.begin(), messages.end(), message_ptr_less_comparator());
+
+        answer << GET_CHAT_MSG_SUCCESS << "\n";
+        UtilitySerializator::serialize(answer, messages);
+        answer << END_OF_REQUEST;
+
+    } catch (std::runtime_error& ex) {
+        std::cerr << ex.what() << '\n';
+        answer << GET_CHAT_MSG_FAILED << "\n" << END_OF_REQUEST;
     }
 
     iterator->out_stream_ << answer.str();

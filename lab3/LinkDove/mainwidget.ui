@@ -302,7 +302,7 @@ QTabBar::tab:selected {
 }</string>
          </property>
          <property name="currentIndex">
-          <number>2</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="tabChats">
           <property name="styleSheet">
@@ -360,6 +360,21 @@ QTabBar::tab:selected {
           <attribute name="title">
            <string>Группы</string>
           </attribute>
+          <layout class="QGridLayout" name="gridLayout_9">
+           <item row="0" column="0">
+            <widget class="ChatList" name="chatList" native="true">
+             <property name="maximumSize">
+              <size>
+               <width>320</width>
+               <height>16777215</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="GroupWidget" name="groupWidget" native="true"/>
+           </item>
+          </layout>
          </widget>
          <widget class="QWidget" name="tabChannels">
           <property name="styleSheet">
@@ -470,6 +485,18 @@ QTabBar::tab:selected {
    <class>ChannelWidget</class>
    <extends>QWidget</extends>
    <header>channelwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ChatList</class>
+   <extends>QWidget</extends>
+   <header>chatlist.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>GroupWidget</class>
+   <extends>QWidget</extends>
+   <header>groupwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

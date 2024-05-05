@@ -44,6 +44,8 @@ void MainWidget::slotRedirectClick(QWidget *sender) {
             ClientSingleton::get_client()->async_get_interlocutors();
         } else if (ui->tabWidget->currentIndex() == 2) { // FIX MAGIN INT
             ClientSingleton::get_client()->async_get_channels();
+        } else {
+            ClientSingleton::get_client()->async_get_chats();
         }
 
     } else if (sender == ui->settingLabel) {
@@ -114,4 +116,5 @@ void MainWidget::setupConnection() {
 
     connect(ui->usersList, &UsersList::userCardClicked, ui->chatWidget, &ChatWidget::slotOpenChatWith);
     connect(ui->channelList, &ChannelList::channelCardClicked, ui->channelWidget, &ChannelWidget::slotOpenChannel);
+    connect(ui->chatList, &ChatList::chatCardClicked, ui->groupWidget, &GroupWidget::slotOpenGroup);
 }

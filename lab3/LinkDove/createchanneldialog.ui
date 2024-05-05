@@ -137,7 +137,7 @@ QPushButton:hover {
 }</string>
      </property>
      <property name="text">
-      <string>Введите название чата.</string>
+      <string>Введите название.</string>
      </property>
     </widget>
    </item>

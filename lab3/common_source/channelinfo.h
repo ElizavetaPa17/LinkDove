@@ -5,7 +5,7 @@
 
 #include "constants.h"
 
-struct ChannelInfo final {
+struct ChannelInfo {
 public:
     unsigned long long id_ = CREATED_ENTITY_ID;
     unsigned long long owner_id_ = CREATED_ENTITY_ID;

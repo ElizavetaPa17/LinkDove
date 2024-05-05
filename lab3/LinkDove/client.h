@@ -11,6 +11,7 @@
 #include "logininfo.h"
 #include "UserInfo.h"
 #include "channelinfo.h"
+#include "chatinfo.h"
 #include "complaint.h"
 #include "constants.h"
 #include "imessage.h"
@@ -152,6 +153,47 @@ public:
     void async_get_channel_messages(unsigned long long channel_id);
 
     /**
+     * <p> Отправляет запрос на создание чата. </p>
+     * @brief async_create_chat
+     * @param chat_name - Название чата.
+     */
+    void async_create_chat(const std::string &chat_name);
+
+    /**
+     * <p> Отправляет запрос на получение чатов текущего пользователя. </p>
+     * @brief async_get_chats
+     */
+    void async_get_chats();
+
+    /**
+     * <p> Отправляет запрос на поиск информации о чате. </p>
+     * @brief async_find_chat
+     * @param chat_name - Название чата.
+     */
+    void async_find_chat(const std::string &chat_name);
+
+    /**
+     * <p> Отправляет запрос на получение информации о том, является ли текущий пользователь участником чата. </p>
+     * @brief is_chat_participant_request
+     * @param chat_id - Идентификатор чата.
+     */
+    void async_is_chat_participant_request(unsigned long long chat_id);
+
+    /**
+     * <p> Отправляет запрос на добавление текущего пользователя в чат с идентификатором chat_id.</p>
+     * @brief async_add_chat_participant_request
+     * @param chat_id - Идентификатор чата в который добавляется текущий пользователь.
+     */
+    void async_add_chat_participant_request(unsigned long long chat_id);
+
+    /**
+     * <p> Получает сообщения из чата с идентификатором chat_id. </p>
+     * @brief async_get_chat_messages
+     * @param chat_id - Идентификатор чата.
+     */
+    void async_get_chat_messages(unsigned long long chat_id);
+
+    /**
      * <p> Возвращает информацию о пользователе. </p>
      * @brief get_status_info
      * @return - Структура, содержащая информацию о пользователе.
@@ -199,6 +241,20 @@ public:
      * @return - Вектор каналов, в которых состоит текущий пользователь.
      */
     std::vector<ChannelInfo> get_channels();
+
+    /**
+     * <p> Возвращает список чатов, в которых состоит текущий пользователь. Вызывается после запроса на получение этих чатов. </p>
+     * @brief get_chats
+     * @return - Вектор чатов, в которых состоит текущий пользоваетль.
+     */
+    std::vector<ChatInfo> get_chats();
+
+    /**
+     * <p> Возвращает информацию о найденном чате. </p>
+     * @brief get_found_chat
+     * @return - Структура, содержащая информацию о найденном чате.
+     */
+    ChatInfo get_found_chat();
 
     /**
      * <p> Определяет, установил ли клиент соединение с сервером. </p>
@@ -282,7 +338,7 @@ signals:
      * @brief get_create_channel_result
      * @param result - Параметр, содержащий результат запроса.
      */
-    void get_create_channel_result(int result);
+    void create_channel_result(int result);
 
     /**
      * <p> Генерирует сигнал после получения результата запроса на поиск информации о пользователе. </p>
@@ -320,6 +376,49 @@ signals:
      */
     void get_channel_msg_result(int result);
 
+    /**
+     * <p> Генерирует сигнал после получения результата запроса на создание чата.  </p>
+     * @brief create_chat_result
+     * @param result - Параметр, содержащий результат запроса.
+     */
+    void create_chat_result(int result);
+
+    /**
+     * <p> Генерирует сигнал после получения результата запроса на поиск информации о чатах, в которых состоит текущий пользователь. </p>
+     * @brief get_chats_result
+     * @param result - Параметр, содержащий результат запроса.
+     */
+    void get_chats_result(int result);
+
+    /**
+     * <p> Генерирует сигнал после получения результата поиска информации о чате. </p>
+     * @brief find_chat_result
+     * @param result - Параметр, содержащий результат запроса.
+     */
+    void find_chat_result(int result);
+
+    /**
+     * <p> Генерирует сигнал после получения результата запроса информации о том, является ли текущий пользователь участником чата. </p>
+     * @brief is_chat_participant_result
+     * @param result - Параметр, содеращий результат запроса.
+     * @param is_participant - В случае успеха содержит является ответом на запрос, иначе - всегда false.
+     */
+    void is_chat_participant_result(int result, bool is_participant);
+
+    /**
+     * <p> Генерирует сигнал после получения результата запроса на добавление текущего пользователя в чат. </p>
+     * @brief add_participant_to_chat_result
+     * @param result - Параметр, содеращий результат запроса.
+     */
+    void add_participant_to_chat_result(int result);
+
+    /**
+     * <p> Генерирует сигнал после получения результата запроса на получение списка сообщений из чата (группы). </p>
+     * @brief get_chat_msg_result
+     * @param result - Параметр, содержащий результат запроса.
+     */
+    void get_chat_msg_result(int result);
+
 private:
     std::shared_ptr<asio::io_context> io_context_ptr_;
     IStreamConnection<tcp> connection_;
@@ -330,11 +429,13 @@ private:
     StatusInfo updated_status_info_;
     StatusInfo found_status_info_;
     ChannelInfo found_channel_info_;
+    ChatInfo found_chat_info_;
 
     std::vector<Complaint> complaints_;
     std::vector<std::shared_ptr<IMessage>> messages_;
     std::vector<StatusInfo> status_info_vec_;
     std::vector<ChannelInfo> channels_;
+    std::vector<ChatInfo> chats_;
 
     void create_account() {}
 

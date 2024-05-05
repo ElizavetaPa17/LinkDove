@@ -10,6 +10,7 @@
 
 #include "individualmessage.h"
 #include "textmessagecontent.h"
+#include "groupmessage.h"
 
 size_t UtilitySerializator::serialize(std::ostream& os, const std::string& value) {
     const auto pos = os.tellp();
@@ -136,6 +137,9 @@ std::pair<size_t, std::shared_ptr<IMessage>> UtilitySerializator::deserialize_ms
             msg_ptr = std::make_shared<ChannelMessage>();
             break;
         }
+        case GROUP_MSG_TYPE: {
+            msg_ptr = std::make_shared<GroupMessage>();
+        }
     }
 
     // Десериализуем тип содержимого сообщения
@@ -254,6 +258,38 @@ std::pair<size_t, std::vector<ChannelInfo>> UtilitySerializator::deserialize_ch_
     return std::make_pair(static_cast<size_t>(len), vec);
 }
 
+size_t UtilitySerializator::serialize(std::ostream &os, const std::vector<ChatInfo> &value) {
+    const auto pos = os.tellp();
+
+    // Приводим к типу uint32_t, т.к. на разных машинах размер машинного слова отличается,
+    // что может привести к проблемам.
+    const auto len = static_cast<uint32_t>(value.size());
+
+    // Сериализуем сначала размер вектора, а потом сам вектор.
+    os.write(reinterpret_cast<const char*>(&len), sizeof(len));
+    for (int i = 0; i < len; ++i) {
+        value[i].serialize(os);
+    }
+
+    return static_cast<size_t>(os.tellp() - pos);
+}
+
+std::pair<size_t, std::vector<ChatInfo>> UtilitySerializator::deserialize_chat_info_vec(std::istream& is) {
+    std::vector<ChatInfo> vec;
+    uint32_t len = 0; // Размер сериализованной строки был записан в формате uint32_t
+
+    is.read(reinterpret_cast<char*>(&len), sizeof(len));
+    if (len > 0) {
+        vec.resize(len);
+
+        for (int i = 0; i < len; ++i) {
+            vec[i].deserialize(is);
+        }
+    }
+
+    return std::make_pair(static_cast<size_t>(len), vec);
+}
+
 void QtUtility::clean_layout(QLayout *layout) {
     QLayoutItem *widget_item = nullptr;
 
@@ -335,11 +371,63 @@ std::shared_ptr<ChannelMessage> MessageUtility::create_channel_image_message(uns
     return ind_message;
 }
 
+std::shared_ptr<GroupMessage> MessageUtility::create_group_text_message(unsigned long long group_id,
+                                                                        unsigned long long owner_id,
+                                                                        const std::string &text)
+{
+    std::shared_ptr<GroupMessage> message = std::make_shared<GroupMessage>();
+    message->set_group_id(group_id);
+    message->set_owner_id(owner_id);
+
+    std::shared_ptr<TextMessageContent> text_msg_content_ptr = std::make_shared<TextMessageContent>();
+    text_msg_content_ptr->set_text(text);
+    message->set_msg_content(text_msg_content_ptr);
+
+    return message;
+}
+
+std::shared_ptr<GroupMessage> MessageUtility::create_group_image_message(unsigned long long group_id,
+                                                           unsigned long long owner_id,
+                                                           const std::string &image_path)
+{
+    std::shared_ptr<GroupMessage> message = std::make_shared<GroupMessage>();
+    message->set_group_id(group_id);
+    message->set_owner_id(owner_id);
+
+    std::shared_ptr<ImageMessageContent> text_msg_content_ptr = std::make_shared<ImageMessageContent>();
+    text_msg_content_ptr->set_image_path(image_path);
+    message->set_msg_content(text_msg_content_ptr);
+
+    return message;
+}
+
 std::string MessageUtility::copy_image_to_ind_folder(const QString &image_path) {
     QString new_image_path = QString(MEDIA_IND_IMAGE_PATH) + QFileInfo(image_path).fileName();
     if (!QFile::exists(new_image_path)) {
             if (!QFile::copy(image_path, new_image_path)) {
                 std::runtime_error("Unable to copy image into ind_folder\n");
+            }
+    }
+
+    return new_image_path.toStdString();
+}
+
+std::string MessageUtility::copy_image_to_channel_folder(const QString& image_path) {
+    QString new_image_path = QString(MEDIA_CHANNEL_IMAGE_PATH) + QFileInfo(image_path).fileName();
+    if (!QFile::exists(new_image_path)) {
+            if (!QFile::copy(image_path, new_image_path)) {
+                std::runtime_error("Unable to copy image into channel_folder\n");
+            }
+    }
+
+    return new_image_path.toStdString();
+}
+
+std::string MessageUtility::copy_image_to_chat_folder(const QString& image_path) {
+    QString new_image_path = QString(MEDIA_CHAT_IMAGE_PATH) + QFileInfo(image_path).fileName();
+    if (!QFile::exists(new_image_path)) {
+            if (!QFile::copy(image_path, new_image_path)) {
+                std::runtime_error("Unable to copy image into chat_folder\n");
             }
     }
 

@@ -41,7 +41,6 @@ void ChannelList::removeChannels() {
 }
 
 void ChannelList::slotClear() {
-    std::cerr << "clear channels list\n";
     removeChannels();
 }
 
@@ -112,7 +111,7 @@ void ChannelList::paintEvent(QPaintEvent *) {
 void ChannelList::setupConnection() {
     connect(ui->searchEdit, &QLineEdit::returnPressed, this, &ChannelList::slotsHandleReturnPress);
     connect(ui->createChannelButton, &QPushButton::clicked, this, &ChannelList::slotCreateChannel);
-    connect(ClientSingleton::get_client(), &Client::get_create_channel_result, this, &ChannelList::slotCreateChannelResult);
+    connect(ClientSingleton::get_client(), &Client::create_channel_result, this, &ChannelList::slotCreateChannelResult);
     connect(ClientSingleton::get_client(), &Client::find_channel_result, this, &ChannelList::slotFindChannelResult);
     connect(ClientSingleton::get_client(), &Client::get_channels_result, this, &ChannelList::slotGetChannelsResult);
 }

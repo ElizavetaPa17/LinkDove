@@ -72,7 +72,7 @@ private slots:
     /**
      * <p> Слот, принимающий события нажатия на виджет результата поиска канала. </p>
      * @brief slotHandleChannelCardClicked
-     * @param channel_info
+     * @param channel_info - Структура, содержащая информацию о канале.
      */
     void slotHandleChannelCardClicked(const ChannelInfo &channel_info);
 

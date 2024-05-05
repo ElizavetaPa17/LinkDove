@@ -51,6 +51,9 @@ enum ResponseTypes {
     SEND_CHNNL_MSG_SUCCESS_ANSWER,
     SEND_CHNNL_MSG_FAILED_ANSWER,
 
+    SEND_CHAT_MSG_SUCCESS_ANSWER,
+    SEND_CHAT_MSG_FAILED_ANSWER,
+
     GET_IND_MSG_SUCCESS_ANSWER,
     GET_IND_MSG_FAILED_ANSWER,
 
@@ -74,11 +77,30 @@ enum ResponseTypes {
 
     GET_CHNNL_MSG_SUCCESS_ANSWER,
     GET_CHNNL_MSG_FAILED_ANSWER,
+
+    CREATE_CHAT_SUCCESS_ANSWER,
+    CREATE_CHAT_FAILED_ANSWER,
+
+    GET_CHATS_SUCCESS_ANSWER,
+    GET_CHATS_FAILED_ANSWER,
+
+    FIND_CHAT_SUCCESS_ANSWER,
+    FIND_CHAT_FAILED_ANSWER,
+
+    IS_CHAT_PARTICIPANT_SUCCESS_ANSWER,
+    IS_CHAT_PARTICIPANT_FAILED_ANSWER,
+
+    ADD_PARTICIPANT_TO_CHAT_SUCCESS_ANSWER,
+    ADD_PARTICIPANT_TO_CHAT_FAILED_ANSWER,
+
+    GET_CHAT_MSG_SUCCESS_ANSWER,
+    GET_CHAT_MSG_FAILED_ANSWER,
 };
 
 enum MessageType {
     INDIVIDUAL_MSG_TYPE,
-    CHANNEL_MSG_TYPE
+    CHANNEL_MSG_TYPE,
+    GROUP_MSG_TYPE
 };
 
 enum MessageContentType {
@@ -117,6 +139,8 @@ const int GET_COMPLAINTS_LIMIT = 100;
 #define DATETIME_FORMAT "yyyy-MM-dd hh:mm:ss"
 
 #define MEDIA_IND_IMAGE_PATH "media/ind_images/"
+#define MEDIA_CHANNEL_IMAGE_PATH "media/channel_images"
+#define MEDIA_CHAT_IMAGE_PATH "media/chat_images"
 
 // Идентификатор для идентификатора сущности, которая создана, но еще не инициализирована или не сохранена в БД.
 const int CREATED_ENTITY_ID = 0;
@@ -202,6 +226,10 @@ extern const char *SEND_IND_MSG_FAILED;
 extern const char *SEND_CHNNL_MSG_SUCCESS;
 // Ответ сервера на неудачную отправку сообщения в канал
 extern const char *SEND_CHNNL_MSG_FAILED;
+// Ответ сервера на успешную отправку сообщения в чат (группу)
+extern const char *SEND_CHAT_MSG_SUCCESS;
+// Ответ сервера на неудачную отправку сообщения в чат (группу)
+extern const char *SEND_CHAT_MSG_FAILED;
 
 // Запрос на получение сообщений в чате с собеседником
 extern const char *GET_IND_MSG_REQUEST;
@@ -258,3 +286,45 @@ extern const char *GET_CHNNL_MSG_REQUEST;
 extern const char *GET_CHNNL_MSG_SUCCESS;
 // Ответ сервера на неудачное получение сообщений из канала
 extern const char *GET_CHNNL_MSG_FAILED;
+
+// Запрос на создание чата
+extern const char *CREATE_CHAT_REQUEST;
+// Ответ сервера на успешное создание чата
+extern const char *CREATE_CHAT_SUCCESS;
+// Ответ сервера на неудачное создание чата
+extern const char *CREATE_CHAT_FAILED;
+
+// Запрос на получение информации о чатах, в которых состоит текущий пользователь
+extern const char *GET_CHATS_REQUEST;
+// Ответ сервера на успешную отправку информации о таких чатах
+extern const char *GET_CHATS_SUCCESS;
+// Ответ сервера на неудачную отправку информации о таких чатах
+extern const char *GET_CHATS_FAILED;
+
+// Запрос на поиск информации о чате
+extern const char *FIND_CHAT_REQUEST;
+// Ответ сервера на успешный поиск информации о чате
+extern const char *FIND_CHAT_SUCCESS;
+// Ответ сервера на неудачный поиск информации о чате
+extern const char *FIND_CHAT_FAILED;
+
+// Запрос на получение информации о том, является ли пользователь участником чата
+extern const char *IS_CHAT_PARTICIPANT_REQUEST;
+// Ответ сервера на успешную отправку информации
+extern const char *IS_CHAT_PARTICIPANT_SUCCESS;
+// Ответ сервера на неудачную отправку информации
+extern const char *IS_CHAT_PARTICIPANT_FAILED;
+
+// Запрос на добавление текущего пользователя в чат
+extern const char *ADD_PARTICIPANT_TO_CHAT_REQUEST;
+// Ответ сервера на успешное добавление текущего пользователя в чат
+extern const char *ADD_PARTICIPANT_TO_CHAT_SUCCESS;
+// Ответ сервера на неудачное добавление текущего пользователя в чат
+extern const char *ADD_PARTICIPANT_TO_CHAT_FAILED;
+
+// Запрос на получение сообщений из чата
+extern const char *GET_CHAT_MSG_REQUEST;
+// Ответ сервера на успешное получение сообщений из чата
+extern const char *GET_CHAT_MSG_SUCCESS;
+// Ответ сервера на неудачное получение сообщений из чата
+extern const char *GET_CHAT_MSG_FAILED;

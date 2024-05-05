@@ -6,6 +6,7 @@
 #include "UserInfo.h"
 #include "logininfo.h"
 #include "channelinfo.h"
+#include "chatinfo.h"
 #include "complaint.h"
 #include "imessage.h"
 
@@ -157,7 +158,7 @@ public:
      * @brief add_participant_to_channel
      * @param participant_id - Идентификатор добавляемого пользователя.
      * @param channel_id - Идентификатор канала, в который добавляется пользователь.
-     * @return -  В случае успеха возвращает true, иначе - false.
+     * @return - В случае успеха возвращает true, иначе - false.
      */
     bool add_participant_to_channel(unsigned long long participant_id, unsigned long long channel_id);
 
@@ -177,6 +178,72 @@ public:
      * @return - Вектор сообщений.
      */
     std::vector<std::shared_ptr<IMessage> > get_channel_messages(unsigned long long channel_id);
+
+    /**
+     * <p> Добавляет чат в БД. </p>
+     * @brief add_chat
+     * @param chat_info - Структура, содержащая информацию о чате.
+     * @return  - В случае положительного ответа возвращает true, иначе - false.
+     */
+    bool add_chat(const ChatInfo &chat_info);
+
+    /**
+     * <p> Извлекает информацию о чате. </p>
+     * @brief get_chat
+     * @param chat_name - Имя чата.
+     * @return - Структура, содержащая информацию о чате.
+     */
+    ChatInfo get_chat(const std::string &chat_name);
+
+    /**
+     * <p> Извлекает информацию о чате. </p>
+     * @brief get_chat
+     * @param id - Идентификатор чата.
+     * @return - Структура, содержащая информацию о чате.
+     */
+    ChatInfo get_chat(unsigned long long id);
+
+    /**
+     * <p> Добавляет пользователя в чат. </p>
+     * @brief add_participant_to_chat
+     * @param participant_id - Идентификатор добавляемого пользователя.
+     * @param chat_id - Идентификатор чата.
+     * @return - В случае успеха возвращает true, иначе - false.
+     */
+    bool add_participant_to_chat(unsigned long long participant_id, unsigned long long chat_id);
+
+    /**
+     * <p> Проверяет, является ли пользователь участником чата. </p>
+     * @brief is_chat_participant
+     * @param participant_id - Идентификатор пользователя.
+     * @param chat_id - Идентификатор чата.
+     * @return - В случае положительного ответа возвращает true, иначе - false.
+     */
+    bool is_chat_participant(unsigned long long participant_id, unsigned long long chat_id);
+
+    /**
+     * <p> Возвращает информацию о чатах, в которых состоит пользователь. </p>
+     * @brief get_chats
+     * @param id - Идентификатор пользователя, информация о чатах которого извлекается.
+     * @return  - Вектор из структур, содержащих информацию о чатах.
+     */
+    std::vector<ChatInfo> get_chats(unsigned long long id);
+
+    /**
+     * <p> Добавляет сообщение в чат (группу). </p>
+     * @brief add_chat_mess
+     * @param msg - Добавляемое сообщение.
+     * @return - В случае успеха возвращает true, иначе - false.
+     */
+    bool add_chat_message(const IMessage& msg);
+
+    /**
+     * <p> Извлекает сообщения чата из БД. </p>
+     * @brief get_chat_messages
+     * @param chat_id - Идентификатор чата, из которого извлекаются сообщения.
+     * @return - Вектор сообщений.
+     */
+    std::vector<std::shared_ptr<IMessage> > get_chat_messages(unsigned long long chat_id);
 
     /**
      * <p> Возвращает информацию о пользователе, который соответствует никнейму. </p>
@@ -216,10 +283,18 @@ namespace link_dove_database_details__ {
     /**
      * <p> Извлекает данные о группе, которые возвращает объект query. </p>
      * @brief retrieve_channel_info
-     * @param query - Запрос, содержащий данные о пользователе.
+     * @param query - Запрос, содержащий данные о канале.
      * @return - Структура. содержащая данные о канале.
      */
-    ChannelInfo retrieve_channel_info(const QSqlQuery& query);
+    ChannelInfo retrieve_channel_info(const QSqlQuery &query);
+
+    /**
+     * <p Извлекает данные о чате, которые возвращает объект query. </p>
+     * @brief retrieve_chat_info
+     * @param query - Запрос, содержащий данные о чате.
+     * @return - Структура, содержащая данные о чате.
+     */
+    ChatInfo retrieve_chat_info(const QSqlQuery &query);
 
     /**
      * <p> Извлекает данные о пользователе, которые возвращает объект query. </p>
@@ -227,7 +302,7 @@ namespace link_dove_database_details__ {
      * @param query - Запрос, содержащий данные о пользователе.
      * @return - Структура. содержащая данные о пользователе.
      */
-    StatusInfo retrieve_status_info(const QSqlQuery& query);
+    StatusInfo retrieve_status_info(const QSqlQuery &query);
 
     /**
      * <p> Извлекает заданное количество жалоб. </p>
@@ -255,6 +330,15 @@ namespace link_dove_database_details__ {
      * @return - Список сообщений.
      */
     std::vector<std::shared_ptr<IMessage>> retrieve_channel_messages(QSqlQuery &query, QSqlQuery &content_query);
+
+    /**
+     * <p> Извлекает список сообщений из чата. </p>
+     * @brief retrieve_chat_messages
+     * @param query - Запрос, содержащий список сообщений
+     * @param content_query - Вспомогательный запрос для извлечения содержимого
+     * @return - Список сообщений.
+     */
+    std::vector<std::shared_ptr<IMessage>> retrieve_chat_messages(QSqlQuery &query, QSqlQuery &content_query);
 }
 
 #endif // LINKDOVESQLDATABASE_H

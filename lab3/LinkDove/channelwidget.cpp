@@ -45,7 +45,6 @@ void ChannelWidget::slotHandleIsChannelParticipantResult(int result, bool is_par
             ui->stackedWidget->setCurrentIndex(1); // NOT_PARTICIPANT_PAGE
         }
 
-        ClientSingleton::get_client()->async_get_channel_messages(channel_info_.id_);
     } else {
         std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Ошибка получения информации об участниках канала. Попытайтесь позже. ");
         dialog_ptr->exec();
@@ -53,6 +52,8 @@ void ChannelWidget::slotHandleIsChannelParticipantResult(int result, bool is_par
         ui->stackedWidget->show();
         ui->stackedWidget->setCurrentIndex(1); // NOT_PARTICIPANT_PAGE
     }
+
+    ClientSingleton::get_client()->async_get_channel_messages(channel_info_.id_);
 }
 
 void ChannelWidget::slotClear() {
@@ -152,7 +153,7 @@ void ChannelWidget::slotChooseImage() {
 
     if (!str.isEmpty()) {
         try {
-            image_path_ = MessageUtility::copy_image_to_ind_folder(str);
+            image_path_ = MessageUtility::copy_image_to_channel_folder(str);
             std::shared_ptr<ChannelMessage> ind_message = MessageUtility::create_channel_image_message(channel_info_.id_,
                                                                                                        image_path_);
             ClientSingleton::get_client()->async_send_message(*ind_message);
