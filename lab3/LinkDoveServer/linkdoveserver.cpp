@@ -650,8 +650,10 @@ void LinkDoveServer::handle_is_chat_participant_request(ConnectionIterator itera
         answer << IS_CHAT_PARTICIPANT_SUCCESS << "\n";
         UtilitySerializator::serialize_fundamental<bool>(answer, is_participant);
         answer << END_OF_REQUEST;
+        std::cerr << "нет ошибки\n";
     } catch (std::runtime_error &ex) {
         std::cerr << ex.what();
+        std::cerr << "Ощибочка\n";
         answer << IS_CHAT_PARTICIPANT_FAILED << "\n" << END_OF_REQUEST;
     }
 

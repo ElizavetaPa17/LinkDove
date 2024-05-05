@@ -26,6 +26,7 @@ ChannelWidget::~ChannelWidget()
 
 void ChannelWidget::slotOpenChannel(const ChannelInfo &channel_info) {
     channel_info_ = channel_info;
+    ui->infoLabel->setText(channel_info_.name_.c_str());
 
     slotClear();
     ClientSingleton::get_client()->async_is_channel_participant_request(channel_info_.id_);
@@ -94,6 +95,7 @@ void ChannelWidget::slotHandleSendMessage(int result) {
                 phboxLayout->addStretch();
 
                 ui->verticalLayout->addLayout(phboxLayout);
+                ui->verticalLayout->addStretch();
                 break;
             }
         }

@@ -628,9 +628,9 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
             emit find_chat_result(FIND_CHAT_FAILED_ANSWER);
         } else if (answer_type == IS_CHAT_PARTICIPANT_SUCCESS) {
             bool is_participant = UtilitySerializator::deserialize_fundamental<bool>(connection_.in_stream_).second;
-            emit is_chat_participant_result(IS_CHANNEL_PARTICIPANT_SUCCESS_ANSWER, is_participant);
-        } else if (answer_type == IS_CHANNEL_PARTICIPANT_FAILED) {
-            emit is_chat_participant_result(IS_CHANNEL_PARTICIPANT_SUCCESS_ANSWER, false);
+            emit is_chat_participant_result(IS_CHAT_PARTICIPANT_SUCCESS_ANSWER, is_participant);
+        } else if (answer_type == IS_CHAT_PARTICIPANT_FAILED) {
+            emit is_chat_participant_result(IS_CHAT_PARTICIPANT_FAILED_ANSWER, false);
         } else if (answer_type == ADD_PARTICIPANT_TO_CHAT_SUCCESS) {
             emit add_participant_to_chat_result(ADD_PARTICIPANT_TO_CHAT_SUCCESS_ANSWER);
         } else if (answer_type == ADD_PARTICIPANT_TO_CHAT_FAILED){

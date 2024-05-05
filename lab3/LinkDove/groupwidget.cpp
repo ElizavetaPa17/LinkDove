@@ -84,10 +84,11 @@ void GroupWidget::slotHandleSendMessage(int result) {
                 pix = pix.scaledToWidth(450);
 
                 QHBoxLayout *phboxLayout = new QHBoxLayout();
-                phboxLayout->addWidget(new MessageCard(nullptr, pix, image_path_.c_str()));
                 phboxLayout->addStretch();
+                phboxLayout->addWidget(new MessageCard(nullptr, pix, image_path_.c_str()));
 
                 ui->verticalLayout->addLayout(phboxLayout);
+                ui->verticalLayout->addStretch();
                 break;
             }
         }
