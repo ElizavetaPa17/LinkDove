@@ -25,6 +25,10 @@ void ProfileWidget::setStatusInfo(const StatusInfo &status_info) {
     ui->emailLabel->setText(QString::fromUtf8(status_info.email_));
     ui->birthdayLabel->setText(status_info.birthday_.toString(BIRTHAY_FORMAT));
     ui->textStatusLabel->setText(QString::fromUtf8(status_info.text_status_));
+
+    QPixmap pix(status_info_.image_path_.c_str());
+    pix = pix.scaled(300, 300);
+    ui->profileIconLabel->setPixmap(pix);
 }
 
 StatusInfo ProfileWidget::getStatusInfo() {

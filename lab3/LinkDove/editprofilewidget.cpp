@@ -9,6 +9,7 @@
 #include "constants.h"
 #include "infodialog.h"
 #include "clientsingleton.h"
+#include "utility.h"
 
 EditProfileWidget::EditProfileWidget(QWidget *parent) :
     QWidget(parent),
@@ -25,10 +26,16 @@ EditProfileWidget::~EditProfileWidget()
 }
 
 void EditProfileWidget::setStatusInfo(const StatusInfo& status_info) {
+    status_info_ = status_info;
+
     ui->usernameEdit->setText(status_info.username_.c_str());
     ui->emailEdit->setText(status_info.email_.c_str());
     ui->birthdayLabel->setText(status_info.birthday_.toString(BIRTHAY_FORMAT));
     ui->textEdit->setText(status_info.text_status_.c_str());
+
+    QPixmap pix(status_info_.image_path_.c_str());
+    pix = pix.scaled(300, 300);
+    ui->profileIconLabel->setPixmap(pix);
 }
 
 StatusInfo EditProfileWidget::getStatusInfo() {
@@ -49,7 +56,6 @@ void EditProfileWidget::slotEditFinished() {
     status_info_.birthday_    = QDate::fromString(ui->birthdayLabel->text());
     status_info_.text_status_ = ui->textEdit->toPlainText().toStdString();
 
-
     ClientSingleton::get_client()->async_update_user(status_info_);
     emit editFinished();
 }
@@ -57,10 +63,14 @@ void EditProfileWidget::slotEditFinished() {
 void EditProfileWidget::slotChooseUserIcon() {
     QString file_path = QFileDialog::getOpenFileName(nullptr, "Икона пользователя", "", "*.png ;; *.jpg");
 
+    file_path = MessageUtility::copy_image_to_avatars_folder(file_path).c_str();
+
     if (!file_path.isEmpty()) {
         QPixmap pixmap(file_path);
         pixmap = pixmap.scaled(300, 300);
         ui->profileIconLabel->setPixmap(pixmap);
+
+        status_info_.image_path_ = file_path.toStdString();
     }
 }
 

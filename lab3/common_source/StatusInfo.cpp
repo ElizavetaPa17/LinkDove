@@ -14,7 +14,7 @@ size_t StatusInfo::serialize(std::ostream &os) const {
     size += UtilitySerializator::serialize(os, email_);
     size += UtilitySerializator::serialize(os, birthday_.toString(BIRTHAY_FORMAT).toStdString());
     size += UtilitySerializator::serialize(os, text_status_);
-    size += UtilitySerializator::serialize(os, image_bytes_);
+    size += UtilitySerializator::serialize(os, image_path_);
     size == UtilitySerializator::serialize_fundamental<bool>(os, is_banned_);
 
     return size;
@@ -45,10 +45,9 @@ size_t StatusInfo::deserialize(std::istream &is) {
     size += temp_str_pair.first;
     text_status_ = temp_str_pair.second;
 
-    std::pair<size_t, std::vector<char>> temp_vec_pair;
-    temp_vec_pair = UtilitySerializator::deserialize_char_vec(is);
-    size += temp_vec_pair.first;
-    image_bytes_ = temp_vec_pair.second;
+    temp_str_pair = UtilitySerializator::deserialize_string(is);
+    size += temp_str_pair.first;
+    image_path_ = temp_str_pair.second;
 
     std::pair<size_t, bool> temp_bool_pair;
     temp_bool_pair = UtilitySerializator::deserialize_fundamental<bool>(is);

@@ -56,7 +56,7 @@ bool LinkDoveSQLDataBase::setup_tables() {
                             "  password VARCHAR(40) NOT NULL, "
                             "  birthday DATE NOT NULL, "
                             "  text_status VARCHAR(256), "
-                            "  image MEDIUMBLOB, "
+                            "  image VARCHAR(400) DEFAULT 'media/avatars/default_avatar.png', "
                             "  is_banned TINYINT DEFAULT 0); ");
 
     if (!is_ok) {
@@ -302,29 +302,35 @@ bool LinkDoveSQLDataBase::update_user(const StatusInfo& status_info) {
         query.prepare("UPDATE USERS "
                   "SET username = :username,"
                   "    email = :email, "
-                  "    text_status = :text_status "
+                  "    text_status = :text_status, "
+                  "    image = :image "
                   "WHERE ID = :id; ");
         query.bindValue(":username",    status_info.username_.c_str());
         query.bindValue(":email",       status_info.email_.c_str());
     } else if (is_username_changed) {
         query.prepare("UPDATE USERS "
                   "SET username = :username,"
-                  "    text_status = :text_status "
+                  "    text_status = :text_status, "
+                  "    image = :image "
                   "WHERE ID = :id; ");
         query.bindValue(":username",    status_info.username_.c_str());
     } else if (is_email_changed) {
         query.prepare("UPDATE USERS "
                   "SET email       = :email, "
-                  "    text_status = :text_status "
+                  "    text_status = :text_status, "
+                  "    image = :image "
                   "WHERE ID = :id; ");
         query.bindValue(":email",       status_info.email_.c_str());
+        query.bindValue(":image", status_info.image_path_.c_str());
     } else {
         query.prepare("UPDATE USERS "
-                      "SET text_status = :text_status "
+                      "SET text_status = :text_status, "
+                      "    image = :image "
                       "WHERE ID = :id; ");
     }
 
     query.bindValue(":text_status", status_info.text_status_.c_str());
+    query.bindValue(":image", status_info.image_path_.c_str());
     query.bindValue(":id",          status_info.id_);
 
     if (!query.exec()) {
@@ -437,7 +443,7 @@ std::vector<Complaint> LinkDoveSQLDataBase::get_complaints(int count) {
         throw std::runtime_error("get_complaints failed: query.exec");
     } else {
         if (!query.next()) {
-            std::vector<Complaint>(); // в БД нет жалоб
+            return std::vector<Complaint>(); // в БД нет жалоб
         } else {
             return link_dove_database_details__::retrieve_complaints(query, count);
         }
@@ -1292,9 +1298,7 @@ namespace link_dove_database_details__ {
         status_info.email_       = query.value("email").toString().toStdString();
         status_info.birthday_    = QDate::fromString(query.value("birthday").toString(), QString(BIRTHAY_FORMAT));
         status_info.text_status_ = query.value("text_status").toString().toStdString();
-
-        QByteArray image_bytes   = query.value("image").toByteArray();
-        status_info.image_bytes_ = std::vector(image_bytes.begin(), image_bytes.end());
+        status_info.image_path_ = query.value("image").toString().toStdString();
 
         return status_info;
     }

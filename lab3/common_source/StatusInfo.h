@@ -13,7 +13,7 @@ struct StatusInfo final {
     std::string email_;
     QDate       birthday_;
     std::string text_status_;
-    std::vector<char> image_bytes_;
+    std::string image_path_;
     bool is_banned_ = false;
 
     /**

@@ -328,6 +328,14 @@ public:
      * @return - Путь к изображению в папке MEDIA_CHAT_IMAGE_PATH.
      */
     static std::string copy_image_to_chat_folder(const QString& image_path);
+
+    /**
+     * <p> Копирует изображение из места, куда указывает image_path, в MEDIA_AVATARS_IMAGE_PATH. </p>
+     * @brief copy_image_to_avatars_folder
+     * @param image_path - Старый путь к изображению.
+     * @return - Путь к изображению в папке MEDIA_AVATARS_IMAGE_PATH.
+     */
+    static std::string copy_image_to_avatars_folder(const QString& image_path);
 };
 
 #endif // UTILITY_H

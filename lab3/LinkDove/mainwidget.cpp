@@ -106,6 +106,7 @@ void MainWidget::setupConnection() {
     connect(ui->settingWidget,   &SettingWidget::quitAccount,  ui->usersList,   &UsersList::slotClear);
     connect(ui->settingWidget,   &SettingWidget::quitAccount,  ui->channelList, &ChannelList::slotClear);
     connect(ui->settingWidget,   &SettingWidget::quitAccount,  ui->channelWidget, &ChannelWidget::slotClear);
+    connect(ui->settingWidget,   &SettingWidget::quitAccount,  ui->groupWidget, &GroupWidget::slotClear);
 
     connect(ui->profileWidget,     &ProfileWidget::editProfile, [this] () {
                                                                     ui->profileStackedWidget->setCurrentIndex(EDITED_PROFILE_PAGE);

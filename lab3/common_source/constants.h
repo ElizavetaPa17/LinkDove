@@ -139,8 +139,9 @@ const int GET_COMPLAINTS_LIMIT = 100;
 #define DATETIME_FORMAT "yyyy-MM-dd hh:mm:ss"
 
 #define MEDIA_IND_IMAGE_PATH "media/ind_images/"
-#define MEDIA_CHANNEL_IMAGE_PATH "media/channel_images"
-#define MEDIA_CHAT_IMAGE_PATH "media/chat_images"
+#define MEDIA_CHANNEL_IMAGE_PATH "media/channel_images/"
+#define MEDIA_CHAT_IMAGE_PATH "media/chat_images/"
+#define MEDIA_AVATARS_IMAGE_PATH "media/avatars/"
 
 // Идентификатор для идентификатора сущности, которая создана, но еще не инициализирована или не сохранена в БД.
 const int CREATED_ENTITY_ID = 0;

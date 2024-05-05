@@ -433,3 +433,14 @@ std::string MessageUtility::copy_image_to_chat_folder(const QString& image_path)
 
     return new_image_path.toStdString();
 }
+
+std::string MessageUtility::copy_image_to_avatars_folder(const QString& image_path) {
+    QString new_image_path = QString(MEDIA_AVATARS_IMAGE_PATH) + QFileInfo(image_path).fileName();
+    if (!QFile::exists(new_image_path)) {
+            if (!QFile::copy(image_path, new_image_path)) {
+                std::runtime_error("Unable to copy image into chat_folder\n");
+            }
+    }
+
+    return new_image_path.toStdString();
+}
