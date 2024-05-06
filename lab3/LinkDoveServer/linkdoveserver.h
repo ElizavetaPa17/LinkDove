@@ -272,6 +272,13 @@ private:
      */
     void handle_get_chat_messages_request(ConnectionIterator iterator);
 
+    /**
+     * <p> Обрабатывает запрос на удаление чата (группы). </p>
+     * @brief handle_delete_chat
+     * @param iterator
+     */
+    void handle_delete_chat(ConnectionIterator iterator);
+
     /** <p> Запускает в отдельном потоке контекст для обработки асинхронных функций. </p>
      * @brief run_context
      */

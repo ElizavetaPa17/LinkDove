@@ -84,6 +84,19 @@ private slots:
      */
     void slotChooseImage();
 
+    /**
+     * <p> Слот, который вызывается при нажатии кнопки удаления чата (группы). </p>
+     * @brief slotDeleteGroup
+     */
+    void slotDeleteGroup();
+
+    /**
+     * <p> Обрабатывает результат удаления группы. </p>
+     * @brief slotHandleDeleteResult
+     * @param result - Результат удаления группы.
+     */
+    void slotHandleDeleteResult(int result);
+
 private:
     Ui::GroupWidget *ui;
     ChatInfo chat_info_;

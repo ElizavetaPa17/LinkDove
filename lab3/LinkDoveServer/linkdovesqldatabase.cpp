@@ -954,12 +954,6 @@ bool LinkDoveSQLDataBase::delete_channel(unsigned long long channel_id) {
         // если удаление было успешным, то row affected > 0, иначе row affected == 0 (false).
         return query.numRowsAffected();
     }
-
-    // Удаляем все изображения
-
-    // Удаляем всех участников
-
-    // Удаляем сам канал
 }
 
 bool LinkDoveSQLDataBase::add_chat(const ChatInfo &chat_info) {
@@ -1095,6 +1089,23 @@ std::vector<ChatInfo> LinkDoveSQLDataBase::get_chats(unsigned long long id) {
     }
 
     return chats;
+}
+
+bool LinkDoveSQLDataBase::delete_chat(unsigned long long chat_id) {
+    QSqlQuery query(data_base_);
+
+    // Удаляем все текстовые сообщения
+    query.prepare(" DELETE FROM CHATS "
+                  " WHERE ID=:id; ");
+
+    query.bindValue(":id", chat_id);
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString() << '\n';
+        return false;
+    } else {
+        // если удаление было успешным, то row affected > 0, иначе row affected == 0 (false).
+        return query.numRowsAffected();
+    }
 }
 
 bool LinkDoveSQLDataBase::add_chat_message(const IMessage& msg) {

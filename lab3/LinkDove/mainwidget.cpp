@@ -141,6 +141,11 @@ void MainWidget::setupConnection() {
                                                                                                         ui->channelStackedWidget->setCurrentIndex(1);
                                                                                                       }
                                                                                                     });
+    connect(ClientSingleton::get_client(), &Client::delete_chat_result, this, [this](int result) {
+                                                                                                    if (result == DELETE_CHAT_SUCCESS_ANSWER) {
+                                                                                                      ui->chatStackedWidget->setCurrentIndex(1);
+                                                                                                    }
+                                                                                                  });
 
     connect(ui->usersList, &UsersList::userCardClicked, ui->chatWidget, &ChatWidget::slotOpenChatWith);
     connect(ui->channelList, &ChannelList::channelCardClicked, ui->channelWidget, &ChannelWidget::slotOpenChannel);

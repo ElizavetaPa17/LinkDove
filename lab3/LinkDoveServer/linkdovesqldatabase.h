@@ -238,6 +238,14 @@ public:
     std::vector<ChatInfo> get_chats(unsigned long long id);
 
     /**
+     * <p> Удаляет чат (группу) из БД. </p>
+     * @brief delete_chat
+     * @param chat_id - Идентификатор удаляемого чата (группы).
+     * @return - В случае успеха возвращает true, иначе - false.
+     */
+    bool delete_chat(unsigned long long chat_id);
+
+    /**
      * <p> Добавляет сообщение в чат (группу). </p>
      * @brief add_chat_mess
      * @param msg - Добавляемое сообщение.

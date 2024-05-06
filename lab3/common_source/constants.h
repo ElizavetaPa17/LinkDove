@@ -98,6 +98,9 @@ enum ResponseTypes {
 
     GET_CHAT_MSG_SUCCESS_ANSWER,
     GET_CHAT_MSG_FAILED_ANSWER,
+
+    DELETE_CHAT_SUCCESS_ANSWER,
+    DELETE_CHAT_FAILED_ANSWER,
 };
 
 enum MessageType {
@@ -339,3 +342,10 @@ extern const char *GET_CHAT_MSG_REQUEST;
 extern const char *GET_CHAT_MSG_SUCCESS;
 // Ответ сервера на неудачное получение сообщений из чата
 extern const char *GET_CHAT_MSG_FAILED;
+
+// Запрос на удаление чата
+extern const char *DELETE_CHAT_REQUEST;
+// Ответ сервера на успешное удаление чата
+extern const char *DELETE_CHAT_SUCCESS;
+// Ответ сервера на неудачное удаление чата
+extern const char *DELETE_CHAT_FAILED;

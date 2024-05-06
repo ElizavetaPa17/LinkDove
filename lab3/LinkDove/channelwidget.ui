@@ -322,6 +322,9 @@ QPushButton:hover {
      <property name="cursor">
       <cursorShape>PointingHandCursor</cursorShape>
      </property>
+     <property name="toolTip">
+      <string>Удалить канал</string>
+     </property>
      <property name="text">
       <string/>
      </property>

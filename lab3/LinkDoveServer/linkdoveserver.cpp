@@ -181,6 +181,8 @@ void LinkDoveServer::handle_type_request(ConnectionIterator iterator) {
         handle_find_chat_request(iterator);
     } else if (request_type == GET_CHAT_MSG_REQUEST) {
         handle_get_chat_messages_request(iterator);
+    } else if (request_type == DELETE_CHAT_REQUEST) {
+        handle_delete_chat(iterator);
     }
 }
 
@@ -715,6 +717,22 @@ void LinkDoveServer::handle_get_chat_messages_request(ConnectionIterator iterato
     } catch (std::runtime_error& ex) {
         std::cerr << ex.what() << '\n';
         answer << GET_CHAT_MSG_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_delete_chat(ConnectionIterator iterator) {
+    unsigned long long chat_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    if (data_base_.delete_chat(chat_id)) {
+        answer << DELETE_CHAT_SUCCESS << "\n" << END_OF_REQUEST;
+    } else {
+        answer << DELETE_CHAT_FAILED << "\n" << END_OF_REQUEST;
     }
 
     iterator->out_stream_ << answer.str();

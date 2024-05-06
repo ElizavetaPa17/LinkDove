@@ -187,8 +187,6 @@ void ChannelWidget::slotHandleDeleteResult(int result) {
     if (result == DELETE_CHANNEL_SUCCESS_ANSWER) {
         slotClear();
     }
-
-    std::cerr << "Канал удален.\n";
 }
 
 void ChannelWidget::setupConnection() {

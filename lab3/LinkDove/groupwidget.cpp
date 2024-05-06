@@ -6,6 +6,7 @@
 #include "groupmessage.h"
 #include "clientsingleton.h"
 #include "infodialog.h"
+#include "agreedialog.h"
 #include "messagecard.h"
 #include "utility.h"
 
@@ -181,6 +182,20 @@ void GroupWidget::slotChooseImage() {
     }
 }
 
+void GroupWidget::slotDeleteGroup() {
+    std::unique_ptr<AgreeDialog> dialog_ptr = std::make_unique<AgreeDialog>(nullptr, "Вы точно хотите удалить группу?");
+    if (dialog_ptr->exec() == QDialog::Accepted) {
+        ClientSingleton::get_client()->async_delete_chat(chat_info_.id_);
+    }
+}
+
+
+void GroupWidget::slotHandleDeleteResult(int result) {
+    if (result == DELETE_CHAT_SUCCESS_ANSWER) {
+        slotClear();
+    }
+}
+
 void GroupWidget::setupConnection() {
     connect(ui->messageEdit,       &QLineEdit::returnPressed, this, &GroupWidget::slotSendMessage);
     connect(ui->sendButton,        &QPushButton::clicked,     this, &GroupWidget::slotSendMessage);
@@ -190,7 +205,10 @@ void GroupWidget::setupConnection() {
     connect(ClientSingleton::get_client(), &Client::get_chat_msg_result, this, &GroupWidget::slotHandleGetMessages);
     connect(ClientSingleton::get_client(), &Client::is_chat_participant_result, this, &GroupWidget::slotHandleIsGroupParticipantResult);
     connect(ClientSingleton::get_client(), &Client::add_participant_to_chat_result, this, &GroupWidget::slotHandleAddParticipantGroupResult);
+    connect(ClientSingleton::get_client(), &Client::delete_chat_result, this, &GroupWidget::slotHandleDeleteResult);
+
     connect(ui->joinButton, &QPushButton::clicked, ClientSingleton::get_client(), [this] () {
                                                                                     ClientSingleton::get_client()->async_add_chat_participant_request(chat_info_.id_);
                                                                                   });
+    connect(ui->deleteButton, &QPushButton::clicked, this, &GroupWidget::slotDeleteGroup);
 }

@@ -201,6 +201,13 @@ public:
     void async_get_chat_messages(unsigned long long chat_id);
 
     /**
+     * <p> Отправляет запрос на удаление чата (группы). </p>
+     * @brief async_delete_chat
+     * @param channel_id - Идентификатор удаляемой группы.
+     */
+    void async_delete_chat(unsigned long long group_id);
+
+    /**
      * <p> Возвращает информацию о пользователе. </p>
      * @brief get_status_info
      * @return - Структура, содержащая информацию о пользователе.
@@ -432,6 +439,13 @@ signals:
      * @param result - Параметр, содержащий результат запроса.
      */
     void get_chat_msg_result(int result);
+
+    /**
+     * <p> Генерирует сигнал после получения результата удаления чата (группы). </p>
+     * @brief delete_chat_result
+     * @param result - Параметр, содеращий результат запроса.
+     */
+    void delete_chat_result(int result);
 
 private:
     std::shared_ptr<asio::io_context> io_context_ptr_;
