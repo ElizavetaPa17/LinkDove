@@ -53,6 +53,16 @@ void MainWidget::slotRedirectClick(QWidget *sender) {
     }
 }
 
+void MainWidget::slotTabRedirectClick(int index) {
+    if (index == 0) { // FIX MAGIC INT
+        ClientSingleton::get_client()->async_get_interlocutors();
+    } else if (index == 2) { // FIX MAGIN INT
+        ClientSingleton::get_client()->async_get_channels();
+    } else {
+        ClientSingleton::get_client()->async_get_chats();
+    }
+}
+
 void MainWidget::slotQuit() {
     // clear status info value
     //memset(&status_info_, 0, sizeof(status_info_));
@@ -100,13 +110,16 @@ void MainWidget::setupConnection() {
     connect(ui->chatLabel,       &ClickableLabel::clicked,     this, &MainWidget::slotRedirectClick);
     connect(ui->settingLabel,    &ClickableLabel::clicked,     this, &MainWidget::slotRedirectClick);
 
+    connect(ui->tabWidget, &QTabWidget::currentChanged, this, &MainWidget::slotTabRedirectClick);
+
     // При выходе из аккаунта сбрасываем все содержимое виджетов
     connect(ui->settingWidget,   &SettingWidget::quitAccount,  this, &MainWidget::slotQuit);
-    connect(ui->settingWidget,   &SettingWidget::quitAccount,  ui->chatWidget, &ChatWidget::slotClear);
-    connect(ui->settingWidget,   &SettingWidget::quitAccount,  ui->usersList,   &UsersList::slotClear);
-    connect(ui->settingWidget,   &SettingWidget::quitAccount,  ui->channelList, &ChannelList::slotClear);
+    connect(ui->settingWidget,   &SettingWidget::quitAccount,  ui->chatWidget,    &ChatWidget::slotClear);
+    connect(ui->settingWidget,   &SettingWidget::quitAccount,  ui->usersList,     &UsersList::slotClear);
+    connect(ui->settingWidget,   &SettingWidget::quitAccount,  ui->channelList,   &ChannelList::slotClear);
+    connect(ui->settingWidget,   &SettingWidget::quitAccount,  ui->chatList,      &ChatList::slotClear);
     connect(ui->settingWidget,   &SettingWidget::quitAccount,  ui->channelWidget, &ChannelWidget::slotClear);
-    connect(ui->settingWidget,   &SettingWidget::quitAccount,  ui->groupWidget, &GroupWidget::slotClear);
+    connect(ui->settingWidget,   &SettingWidget::quitAccount,  ui->groupWidget,   &GroupWidget::slotClear);
 
     connect(ui->profileWidget,     &ProfileWidget::editProfile, [this] () {
                                                                     ui->profileStackedWidget->setCurrentIndex(EDITED_PROFILE_PAGE);

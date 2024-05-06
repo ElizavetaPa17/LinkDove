@@ -77,11 +77,16 @@ void SettingWidget::slotDisplayComplaintList(int get_complaints_result) {
     complaint_dialog_.removeAllComplaints();
     std::vector<Complaint> complaints = ClientSingleton::get_client()->get_complaints();
     size_t sz = complaints.size();
-    for (int i = 0; i < sz; ++i) {
-        complaint_dialog_.addComplaint(complaints[i]);
-    }
 
-    complaint_dialog_.exec();
+    if (sz == 0) {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Список жалоб пуст.");
+        dialog_ptr->exec();
+    } else {
+        for (int i = 0; i < sz; ++i) {
+            complaint_dialog_.addComplaint(complaints[i]);
+        }
+        complaint_dialog_.exec();
+    }
 }
 
 void SettingWidget::slotDisplayAboutDialog() {

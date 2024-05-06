@@ -47,6 +47,7 @@ public slots:
 
 private:
     QScrollArea *scroll_area_;
+
     unsigned long long removed_complaint_id_;
 
     /**

@@ -49,6 +49,13 @@ private slots:
     void slotRedirectClick(QWidget *sender);
 
     /**
+     * <p> Преобразовывает сигналы клика на типы чатов в сигнал switchToPage на нужную страницу.</p>
+     * @brief slotTabRedirectClick
+     * @param index - Индекс страницы, на которую нажимает пользователь.
+     */
+    void slotTabRedirectClick(int index);
+
+    /**
      * <p> Принимает сигналы выхода из аккаунта. </p>
      * @brief slotQuit
      */
