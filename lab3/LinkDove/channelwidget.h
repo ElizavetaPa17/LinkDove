@@ -96,6 +96,19 @@ private slots:
      */
     void slotHandleDeleteResult(int result);
 
+    /**
+     * <p> Слот, который вызывается при нажатии кнопки выхода из канала. </p>
+     * @brief slotQuitChannel
+     */
+    void slotQuitChannel();
+
+    /**
+     * <p> Слот, который обрабатывает результат выхода из канала. </p>
+     * @brief slotQuitChannelResult
+     * @param result - Результат выхода из канала.
+     */
+    void slotQuitChannelResult(int result);
+
 private:
     Ui::ChannelWidget *ui;
     ChannelInfo channel_info_;

@@ -61,6 +61,13 @@ private slots:
      */
     void slotQuit();
 
+    /**
+     * <p> Слот, который управляет установкой нужных страниц при выходе из групп, каналов или их удалений. </p>
+     * @brief slotRedirectTabWidget
+     * @param result - Параметр, содержащий результат запроса к серверу.
+     */
+    void slotRedirectTabWidget(int result);
+
 private:
     Ui::MainWidget *ui;
     StatusInfo status_info_;

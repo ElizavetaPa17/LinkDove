@@ -91,11 +91,24 @@ private slots:
     void slotDeleteGroup();
 
     /**
-     * <p> Обрабатывает результат удаления группы. </p>
+     * <p> Слот, который обрабатывает результат удаления группы. </p>
      * @brief slotHandleDeleteResult
      * @param result - Результат удаления группы.
      */
     void slotHandleDeleteResult(int result);
+
+    /**
+     * <p> Слот, который вызывается при нажатии кнопки выхода из чата (группы). </p>
+     * @brief slotQuitGroup
+     */
+    void slotQuitGroup();
+
+    /**
+     * <p> Слот, который обрабатывает результат выхода из группы. </p>
+     * @brief slotQuitGroupResult
+     * @param result
+     */
+    void slotQuitGroupResult(int result);
 
 private:
     Ui::GroupWidget *ui;

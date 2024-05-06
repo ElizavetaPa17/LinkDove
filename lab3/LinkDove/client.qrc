@@ -20,5 +20,6 @@
     <file alias="microphone_icon.png">../resources/microphone_icon.png</file>
     <file alias="add_icon.png">../resources/add_icon.png</file>
     <file alias="trash_icon.png">../resources/trash_icon.png</file>
+    <file alias="quit_icon.png">../resources/quit_icon.png</file>
 </qresource>
 </RCC>

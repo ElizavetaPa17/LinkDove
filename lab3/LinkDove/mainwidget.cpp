@@ -76,6 +76,19 @@ void MainWidget::slotQuit() {
     emit switchToPage(this, LOGIN_PAGE);
 }
 
+void MainWidget::slotRedirectTabWidget(int result) {
+    if (result == DELETE_CHANNEL_SUCCESS_ANSWER || result == QUIT_CHANNEL_SUCCESS_ANSWER) {
+        ui->channelStackedWidget->setCurrentIndex(1);
+        ClientSingleton::get_client()->async_get_channels();
+    } else if (result == DELETE_CHAT_SUCCESS_ANSWER || result == QUIT_CHAT_SUCCESS_ANSWER) {
+        ui->groupStackedWidget->setCurrentIndex(1);
+        ClientSingleton::get_client()->async_get_chats();
+    } else if (result == DELETE_IND_CHAT_SUCCESS_ANSWER) {
+        ui->chatStackedWidget->setCurrentIndex(1);
+        ClientSingleton::get_client()->async_get_interlocutors();
+    }
+}
+
 void MainWidget::setPrivilegedMode(bool flag) {
     ui->profileWidget->setPrivelegedMode(flag);
     ui->settingWidget->setPrivilegedMode(flag);
@@ -138,24 +151,11 @@ void MainWidget::setupConnection() {
     connect(ClientSingleton::get_client(), &Client::update_user_result,    this, &MainWidget::slotUpdateUserResult);
 
 
-    connect(ClientSingleton::get_client(), &Client::delete_channel_result, this, [this](int result) {
-                                                                                                      if (result == DELETE_CHANNEL_SUCCESS_ANSWER) {
-                                                                                                        ui->channelStackedWidget->setCurrentIndex(1);
-                                                                                                        ClientSingleton::get_client()->async_get_channels();
-                                                                                                      }
-                                                                                                    });
-    connect(ClientSingleton::get_client(), &Client::delete_chat_result, this, [this](int result) {
-                                                                                                    if (result == DELETE_CHAT_SUCCESS_ANSWER) {
-                                                                                                      ui->groupStackedWidget->setCurrentIndex(1);
-                                                                                                      ClientSingleton::get_client()->async_get_chats();
-                                                                                                    }
-                                                                                                  });
-    connect(ClientSingleton::get_client(), &Client::delete_ind_chat_result, this, [this](int result) {
-                                                                                                       if (result == DELETE_IND_CHAT_SUCCESS_ANSWER) {
-                                                                                                         ui->chatStackedWidget->setCurrentIndex(1);
-                                                                                                         ClientSingleton::get_client()->async_get_interlocutors();
-                                                                                                       }
-                                                                                                     });
+    connect(ClientSingleton::get_client(), &Client::delete_channel_result,  this, &MainWidget::slotRedirectTabWidget);
+    connect(ClientSingleton::get_client(), &Client::delete_chat_result,     this, &MainWidget::slotRedirectTabWidget);
+    connect(ClientSingleton::get_client(), &Client::delete_ind_chat_result, this, &MainWidget::slotRedirectTabWidget);
+    connect(ClientSingleton::get_client(), &Client::quit_chat_result,       this, &MainWidget::slotRedirectTabWidget);
+    connect(ClientSingleton::get_client(), &Client::quit_channel_result,    this, &MainWidget::slotRedirectTabWidget);
 
 
     connect(ui->usersList, &UsersList::userCardClicked, ui->chatWidget, &ChatWidget::slotOpenChatWith);

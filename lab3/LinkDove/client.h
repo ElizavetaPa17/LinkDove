@@ -167,6 +167,14 @@ public:
     void async_delete_channel(unsigned long long channel_id);
 
     /**
+     * <p> Удаляет пользователя из канала. </p>
+     * @brief async_quit_channel
+     * @param user_id - Идентификатор удаляемого из канала пользователя.
+     * @param channel_id - Идентификатор канала, из которого удаляется пользователь.
+     */
+    void async_quit_channel(unsigned long long user_id, unsigned long long channel_id);
+
+    /**
      * <p> Отправляет запрос на создание чата. </p>
      * @brief async_create_chat
      * @param chat_name - Название чата.
@@ -213,6 +221,14 @@ public:
      * @param channel_id - Идентификатор удаляемой группы.
      */
     void async_delete_chat(unsigned long long group_id);
+
+    /**
+     * <p> Отправляет запрос на удаление пользователя из группы. </p>
+     * @brief async_quit_chat
+     * @param user_id - Идентификатор удаляемого пользователя.
+     * @param group_id - Идентификатор группы, из которой удаляется пользователь.
+     */
+    void async_quit_chat(unsigned long long user_id, unsigned long long group_id);
 
     /**
      * <p> Возвращает информацию о пользователе. </p>
@@ -412,6 +428,13 @@ signals:
     void delete_channel_result(int result);
 
     /**
+     * <p> Генерирует сигнал после получения результата удаления пользователя из канала. </p>
+     * @brief quit_channel_result
+     * @param result - Параметр, содеращий результат запроса.
+     */
+    void quit_channel_result(int result);
+
+    /**
      * <p> Генерирует сигнал после получения результата запроса на создание чата.  </p>
      * @brief create_chat_result
      * @param result - Параметр, содержащий результат запроса.
@@ -453,6 +476,13 @@ signals:
      * @param result - Параметр, содержащий результат запроса.
      */
     void get_chat_msg_result(int result);
+
+    /**
+     * <p> Генерирует сигнал после получения результата запроса на удаление пользователя из чата (группы). </p>
+     * @brief quit_chat_result
+     * @param result - Параметр, содержащий результат запроса.
+     */
+    void quit_chat_result(int result);
 
     /**
      * <p> Генерирует сигнал после получения результата удаления чата (группы). </p>

@@ -39,6 +39,8 @@ void ChannelWidget::slotHandleIsChannelParticipantResult(int result, bool is_par
     if (result == IS_CHANNEL_PARTICIPANT_SUCCESS_ANSWER) {
         if (is_participant) {
             ui->stackedWidget->setCurrentIndex(0); // PARTICIPANT_PAGE
+            ui->quitButton->show();
+
             if (channel_info_.owner_id_ == ClientSingleton::get_client()->get_status_info().id_) { // если текущий пользователь - владелец канала,
                 ui->stackedWidget->show();                                                         // отображаем панель для отправки сообщений
                 ui->deleteButton->show();
@@ -49,6 +51,7 @@ void ChannelWidget::slotHandleIsChannelParticipantResult(int result, bool is_par
         } else {
             ui->stackedWidget->show();
             ui->deleteButton->hide();
+            ui->quitButton->hide();
             ui->stackedWidget->setCurrentIndex(1); // NOT_PARTICIPANT_PAGE
         }
 
@@ -192,6 +195,22 @@ void ChannelWidget::slotHandleDeleteResult(int result) {
     }
 }
 
+void ChannelWidget::slotQuitChannel() {
+    std::unique_ptr<AgreeDialog> dialog_ptr = std::make_unique<AgreeDialog>(nullptr, "Вы точно хотите покинуть канал?");
+    if (dialog_ptr->exec() == QDialog::Accepted) {
+        ClientSingleton::get_client()->async_quit_channel(ClientSingleton::get_client()->get_status_info().id_, channel_info_.id_);
+    }
+}
+
+void ChannelWidget::slotQuitChannelResult(int result) {
+    if (result == QUIT_CHANNEL_SUCCESS_ANSWER) {
+        slotClear();
+    } else {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Что-то пошло не так при попытке покинуть канал. ");
+        dialog_ptr->exec();
+    }
+}
+
 void ChannelWidget::setupConnection() {
     connect(ui->messageEdit,       &QLineEdit::returnPressed, this, &ChannelWidget::slotSendMessage);
     connect(ui->sendButton,        &QPushButton::clicked,     this, &ChannelWidget::slotSendMessage);
@@ -202,9 +221,11 @@ void ChannelWidget::setupConnection() {
     connect(ClientSingleton::get_client(), &Client::is_channel_participant_result, this, &ChannelWidget::slotHandleIsChannelParticipantResult);
     connect(ClientSingleton::get_client(), &Client::add_participant_to_channel_result, this, &ChannelWidget::slotHandleAddParticipantChannelResult);
     connect(ClientSingleton::get_client(), &Client::delete_channel_result, this, &ChannelWidget::slotHandleDeleteResult);
+    connect(ClientSingleton::get_client(), &Client::quit_channel_result, this, &ChannelWidget::slotQuitChannelResult);
 
     connect(ui->joinButton, &QPushButton::clicked, ClientSingleton::get_client(), [this] () {
                                                                                     ClientSingleton::get_client()->async_add_channel_participant_request(channel_info_.id_);
                                                                                   });
     connect(ui->deleteButton, &QPushButton::clicked, this, &ChannelWidget::slotDeleteChannel);
+    connect(ui->quitButton, &QPushButton::clicked, this, &ChannelWidget::slotQuitChannel);
 }

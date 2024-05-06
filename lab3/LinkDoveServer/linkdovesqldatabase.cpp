@@ -977,6 +977,23 @@ bool LinkDoveSQLDataBase::delete_channel(unsigned long long channel_id) {
     }
 }
 
+bool LinkDoveSQLDataBase::quit_channel(unsigned long long user_id, unsigned long long channel_id) {
+    QSqlQuery query(data_base_);
+    query.prepare(" DELETE FROM CHANNEL_PARTICIPANTS "
+                  " WHERE participant_id=:participant_id AND channel_id=:channel_id; " );
+
+    query.bindValue(":participant_id", user_id);
+    query.bindValue(":channel_id", channel_id);
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString() << '\n';
+        return false;
+    } else {
+        // если удаление было успешным, то row affected > 0, иначе row affected == 0 (false).
+        return query.numRowsAffected();
+    }
+}
+
 bool LinkDoveSQLDataBase::add_chat(const ChatInfo &chat_info) {
     QSqlQuery query(data_base_);
     query.prepare(" INSERT INTO CHATS "
@@ -1120,6 +1137,23 @@ bool LinkDoveSQLDataBase::delete_chat(unsigned long long chat_id) {
                   " WHERE ID=:id; ");
 
     query.bindValue(":id", chat_id);
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString() << '\n';
+        return false;
+    } else {
+        // если удаление было успешным, то row affected > 0, иначе row affected == 0 (false).
+        return query.numRowsAffected();
+    }
+}
+
+bool LinkDoveSQLDataBase::quit_chat(unsigned long long user_id, unsigned long long chat_id) {
+    QSqlQuery query(data_base_);
+    query.prepare(" DELETE FROM CHAT_PARTICIPANTS "
+                  " WHERE participant_id=:participant_id AND chat_id=:chat_id; " );
+
+    query.bindValue(":participant_id", user_id);
+    query.bindValue(":chat_id", chat_id);
+
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString() << '\n';
         return false;

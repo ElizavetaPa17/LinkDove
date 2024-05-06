@@ -84,6 +84,9 @@ enum ResponseTypes {
     DELETE_CHANNEL_SUCCESS_ANSWER,
     DELETE_CHANNEL_FAILED_ANSWER,
 
+    QUIT_CHANNEL_SUCCESS_ANSWER,
+    QUIT_CHANNEL_FAILED_ANSWER,
+
     CREATE_CHAT_SUCCESS_ANSWER,
     CREATE_CHAT_FAILED_ANSWER,
 
@@ -104,6 +107,9 @@ enum ResponseTypes {
 
     DELETE_CHAT_SUCCESS_ANSWER,
     DELETE_CHAT_FAILED_ANSWER,
+
+    QUIT_CHAT_SUCCESS_ANSWER,
+    QUIT_CHAT_FAILED_ANSWER,
 };
 
 enum MessageType {
@@ -311,6 +317,13 @@ extern const char *DELETE_CHANNEL_SUCCESS;
 // Ответ сервера на неудачное удаление канала
 extern const char *DELETE_CHANNEL_FAILED;
 
+// Запрос на удаление из канала пользователя
+extern const char *QUIT_CHANNEL_REQUEST;
+// Ответ сервера на успешное удаление пользователя из канала
+extern const char *QUIT_CHANNEL_SUCCESS;
+// Ответ сервера на неудачное удаление пользователя из канала
+extern const char *QUIT_CHANNEL_FAILED;
+
 // Запрос на создание чата
 extern const char *CREATE_CHAT_REQUEST;
 // Ответ сервера на успешное создание чата
@@ -359,3 +372,10 @@ extern const char *DELETE_CHAT_REQUEST;
 extern const char *DELETE_CHAT_SUCCESS;
 // Ответ сервера на неудачное удаление чата
 extern const char *DELETE_CHAT_FAILED;
+
+// Запрос на удаление из чата пользователя
+extern const char *QUIT_CHAT_REQUEST;
+// Ответ сервера на успешное удаление пользователя из чата
+extern const char *QUIT_CHAT_SUCCESS;
+// Ответ сервера на неудачное удаление пользователя из чата
+extern const char *QUIT_CHAT_FAILED;

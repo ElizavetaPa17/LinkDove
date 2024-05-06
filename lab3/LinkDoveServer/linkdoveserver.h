@@ -238,6 +238,13 @@ private:
     void handle_delete_channel(ConnectionIterator iterator);
 
     /**
+     * <p> Обрабатывает запрос на удаление пользователя из канала. </p>
+     * @brief handle_quit_channel
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_quit_channel(ConnectionIterator iterator);
+
+    /**
      * <p> Обрабатывает запрос на создание чата. </p>
      * @brief handle_create_chat_request
      * @param iterator - Итератор на сокет, запрос которого обрабатывается.
@@ -282,9 +289,16 @@ private:
     /**
      * <p> Обрабатывает запрос на удаление чата (группы). </p>
      * @brief handle_delete_chat
-     * @param iterator
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
      */
     void handle_delete_chat(ConnectionIterator iterator);
+
+    /**
+     * <p> Обрабатывает запрос на удаление пользователя из чата (группы). </p>
+     * @brief handle_quit_chat
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_quit_chat(ConnectionIterator iterator);
 
     /** <p> Запускает в отдельном потоке контекст для обработки асинхронных функций. </p>
      * @brief run_context

@@ -185,6 +185,10 @@ void LinkDoveServer::handle_type_request(ConnectionIterator iterator) {
         handle_delete_chat(iterator);
     } else if (request_type == DELETE_IND_CHAT_REQUEST) {
         handle_delete_ind_chat(iterator);
+    } else if (request_type == QUIT_CHAT_REQUEST) {
+        handle_quit_chat(iterator);
+    } else if (request_type == QUIT_CHANNEL_REQUEST) {
+        handle_quit_channel(iterator);
     }
 }
 
@@ -613,6 +617,23 @@ void LinkDoveServer::handle_delete_channel(ConnectionIterator iterator) {
     async_write(iterator);
 }
 
+void LinkDoveServer::handle_quit_channel(ConnectionIterator iterator) {
+    unsigned long long user_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second,
+                       channel_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    if (data_base_.quit_channel(user_id, channel_id)) {
+        answer << QUIT_CHANNEL_SUCCESS << "\n" << END_OF_REQUEST;
+    } else {
+        answer << QUIT_CHANNEL_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
 void LinkDoveServer::handle_create_chat_request(ConnectionIterator iterator) {
     ChatInfo chat_info;
     chat_info.deserialize(iterator->in_stream_);
@@ -752,6 +773,23 @@ void LinkDoveServer::handle_delete_chat(ConnectionIterator iterator) {
         answer << DELETE_CHAT_SUCCESS << "\n" << END_OF_REQUEST;
     } else {
         answer << DELETE_CHAT_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_quit_chat(ConnectionIterator iterator) {
+    unsigned long long user_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second,
+                       chat_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    if (data_base_.quit_chat(user_id, chat_id)) {
+        answer << QUIT_CHAT_SUCCESS << "\n" << END_OF_REQUEST;
+    } else {
+        answer << QUIT_CHAT_FAILED << "\n" << END_OF_REQUEST;
     }
 
     iterator->out_stream_ << answer.str();

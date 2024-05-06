@@ -197,6 +197,15 @@ public:
     bool delete_channel(unsigned long long channel_id);
 
     /**
+     * <p> Удаляет пользователя из чата канала. </p>
+     * @brief quit_channel
+     * @param user_id - Идентификатор удаляемого из канала пользователя.
+     * @param chat_id - Идентификатор канала, из которого удаляется пользователь.
+     * @return - В случае успеха возвращает true, иначе - false.
+     */
+    bool quit_channel(unsigned long long user_id, unsigned long long channel_id);
+
+    /**
      * <p> Добавляет чат в БД. </p>
      * @brief add_chat
      * @param chat_info - Структура, содержащая информацию о чате.
@@ -253,6 +262,15 @@ public:
      * @return - В случае успеха возвращает true, иначе - false.
      */
     bool delete_chat(unsigned long long chat_id);
+
+    /**
+     * <p> Удаляет пользователя из чата (группы). </p>
+     * @brief quit_chat
+     * @param user_id - Идентификатор удаляемого из чата пользователя.
+     * @param chat_id - Идентификатор чата, из которого удаляется пользователь.
+     * @return - В случае успеха возвращает true, иначе - false.
+     */
+    bool quit_chat(unsigned long long user_id, unsigned long long chat_id);
 
     /**
      * <p> Добавляет сообщение в чат (группу). </p>
