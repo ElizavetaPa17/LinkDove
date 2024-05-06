@@ -784,6 +784,26 @@ std::vector<StatusInfo> LinkDoveSQLDataBase::get_interlocutors(unsigned long lon
     return interlocutors;
 }
 
+bool LinkDoveSQLDataBase::delete_ind_chat(unsigned long long first_id, unsigned long long second_id) {
+    QSqlQuery query(data_base_);
+    query.prepare(" DELETE FROM INDIVIDUAL_MESSAGES "
+                  " WHERE "
+                  " sender_id=:first_id AND receiver_id=:second_id "
+                  " OR "
+                  " sender_id=:second_id AND receiver_id=:first_id; ");
+
+    query.bindValue(":first_id", first_id);
+    query.bindValue(":second_id", second_id);
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString() << '\n';
+        return false;
+    } else {
+        // если удаление было успешным, то row affected > 0, иначе row affected == 0 (false).
+        return query.numRowsAffected();
+    }
+}
+
 bool LinkDoveSQLDataBase::add_channel(const ChannelInfo &channel_info) {
     QSqlQuery query(data_base_);
     query.prepare(" INSERT INTO CHANNELS "
@@ -947,6 +967,7 @@ bool LinkDoveSQLDataBase::delete_channel(unsigned long long channel_id) {
                   " WHERE ID=:id; ");
 
     query.bindValue(":id", channel_id);
+
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString() << '\n';
         return false;

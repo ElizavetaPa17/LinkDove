@@ -182,6 +182,13 @@ private:
     void handle_get_interlocutors_request(ConnectionIterator iterator);
 
     /**
+     * <p> Обрабатывает запрос на удаление переписки между двумя собеседниками. </p>
+     * @brief handle_delete_ind_chat
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_delete_ind_chat(ConnectionIterator iterator);
+
+    /**
      * <p> Обрабатывает запрос на создание канала. </p>
      * @brief handle_channel_create_request
      * @param iterator - Итератор на сокет, запрос которого обрабатывается.

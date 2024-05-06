@@ -136,16 +136,27 @@ void MainWidget::setupConnection() {
                                                                     disableNavigationBoard();
                                                                 } );
     connect(ClientSingleton::get_client(), &Client::update_user_result,    this, &MainWidget::slotUpdateUserResult);
+
+
     connect(ClientSingleton::get_client(), &Client::delete_channel_result, this, [this](int result) {
                                                                                                       if (result == DELETE_CHANNEL_SUCCESS_ANSWER) {
                                                                                                         ui->channelStackedWidget->setCurrentIndex(1);
+                                                                                                        ClientSingleton::get_client()->async_get_channels();
                                                                                                       }
                                                                                                     });
     connect(ClientSingleton::get_client(), &Client::delete_chat_result, this, [this](int result) {
                                                                                                     if (result == DELETE_CHAT_SUCCESS_ANSWER) {
-                                                                                                      ui->chatStackedWidget->setCurrentIndex(1);
+                                                                                                      ui->groupStackedWidget->setCurrentIndex(1);
+                                                                                                      ClientSingleton::get_client()->async_get_chats();
                                                                                                     }
                                                                                                   });
+    connect(ClientSingleton::get_client(), &Client::delete_ind_chat_result, this, [this](int result) {
+                                                                                                       if (result == DELETE_IND_CHAT_SUCCESS_ANSWER) {
+                                                                                                         ui->chatStackedWidget->setCurrentIndex(1);
+                                                                                                         ClientSingleton::get_client()->async_get_interlocutors();
+                                                                                                       }
+                                                                                                     });
+
 
     connect(ui->usersList, &UsersList::userCardClicked, ui->chatWidget, &ChatWidget::slotOpenChatWith);
     connect(ui->channelList, &ChannelList::channelCardClicked, ui->channelWidget, &ChannelWidget::slotOpenChannel);

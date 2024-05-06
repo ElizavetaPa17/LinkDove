@@ -186,6 +186,9 @@ void ChannelWidget::slotDeleteChannel() {
 void ChannelWidget::slotHandleDeleteResult(int result) {
     if (result == DELETE_CHANNEL_SUCCESS_ANSWER) {
         slotClear();
+    } else {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Что-то пошло не так при попытке удалить канал. ");
+        dialog_ptr->exec();
     }
 }
 

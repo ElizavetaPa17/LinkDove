@@ -175,6 +175,21 @@ void Client::async_get_interlocutors() {
     run_context();
 }
 
+void Client::async_delete_ind_chat(unsigned long long interlocutor_id) {
+    connection_.out_stream_ << DELETE_IND_CHAT_REQUEST  << "\n";
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, status_info_.id_);
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, interlocutor_id);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    asio::async_write(connection_.socket_, connection_.buffer_,
+                      boost::bind(&Client::handle_async_write,
+                                  shared_from_this(),
+                                  asio::placeholders::error,
+                                  asio::placeholders::bytes_transferred));
+
+    run_context();
+}
+
 void Client::async_create_channel(const std::string &channel_name) {
     connection_.out_stream_ << CREATE_CHANNEL_REQUEST << "\n";
 
@@ -680,6 +695,10 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
             emit delete_chat_result(DELETE_CHAT_SUCCESS_ANSWER);
         } else if (answer_type == DELETE_CHAT_FAILED) {
             emit delete_chat_result(DELETE_CHAT_FAILED_ANSWER);
+        } else if (answer_type == DELETE_IND_CHAT_SUCCESS) {
+            emit delete_ind_chat_result(DELETE_IND_CHAT_SUCCESS_ANSWER);
+        } else if (answer_type == DELETE_IND_CHAT_FAILED) {
+            emit delete_ind_chat_result(DELETE_IND_CHAT_FAILED_ANSWER);
         } else {
             std::cerr << "что-то невнятное: " << answer_type << '\n';
         }

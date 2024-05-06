@@ -6,6 +6,7 @@
 #include <QFileDialog>
 
 #include "infodialog.h"
+#include "agreedialog.h"
 #include "interlocutorprofiledialog.h"
 #include "messagecard.h"
 #include "individualmessage.h"
@@ -152,6 +153,22 @@ void ChatWidget::slotDisplayInterlocutorProfile() {
     }
 }
 
+void ChatWidget::slotDeleteChat() {
+    std::unique_ptr<AgreeDialog> dialog_ptr = std::make_unique<AgreeDialog>(nullptr, "Вы точно хотите удалить переписку?");
+    if (dialog_ptr->exec() == QDialog::Accepted) {
+        ClientSingleton::get_client()->async_delete_ind_chat(interlocutor_.id_);
+    }
+}
+
+void ChatWidget::slotHandleDeleteResult(int result) {
+    if (result == DELETE_IND_CHAT_SUCCESS_ANSWER) {
+        slotClear();
+    } else {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Что-то пошло не так при попытке удалить переписку. ");
+        dialog_ptr->exec();
+    }
+}
+
 void ChatWidget::slotClear() {
     ui->messageEdit->clear();
     QtUtility::clean_complex_layout(ui->verticalLayout);
@@ -166,4 +183,7 @@ void ChatWidget::setupConnection() {
 
     connect(ClientSingleton::get_client(), &Client::send_msg_result, this, &ChatWidget::slotHandleSendMessage);
     connect(ClientSingleton::get_client(), &Client::get_ind_msg_result, this, &ChatWidget::slotHandleGetMessages);
+    connect(ClientSingleton::get_client(), &Client::delete_ind_chat_result, this, &ChatWidget::slotHandleDeleteResult);
+
+    connect(ui->deleteButton, &QPushButton::clicked, this, &ChatWidget::slotDeleteChat);
 }

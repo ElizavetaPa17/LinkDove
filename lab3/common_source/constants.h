@@ -60,6 +60,9 @@ enum ResponseTypes {
     GET_INTERLOCUTORS_SUCCESS_ANSWER,
     GET_INTERLOCUTORS_FAILED_ANSWER,
 
+    DELETE_IND_CHAT_SUCCESS_ANSWER,
+    DELETE_IND_CHAT_FAILED_ANSWER,
+
     CREATE_CHANNEL_SUCCESS_ANSWER,
     CREATE_CHANNEL_FAILED_ANSWER,
 
@@ -251,6 +254,13 @@ extern const char *GET_INTERLOCUTORS_REQUEST;
 extern const char *GET_INTERLOCUTORS_SUCCESS;
 // Ответ сервера на неудачную отправку информации о таких собеседниках
 extern const char *GET_INTERLOCUTORS_FAILED;
+
+// Запрос на удаление переписки между двумя собеседниками
+extern const char *DELETE_IND_CHAT_REQUEST;
+// Ответ сервера на успешное удаление переписки
+extern const char *DELETE_IND_CHAT_SUCCESS;
+// Ответ сервера на неудачное удаление переписки
+extern const char *DELETE_IND_CHAT_FAILED;
 
 // Запрос на создание канала
 extern const char *CREATE_CHANNEL_REQUEST;

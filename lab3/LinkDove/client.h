@@ -112,6 +112,13 @@ public:
     void async_get_interlocutors();
 
     /**
+     * <p> Удаляет переписку между двумя собеседниками. </p>
+     * @brief async_delete_ind_chat
+     * @param interlocutor_id - Идентификатор собеседника.
+     */
+    void async_delete_ind_chat(unsigned long long interlocutor_id);
+
+    /**
      * <p> Отправляет запрос на создание канала. </p>
      * @brief async_create_channel
      * @param channel_name - Название создаваемого канала.
@@ -346,6 +353,13 @@ signals:
      * @param result - Параметр, содержащий результат запроса.
      */
     void get_interlocutors_result(int result);
+
+    /**
+     * <p> Генерирует сигнал после получение результата запроса на удаление чата между собеседниками. </p>
+     * @brief delete_ind_chat_result
+     * @param result - Параметр, содержащий результат запроса.
+     */
+    void delete_ind_chat_result(int result);
 
     /**
      * <p> Генерирует сигнал после получения результата запроса на создание канала. </p>

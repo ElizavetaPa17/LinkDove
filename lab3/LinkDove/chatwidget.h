@@ -74,6 +74,19 @@ private slots:
      */
     void slotDisplayInterlocutorProfile();
 
+    /**
+     * <p> Слот, который вызывается при нажатии кнопки удаления чата. </p>
+     * @brief slotDeleteChat
+     */
+    void slotDeleteChat();
+
+    /**
+     * <p> Обрабатывает результат удаления чата. </p>
+     * @brief slotHandleDeleteResult
+     * @param result - Результат удаления чата.
+     */
+    void slotHandleDeleteResult(int result);
+
 private:
     Ui::ChatWidget    *ui;
     StatusInfo interlocutor_;

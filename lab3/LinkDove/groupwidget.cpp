@@ -38,14 +38,20 @@ void GroupWidget::slotHandleIsGroupParticipantResult(int result, bool is_partici
     if (result == IS_CHAT_PARTICIPANT_SUCCESS_ANSWER) {
         if (is_participant) {
             ui->stackedWidget->setCurrentIndex(0); // PARTICIPANT_PAGE
+
+            if (chat_info_.owner_id_ == ClientSingleton::get_client()->get_status_info().id_) {
+                ui->deleteButton->show();
+            }
         } else {
             ui->stackedWidget->setCurrentIndex(1); // NOT_PARTICIPANT_PAGE
+            ui->deleteButton->hide();
         }
     } else {
         std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Ошибка получения информации об участниках группы. Попытайтесь позже. ");
         dialog_ptr->exec();
 
         ui->stackedWidget->setCurrentIndex(1); // NOT_PARTICIPANT_PAGE
+        ui->deleteButton->hide();
     }
 
     ClientSingleton::get_client()->async_get_chat_messages(chat_info_.id_);
@@ -193,6 +199,9 @@ void GroupWidget::slotDeleteGroup() {
 void GroupWidget::slotHandleDeleteResult(int result) {
     if (result == DELETE_CHAT_SUCCESS_ANSWER) {
         slotClear();
+    } else {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Что-то пошло не так при попытке удалить группу. ");
+        dialog_ptr->exec();
     }
 }
 

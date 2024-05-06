@@ -122,6 +122,15 @@ public:
     std::vector<StatusInfo> get_interlocutors(unsigned long long id);
 
     /**
+     * <p> Удаляет переписку между двумя пользователями. </p>
+     * @brief delete_ind_chat
+     * @param first_id - Идентификатор первого собеседника.
+     * @param second_id - Идентификатор второго собеседника.
+     * @return - В случае успеха - true, иначе - false.
+     */
+    bool delete_ind_chat(unsigned long long first_id, unsigned long long second_id);
+
+    /**
      * <p> Добавляет канал в БД. </p>
      * @brief add_channel
      * @param channel_info - Добавляемый канал.
