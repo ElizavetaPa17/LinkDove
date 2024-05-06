@@ -224,6 +224,13 @@ private:
     void handle_get_channel_messages_request(ConnectionIterator iterator);
 
     /**
+     * <p> Обрабатывает запрос на удаление канала. </p>
+     * @brief handle_delete_channel
+     * @param iterator
+     */
+    void handle_delete_channel(ConnectionIterator iterator);
+
+    /**
      * <p> Обрабатывает запрос на создание чата. </p>
      * @brief handle_create_chat_request
      * @param iterator - Итератор на сокет, запрос которого обрабатывается.

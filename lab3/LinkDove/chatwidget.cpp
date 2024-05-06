@@ -33,6 +33,8 @@ void ChatWidget::slotOpenChatWith(const StatusInfo &status_info) {
 
     slotClear();
     ClientSingleton::get_client()->async_get_ind_messages(interlocutor_.id_);
+
+    emit openChatWidget();
 }
 
 void ChatWidget::slotSendMessage() {

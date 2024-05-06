@@ -302,11 +302,11 @@ QTabBar::tab:selected {
 }</string>
          </property>
          <property name="currentIndex">
-          <number>2</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="tabChats">
           <property name="styleSheet">
-           <string notr="true">QWidget#tabChats {
+           <string notr="true">QWidget {
 	background-color: rgb(245, 245, 245);
 	border-radius: 10px;
 }</string>
@@ -319,6 +319,62 @@ QTabBar::tab:selected {
            <string>Чаты</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_5">
+           <item row="0" column="1">
+            <widget class="QStackedWidget" name="chatStackedWidget">
+             <property name="currentIndex">
+              <number>1</number>
+             </property>
+             <widget class="QWidget" name="page_17">
+              <layout class="QGridLayout" name="gridLayout_14">
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <property name="spacing">
+                <number>0</number>
+               </property>
+               <item row="0" column="0">
+                <widget class="ChatWidget" name="chatWidget" native="true"/>
+               </item>
+              </layout>
+             </widget>
+             <widget class="QWidget" name="page_18">
+              <layout class="QGridLayout" name="gridLayout_15">
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_4">
+                 <property name="font">
+                  <font>
+                   <pointsize>17</pointsize>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">QLabel {
+	color: rgb(65, 47, 50);
+	padding-left: 10px;
+	height: 30px;
+}</string>
+                 </property>
+                 <property name="text">
+                  <string>Выберите собеседника.</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </widget>
+           </item>
            <item row="0" column="0">
             <widget class="UsersList" name="usersList" native="true">
              <property name="sizePolicy">
@@ -341,9 +397,6 @@ QTabBar::tab:selected {
              </property>
             </widget>
            </item>
-           <item row="0" column="1">
-            <widget class="ChatWidget" name="chatWidget" native="true"/>
-           </item>
           </layout>
          </widget>
          <widget class="QWidget" name="tabGroups">
@@ -361,8 +414,70 @@ QTabBar::tab:selected {
            <string>Группы</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_9">
+           <item row="0" column="1">
+            <widget class="QStackedWidget" name="groupStackedWidget">
+             <property name="currentIndex">
+              <number>1</number>
+             </property>
+             <widget class="QWidget" name="page_12">
+              <layout class="QGridLayout" name="gridLayout_12">
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <property name="spacing">
+                <number>0</number>
+               </property>
+               <item row="0" column="0">
+                <widget class="GroupWidget" name="groupWidget" native="true"/>
+               </item>
+              </layout>
+             </widget>
+             <widget class="QWidget" name="page_14">
+              <layout class="QGridLayout" name="gridLayout_13">
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_3">
+                 <property name="font">
+                  <font>
+                   <pointsize>17</pointsize>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">QLabel {
+	color: rgb(65, 47, 50);
+	padding-left: 10px;
+	height: 30px;
+}</string>
+                 </property>
+                 <property name="text">
+                  <string>Выберите группу.</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </widget>
+           </item>
            <item row="0" column="0">
             <widget class="ChatList" name="chatList" native="true">
+             <property name="minimumSize">
+              <size>
+               <width>320</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="maximumSize">
               <size>
                <width>320</width>
@@ -370,9 +485,6 @@ QTabBar::tab:selected {
               </size>
              </property>
             </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="GroupWidget" name="groupWidget" native="true"/>
            </item>
           </layout>
          </widget>
@@ -391,6 +503,62 @@ QTabBar::tab:selected {
            <string>Каналы</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_8">
+           <item row="0" column="1">
+            <widget class="QStackedWidget" name="channelStackedWidget">
+             <property name="currentIndex">
+              <number>1</number>
+             </property>
+             <widget class="QWidget" name="page_7">
+              <layout class="QGridLayout" name="gridLayout_10">
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <property name="spacing">
+                <number>0</number>
+               </property>
+               <item row="0" column="0">
+                <widget class="ChannelWidget" name="channelWidget" native="true"/>
+               </item>
+              </layout>
+             </widget>
+             <widget class="QWidget" name="page_9">
+              <layout class="QGridLayout" name="gridLayout_11">
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_2">
+                 <property name="font">
+                  <font>
+                   <pointsize>17</pointsize>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">QLabel {
+	color: rgb(65, 47, 50);
+	padding-left: 10px;
+	height: 30px;
+}</string>
+                 </property>
+                 <property name="text">
+                  <string>Выберите канал.</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </widget>
+           </item>
            <item row="0" column="0">
             <widget class="ChannelList" name="channelList" native="true">
              <property name="minimumSize">
@@ -406,9 +574,6 @@ QTabBar::tab:selected {
               </size>
              </property>
             </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="ChannelWidget" name="channelWidget" native="true"/>
            </item>
           </layout>
          </widget>

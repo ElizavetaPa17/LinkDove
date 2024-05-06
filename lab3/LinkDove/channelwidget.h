@@ -42,6 +42,13 @@ public slots:
      */
     void slotClear();
 
+signals:
+    /**
+     * <p> Генерирует сигнал при открытии канала. </p>
+     * @brief openChannelWidget
+     */
+    void openChannelWidget();
+
 private slots:
     /**
      * <p> Слот, обрабатывающий отправку сообщения от владельца канала. </p>
@@ -75,6 +82,19 @@ private slots:
      * @brief slotChooseImage
      */
     void slotChooseImage();
+
+    /**
+     * <p> Слот, который вызывается при нажатии кнопки удаления канала. </p>
+     * @brief slotDeleteChannel
+     */
+    void slotDeleteChannel();
+
+    /**
+     * <p> Обрабатывает результат удаления канала. </p>
+     * @brief slotHandleDeleteResult
+     * @param result - Результат удаления канала.
+     */
+    void slotHandleDeleteResult(int result);
 
 private:
     Ui::ChannelWidget *ui;

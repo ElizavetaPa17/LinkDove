@@ -153,6 +153,13 @@ public:
     void async_get_channel_messages(unsigned long long channel_id);
 
     /**
+     * <p> Отправляет запрос на удаление канала. </p>
+     * @brief async_delete_channel
+     * @param channel_id - Идентификатор удаляемого канала.
+     */
+    void async_delete_channel(unsigned long long channel_id);
+
+    /**
      * <p> Отправляет запрос на создание чата. </p>
      * @brief async_create_chat
      * @param chat_name - Название чата.
@@ -357,7 +364,7 @@ signals:
     /**
      * <p> Генерирует сигнал после получения результата запроса информации о том, является ли текущий пользователь участником канала. </p>
      * @brief is_channel_participant_result
-     * @param result - Парамет, содеращий результат запроса.
+     * @param result - Параметр, содеращий результат запроса.
      * @param is_participant - В случае успеха содержит является ответом на запрос, иначе - всегда false.
      */
     void is_channel_participant_result(int result, bool is_participant);
@@ -365,16 +372,23 @@ signals:
     /**
      * <p> Генерирует сигнал после получения результата запроса на добавление текущего пользователя в канал. </p>
      * @brief add_participant_to_channel_result
-     * @param result - Парамет, содеращий результат запроса.
+     * @param result - Параметр, содеращий результат запроса.
      */
     void add_participant_to_channel_result(int result);
 
     /**
      * <p> Генерирует сигнал после получение результата запроса на получение из канала. </p>
      * @brief get_chnnl_messages_result
-     * @param result - Парамет, содеращий результат запроса.
+     * @param result - Параметр, содеращий результат запроса.
      */
     void get_channel_msg_result(int result);
+
+    /**
+     * <p> Генерирует сигнал после получения результата удаления канала. </p>
+     * @brief delete_channel_result
+     * @param result - Параметр, содеращий результат запроса.
+     */
+    void delete_channel_result(int result);
 
     /**
      * <p> Генерирует сигнал после получения результата запроса на создание чата.  </p>

@@ -43,6 +43,13 @@ public slots:
      */
     void slotClear();
 
+signals:
+    /**
+     * <p> Генерирует сигнал при открытии группы. </p>
+     * @brief openGroupWidget
+     */
+    void openGroupWidget();
+
 private slots:
     /**
      * <p> Слот, обрабатывающий отправку сообщения от владельца канала. </p>

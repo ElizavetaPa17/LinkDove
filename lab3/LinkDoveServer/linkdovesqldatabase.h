@@ -180,6 +180,14 @@ public:
     std::vector<std::shared_ptr<IMessage> > get_channel_messages(unsigned long long channel_id);
 
     /**
+     * <p> Удаляет канал из БД. </p>
+     * @brief delete_channel
+     * @param channel_id - Идентификатор удаляемого канала.
+     * @return - В случае успеха возвращает true, иначе - false.
+     */
+    bool delete_channel(unsigned long long channel_id);
+
+    /**
      * <p> Добавляет чат в БД. </p>
      * @brief add_chat
      * @param chat_info - Структура, содержащая информацию о чате.

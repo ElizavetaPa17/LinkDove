@@ -167,6 +167,8 @@ void LinkDoveServer::handle_type_request(ConnectionIterator iterator) {
         handle_add_channel_participant_request(iterator);
     } else if (request_type == GET_CHNNL_MSG_REQUEST) {
         handle_get_channel_messages_request(iterator);
+    } else if (request_type == DELETE_CHANNEL_REQUEST) {
+        handle_delete_channel(iterator);
     } else if (request_type == CREATE_CHAT_REQUEST) {
         handle_create_chat_request(iterator);
     } else if (request_type == IS_CHAT_PARTICIPANT_REQUEST) {
@@ -178,7 +180,6 @@ void LinkDoveServer::handle_type_request(ConnectionIterator iterator) {
     } else if (request_type == FIND_CHAT_REQUEST) {
         handle_find_chat_request(iterator);
     } else if (request_type == GET_CHAT_MSG_REQUEST) {
-        std::cerr << "get\n";
         handle_get_chat_messages_request(iterator);
     }
 }
@@ -569,6 +570,22 @@ void LinkDoveServer::handle_get_channel_messages_request(ConnectionIterator iter
     } catch (std::runtime_error& ex) {
         std::cerr << ex.what() << '\n';
         answer << GET_CHNNL_MSG_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_delete_channel(ConnectionIterator iterator) {
+    unsigned long long channel_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    if (data_base_.delete_channel(channel_id)) {
+        answer << DELETE_CHANNEL_SUCCESS << "\n" << END_OF_REQUEST;
+    } else {
+        answer << DELETE_CHANNEL_FAILED << "\n" << END_OF_REQUEST;
     }
 
     iterator->out_stream_ << answer.str();

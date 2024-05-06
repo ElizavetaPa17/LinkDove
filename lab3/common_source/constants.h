@@ -78,6 +78,9 @@ enum ResponseTypes {
     GET_CHNNL_MSG_SUCCESS_ANSWER,
     GET_CHNNL_MSG_FAILED_ANSWER,
 
+    DELETE_CHANNEL_SUCCESS_ANSWER,
+    DELETE_CHANNEL_FAILED_ANSWER,
+
     CREATE_CHAT_SUCCESS_ANSWER,
     CREATE_CHAT_FAILED_ANSWER,
 
@@ -287,6 +290,13 @@ extern const char *GET_CHNNL_MSG_REQUEST;
 extern const char *GET_CHNNL_MSG_SUCCESS;
 // Ответ сервера на неудачное получение сообщений из канала
 extern const char *GET_CHNNL_MSG_FAILED;
+
+// Запрос на удаление канала
+extern const char *DELETE_CHANNEL_REQUEST;
+// Ответ сервера на успешное удаление канала
+extern const char *DELETE_CHANNEL_SUCCESS;
+// Ответ сервера на неудачное удаление канала
+extern const char *DELETE_CHANNEL_FAILED;
 
 // Запрос на создание чата
 extern const char *CREATE_CHAT_REQUEST;

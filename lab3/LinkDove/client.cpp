@@ -268,6 +268,20 @@ void Client::async_get_channel_messages(unsigned long long channel_id) {
     run_context();
 }
 
+void Client::async_delete_channel(unsigned long long channel_id) {
+    connection_.out_stream_ << DELETE_CHANNEL_REQUEST << "\n";
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, channel_id);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    asio::async_write(connection_.socket_, connection_.buffer_,
+                       boost::bind(&Client::handle_async_write,
+                                   shared_from_this(),
+                                   asio::placeholders::error,
+                                   asio::placeholders::bytes_transferred));
+
+    run_context();
+}
+
 void Client::async_create_chat(const std::string &chat_name) {
     connection_.out_stream_ << CREATE_CHAT_REQUEST << "\n";
 
@@ -644,6 +658,10 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
             emit get_chat_msg_result(GET_CHAT_MSG_SUCCESS_ANSWER);
         } else if (answer_type == GET_CHAT_MSG_FAILED) {
             emit get_chat_msg_result(GET_CHAT_MSG_FAILED_ANSWER);
+        } else if (answer_type == DELETE_CHANNEL_SUCCESS) {
+            emit delete_channel_result(DELETE_CHANNEL_SUCCESS_ANSWER);
+        } else if (answer_type == DELETE_CHANNEL_FAILED) {
+            emit delete_channel_result(DELETE_CHANNEL_FAILED_ANSWER);
         } else {
             std::cerr << "что-то невнятное: " << answer_type << '\n';
         }

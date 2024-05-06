@@ -29,6 +29,8 @@ void GroupWidget::slotOpenGroup(const ChatInfo &group_info) {
 
     slotClear();
     ClientSingleton::get_client()->async_is_chat_participant_request(group_info.id_);
+
+    emit openGroupWidget();
 }
 
 void GroupWidget::slotHandleIsGroupParticipantResult(int result, bool is_participant) {

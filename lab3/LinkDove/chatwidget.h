@@ -34,6 +34,13 @@ public slots:
      */
     void slotClear();
 
+signals:
+    /**
+     * <p> Генерирует сигнал при открытии чата. </p>
+     * @brief openChatWidget
+     */
+    void openChatWidget();
+
 private slots:
     /**
      * <p> Слот, обрабатывающий отправку сообщения. </p>

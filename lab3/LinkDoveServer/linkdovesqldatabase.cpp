@@ -939,6 +939,29 @@ std::vector<std::shared_ptr<IMessage>> LinkDoveSQLDataBase::get_channel_messages
     }
 }
 
+bool LinkDoveSQLDataBase::delete_channel(unsigned long long channel_id) {
+    QSqlQuery query(data_base_);
+
+    // Удаляем все текстовые сообщения
+    query.prepare(" DELETE FROM CHANNELS "
+                  " WHERE ID=:id; ");
+
+    query.bindValue(":id", channel_id);
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString() << '\n';
+        return false;
+    } else {
+        // если удаление было успешным, то row affected > 0, иначе row affected == 0 (false).
+        return query.numRowsAffected();
+    }
+
+    // Удаляем все изображения
+
+    // Удаляем всех участников
+
+    // Удаляем сам канал
+}
+
 bool LinkDoveSQLDataBase::add_chat(const ChatInfo &chat_info) {
     QSqlQuery query(data_base_);
     query.prepare(" INSERT INTO CHATS "

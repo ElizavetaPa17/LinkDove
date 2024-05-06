@@ -67,6 +67,11 @@ void MainWidget::slotQuit() {
     // clear status info value
     //memset(&status_info_, 0, sizeof(status_info_));
 
+    // Устанавливаем страницу, которая предлагает выбрать собеседника/группу/чат.
+    ui->chatStackedWidget->setCurrentIndex(1);
+    ui->groupStackedWidget->setCurrentIndex(1);
+    ui->channelStackedWidget->setCurrentIndex(1);
+
     ui->stackedWidget->setCurrentIndex(EMPTY_PAGE);
     emit switchToPage(this, LOGIN_PAGE);
 }
@@ -112,12 +117,16 @@ void MainWidget::setupConnection() {
 
     connect(ui->tabWidget, &QTabWidget::currentChanged, this, &MainWidget::slotTabRedirectClick);
 
+    connect(ui->channelWidget, &ChannelWidget::openChannelWidget, this, [this]() {ui->channelStackedWidget->setCurrentIndex(0);});
+    connect(ui->chatWidget,    &ChatWidget::openChatWidget,       this, [this]() {ui->chatStackedWidget->setCurrentIndex(0);});
+    connect(ui->groupWidget,   &GroupWidget::openGroupWidget,     this, [this]() {ui->groupStackedWidget->setCurrentIndex(0);});
+
     // При выходе из аккаунта сбрасываем все содержимое виджетов
     connect(ui->settingWidget,   &SettingWidget::quitAccount,  this, &MainWidget::slotQuit);
-    connect(ui->settingWidget,   &SettingWidget::quitAccount,  ui->chatWidget,    &ChatWidget::slotClear);
     connect(ui->settingWidget,   &SettingWidget::quitAccount,  ui->usersList,     &UsersList::slotClear);
     connect(ui->settingWidget,   &SettingWidget::quitAccount,  ui->channelList,   &ChannelList::slotClear);
     connect(ui->settingWidget,   &SettingWidget::quitAccount,  ui->chatList,      &ChatList::slotClear);
+    connect(ui->settingWidget,   &SettingWidget::quitAccount,  ui->chatWidget,    &ChatWidget::slotClear);
     connect(ui->settingWidget,   &SettingWidget::quitAccount,  ui->channelWidget, &ChannelWidget::slotClear);
     connect(ui->settingWidget,   &SettingWidget::quitAccount,  ui->groupWidget,   &GroupWidget::slotClear);
 
@@ -126,7 +135,12 @@ void MainWidget::setupConnection() {
                                                                     ui->profileEditWidget->setStatusInfo(ui->profileWidget->getStatusInfo());
                                                                     disableNavigationBoard();
                                                                 } );
-    connect(ClientSingleton::get_client(), &Client::update_user_result, this, &MainWidget::slotUpdateUserResult);
+    connect(ClientSingleton::get_client(), &Client::update_user_result,    this, &MainWidget::slotUpdateUserResult);
+    connect(ClientSingleton::get_client(), &Client::delete_channel_result, this, [this](int result) {
+                                                                                                      if (result == DELETE_CHANNEL_SUCCESS_ANSWER) {
+                                                                                                        ui->channelStackedWidget->setCurrentIndex(1);
+                                                                                                      }
+                                                                                                    });
 
     connect(ui->usersList, &UsersList::userCardClicked, ui->chatWidget, &ChatWidget::slotOpenChatWith);
     connect(ui->channelList, &ChannelList::channelCardClicked, ui->channelWidget, &ChannelWidget::slotOpenChannel);
