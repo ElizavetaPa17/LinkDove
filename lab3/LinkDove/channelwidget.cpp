@@ -6,6 +6,7 @@
 #include "utility.h"
 #include "clientsingleton.h"
 #include "infodialog.h"
+#include "listlabeldialog.h"
 #include "channelmessage.h"
 #include "messagecard.h"
 #include "agreedialog.h"
@@ -237,6 +238,19 @@ void ChannelWidget::slotRemoveUserResult(int result) {
     }
 }
 
+void ChannelWidget::slotGetParticipantListResult(int result, std::vector<std::string> participants) {
+    if (result == GET_CHNNL_PARTICIPANTS_SUCCESS_ANSWER) {
+        for (int i = 0; i < participants.size(); ++i) {
+            std::unique_ptr<ListLabelDialog> dialog_ptr = std::make_unique<ListLabelDialog>(nullptr);
+            dialog_ptr->setLabels(participants);
+            dialog_ptr->exec();
+        }
+    } else {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Что-то пошло не так при попытке получить список участников канала.");
+        dialog_ptr->exec();
+    }
+}
+
 void ChannelWidget::setupConnection() {
     connect(ui->messageEdit,       &QLineEdit::returnPressed, this, &ChannelWidget::slotSendMessage);
     connect(ui->sendButton,        &QPushButton::clicked,     this, &ChannelWidget::slotSendMessage);
@@ -249,6 +263,7 @@ void ChannelWidget::setupConnection() {
     connect(ClientSingleton::get_client(), &Client::delete_channel_result, this, &ChannelWidget::slotHandleDeleteResult);
     connect(ClientSingleton::get_client(), &Client::quit_channel_result, this, &ChannelWidget::slotQuitChannelResult);
     connect(ClientSingleton::get_client(), &Client::remove_user_from_channel_result, this, &ChannelWidget::slotRemoveUserResult);
+    connect(ClientSingleton::get_client(), &Client::get_channel_participants_result, this, &ChannelWidget::slotGetParticipantListResult);
 
     connect(ui->joinButton, &QPushButton::clicked, ClientSingleton::get_client(), [this] () {
                                                                                     ClientSingleton::get_client()->async_add_channel_participant_request(channel_info_.id_);
@@ -256,4 +271,7 @@ void ChannelWidget::setupConnection() {
     connect(ui->deleteButton, &QPushButton::clicked, this, &ChannelWidget::slotDeleteChannel);
     connect(ui->quitButton, &QPushButton::clicked, this, &ChannelWidget::slotQuitChannel);
     connect(ui->removeUserButton, &QPushButton::clicked, this, &ChannelWidget::slotRemoveUser);
+    connect(ui->participantsButton, &QPushButton::clicked, this, [this]() {
+                                                                            ClientSingleton::get_client()->async_get_channel_participants(channel_info_.id_);
+                                                                          });
 }

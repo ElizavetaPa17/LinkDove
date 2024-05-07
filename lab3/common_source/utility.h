@@ -47,21 +47,21 @@ public:
     static std::pair<size_t, std::string> deserialize_string(std::istream& is);
 
     /**
-     * <p> Сериализует вектор символов в поток. </p>
+     * <p> Сериализует вектор строк в поток. </p>
      * @brief serialize
      * @param os - Поток, в который осуществляется сериализация.
-     * @param value - Сериализуемый вектор символов.
+     * @param vec - Сериализуемый вектор.
      * @return - Размер сериализованных данных.
      */
-    static size_t serialize(std::ostream &os, const std::vector<char>& value);
+    static size_t serialize(std::ostream &os, const std::vector<std::string> &vec);
 
     /**
-     * <p> Десериализует вектор символов из потока. </p>
-     * @brief deserialize_char_vec
+     * <p> Десериализует вектор строк из потока. </p>
+     * @brief deserialize_vec_string
      * @param is - Поток, из которого осуществляется десериализация.
-     * @return - Пара - <размер десериализованных данных, десериализованный вектор символов>.
+     * @return - Пара - <размер десериализованных данных, десериализованный вектор строк>.
      */
-    static std::pair<size_t, std::vector<char>> deserialize_char_vec(std::istream& is);
+    static std::pair<size_t, std::vector<std::string>> deserialize_vec_string(std::istream& is);
 
     /**
      * <p> Сериализует вектор жалоб в поток. </p>

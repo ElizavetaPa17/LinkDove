@@ -16,6 +16,12 @@
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="10">
     <widget class="QPushButton" name="deleteButton">
+     <property name="minimumSize">
+      <size>
+       <width>40</width>
+       <height>0</height>
+      </size>
+     </property>
      <property name="maximumSize">
       <size>
        <width>40</width>
@@ -324,6 +330,12 @@ QPushButton:hover {
    </item>
    <item row="0" column="9">
     <widget class="QPushButton" name="removeUserButton">
+     <property name="minimumSize">
+      <size>
+       <width>40</width>
+       <height>0</height>
+      </size>
+     </property>
      <property name="maximumSize">
       <size>
        <width>40</width>
@@ -353,6 +365,12 @@ QPushButton:hover {
    </item>
    <item row="0" column="8">
     <widget class="QPushButton" name="quitButton">
+     <property name="minimumSize">
+      <size>
+       <width>40</width>
+       <height>0</height>
+      </size>
+     </property>
      <property name="maximumSize">
       <size>
        <width>40</width>
@@ -382,6 +400,12 @@ QPushButton:hover {
    </item>
    <item row="0" column="7">
     <widget class="QPushButton" name="participantsButton">
+     <property name="minimumSize">
+      <size>
+       <width>40</width>
+       <height>0</height>
+      </size>
+     </property>
      <property name="maximumSize">
       <size>
        <width>40</width>
@@ -411,6 +435,12 @@ QPushButton:hover {
    </item>
    <item row="0" column="0" colspan="7">
     <widget class="ClickableLabel" name="infoLabel">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="font">
       <font>
        <pointsize>17</pointsize>

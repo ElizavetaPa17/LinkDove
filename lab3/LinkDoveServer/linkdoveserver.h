@@ -231,6 +231,13 @@ private:
     void handle_get_channel_messages_request(ConnectionIterator iterator);
 
     /**
+     * <p> Обрабатывает запрос на получение списка участников канала. </p>
+     * @brief handle_get_channel_participants_request
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_get_channel_participants_request(ConnectionIterator iterator);
+
+    /**
      * <p> Обрабатывает запрос на удаление канала. </p>
      * @brief handle_delete_channel
      * @param iterator
@@ -292,6 +299,13 @@ private:
      * @param iterator - Итератор на сокет, запрос которого обрабатывается.
      */
     void handle_get_chat_messages_request(ConnectionIterator iterator);
+
+    /**
+     * <p> Обрабатывает запрос на получение списка сообщений из чата (группы). </p>
+     * @brief handle_get_chat_participants_request
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_get_chat_participants_request(ConnectionIterator iterator);
 
     /**
      * <p> Обрабатывает запрос на удаление чата (группы). </p>

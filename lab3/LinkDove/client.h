@@ -160,6 +160,13 @@ public:
     void async_get_channel_messages(unsigned long long channel_id);
 
     /**
+     * <p> Отправляет запрос на получение списка участников канала. </p>
+     * @brief async_get_channel_participants
+     * @param channel_id - Идентификатор канала, из которого извлекаются участники.
+     */
+    void async_get_channel_participants(unsigned long long channel_id);
+
+    /**
      * <p> Отправляет запрос на удаление канала. </p>
      * @brief async_delete_channel
      * @param channel_id - Идентификатор удаляемого канала.
@@ -222,6 +229,13 @@ public:
      * @param chat_id - Идентификатор чата.
      */
     void async_get_chat_messages(unsigned long long chat_id);
+
+    /**
+     * <p> Отправляет запрос на получение списка участников чата (группы). </p>
+     * @brief async_get_chat_participants
+     * @param group_id - Идентификатор чата (группы), из которого извлекается список участников.
+     */
+    void async_get_chat_participants(unsigned long long group_id);
 
     /**
      * <p> Отправляет запрос на удаление чата (группы). </p>
@@ -437,6 +451,14 @@ signals:
     void get_channel_msg_result(int result);
 
     /**
+     * <p> Генерирует сигнал после получения результата запроса на получение списка участников канала. </p>
+     * @brief get_channel_participants_result
+     * @param result - Параметр, содеращий результат запроса.
+     * @param participants - Список участников канала.
+     */
+    void get_channel_participants_result(int result, std::vector<std::string> participants);
+
+    /**
      * <p> Генерирует сигнал после получения результата удаления канала. </p>
      * @brief delete_channel_result
      * @param result - Параметр, содеращий результат запроса.
@@ -499,6 +521,14 @@ signals:
      * @param result - Параметр, содержащий результат запроса.
      */
     void get_chat_msg_result(int result);
+
+    /**
+     * <p> Генерирует сигнал после получения результата запроса на получение списка участников чата (группы). </p>
+     * @brief get_chat_participants_result
+     * @param result - Параметр, содержащий результат запроса.
+     * @param participants - Список участников чата (группы).
+     */
+    void get_chat_participants_result(int result, std::vector<std::string> participants);
 
     /**
      * <p> Генерирует сигнал после получения результата запроса на удаление пользователя из чата (группы). </p>

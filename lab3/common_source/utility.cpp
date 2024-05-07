@@ -42,30 +42,35 @@ std::pair<size_t, std::string> UtilitySerializator::deserialize_string(std::istr
     return std::make_pair(static_cast<size_t>(len), str);
 }
 
-size_t UtilitySerializator::serialize(std::ostream &os, const std::vector<char>& value) {
+size_t UtilitySerializator::serialize(std::ostream &os, const std::vector<std::string> &vec) {
     const auto pos = os.tellp();
 
     // Приводим к типу uint32_t, т.к. на разных машинах размер машинного слова отличается,
     // что может привести к проблемам.
-    const auto len = static_cast<uint32_t>(value.size());
+    const auto len = static_cast<uint32_t>(vec.size());
 
     // Сериализуем сначала размер вектора, а потом сам вектор.
     os.write(reinterpret_cast<const char*>(&len), sizeof(len));
     if (len > 0) {
-        os.write(value.data(), value.size());
+        for (int i = 0; i < len; ++i) {
+            UtilitySerializator::serialize(os, vec[i]);
+        }
     }
 
     return static_cast<size_t>(os.tellp() - pos);
 }
 
-std::pair<size_t, std::vector<char>> UtilitySerializator::deserialize_char_vec(std::istream& is) {
-    std::vector<char> vec;
+std::pair<size_t, std::vector<std::string>> UtilitySerializator::deserialize_vec_string(std::istream& is) {
+    std::vector<std::string> vec;
     uint32_t len = 0; // Размер сериализованной строки был записан в формате uint32_t
 
     is.read(reinterpret_cast<char*>(&len), sizeof(len));
     if (len > 0) {
         vec.resize(len);
-        is.read(vec.data(), len);
+
+        for (int i = 0; i < len; ++i) {
+            vec[i] = UtilitySerializator::deserialize_string(is).second;
+        }
     }
 
     return std::make_pair(static_cast<size_t>(len), vec);

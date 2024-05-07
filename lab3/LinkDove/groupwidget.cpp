@@ -8,6 +8,7 @@
 #include "infodialog.h"
 #include "agreedialog.h"
 #include "removeuserdialog.h"
+#include "listlabeldialog.h"
 #include "messagecard.h"
 #include "utility.h"
 
@@ -250,6 +251,19 @@ void GroupWidget::slotRemoveUserResult(int result) {
     }
 }
 
+void GroupWidget::slotGetParticipantListResult(int result, std::vector<std::string> participants) {
+    if (result == GET_CHAT_PARTICIPANTS_SUCCESS_ANSWER) {
+        for (int i = 0; i < participants.size(); ++i) {
+            std::unique_ptr<ListLabelDialog> dialog_ptr = std::make_unique<ListLabelDialog>(nullptr);
+            dialog_ptr->setLabels(participants);
+            dialog_ptr->exec();
+        }
+    } else {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Что-то пошло не так при попытке получить список участников канала.");
+        dialog_ptr->exec();
+    }
+}
+
 void GroupWidget::setupConnection() {
     connect(ui->messageEdit,       &QLineEdit::returnPressed, this, &GroupWidget::slotSendMessage);
     connect(ui->sendButton,        &QPushButton::clicked,     this, &GroupWidget::slotSendMessage);
@@ -262,6 +276,7 @@ void GroupWidget::setupConnection() {
     connect(ClientSingleton::get_client(), &Client::delete_chat_result, this, &GroupWidget::slotHandleDeleteResult);
     connect(ClientSingleton::get_client(), &Client::quit_chat_result, this, &GroupWidget::slotQuitGroupResult);
     connect(ClientSingleton::get_client(), &Client::remove_user_from_chat_result, this, &GroupWidget::slotRemoveUserResult);
+    connect(ClientSingleton::get_client(), &Client::get_chat_participants_result, this, &GroupWidget::slotGetParticipantListResult);
 
     connect(ui->joinButton, &QPushButton::clicked, ClientSingleton::get_client(), [this] () {
                                                                                     ClientSingleton::get_client()->async_add_chat_participant_request(chat_info_.id_);
@@ -270,4 +285,7 @@ void GroupWidget::setupConnection() {
     connect(ui->deleteButton, &QPushButton::clicked, this, &GroupWidget::slotDeleteGroup);
     connect(ui->quitButton, &QPushButton::clicked, this, &GroupWidget::slotQuitGroup);
     connect(ui->removeUserButton, &QPushButton::clicked, this, &GroupWidget::slotRemoveUser);
+    connect(ui->participantsButton, &QPushButton::clicked, this, [this]() {
+                                                                            ClientSingleton::get_client()->async_get_chat_participants(chat_info_.id_);
+                                                                          });
 }

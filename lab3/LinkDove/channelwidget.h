@@ -122,6 +122,14 @@ private slots:
      */
     void slotRemoveUserResult(int result);
 
+    /**
+     * <p> Слот, который обрабатывает результат получения списка участников канала. </p>
+     * @brief slotGetParticipantListResult
+     * @param result - Результат получения списка участников канала.
+     * @param participants - Список участников канала.
+     */
+    void slotGetParticipantListResult(int result, std::vector<std::string> participants);
+
 private:
     Ui::ChannelWidget *ui;
     ChannelInfo channel_info_;

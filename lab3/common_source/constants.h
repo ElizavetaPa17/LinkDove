@@ -81,6 +81,9 @@ enum ResponseTypes {
     GET_CHNNL_MSG_SUCCESS_ANSWER,
     GET_CHNNL_MSG_FAILED_ANSWER,
 
+    GET_CHNNL_PARTICIPANTS_SUCCESS_ANSWER,
+    GET_CHNNL_PARTICIPANTS_FAILED_ANSWER,
+
     DELETE_CHANNEL_SUCCESS_ANSWER,
     DELETE_CHANNEL_FAILED_ANSWER,
 
@@ -116,6 +119,9 @@ enum ResponseTypes {
 
     REMOVE_USER_FROM_CHAT_SUCCESS_ANSWER,
     REMOVE_USER_FROM_CHAT_FAILED_ANSWER,
+
+    GET_CHAT_PARTICIPANTS_SUCCESS_ANSWER,
+    GET_CHAT_PARTICIPANTS_FAILED_ANSWER,
 };
 
 enum MessageType {
@@ -316,6 +322,13 @@ extern const char *GET_CHNNL_MSG_SUCCESS;
 // Ответ сервера на неудачное получение сообщений из канала
 extern const char *GET_CHNNL_MSG_FAILED;
 
+// Запрос на получение списка участников канала
+extern const char *GET_CHNNL_PARTICIPANTS_REQUEST;
+// Ответ сервера на успешное получение списка участников канала
+extern const char *GET_CHNNL_PARTICIPANTS_SUCCESS;
+// Ответ сервера на неудачное получение списка участников канала
+extern const char *GET_CHNNL_PARTICIPANTS_FAILED;
+
 // Запрос на удаление канала
 extern const char *DELETE_CHANNEL_REQUEST;
 // Ответ сервера на успешное удаление канала
@@ -378,6 +391,13 @@ extern const char *GET_CHAT_MSG_REQUEST;
 extern const char *GET_CHAT_MSG_SUCCESS;
 // Ответ сервера на неудачное получение сообщений из чата
 extern const char *GET_CHAT_MSG_FAILED;
+
+// Запрос на получение списка участников чата (группы)
+extern const char *GET_CHAT_PARTICIPANTS_REQUEST;
+// Ответ сервера на успешное получение списка участников чата (группы)
+extern const char *GET_CHAT_PARTICIPANTS_SUCCESS;
+// Ответ сервера на неудачное получение списка участников чата (группы)
+extern const char *GET_CHAT_PARTICIPANTS_FAILED;
 
 // Запрос на удаление чата
 extern const char *DELETE_CHAT_REQUEST;

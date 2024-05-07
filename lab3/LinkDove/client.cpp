@@ -283,6 +283,20 @@ void Client::async_get_channel_messages(unsigned long long channel_id) {
     run_context();
 }
 
+void Client::async_get_channel_participants(unsigned long long channel_id) {
+    connection_.out_stream_ << GET_CHNNL_PARTICIPANTS_REQUEST << "\n";
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, channel_id);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    asio::async_write(connection_.socket_, connection_.buffer_,
+                       boost::bind(&Client::handle_async_write,
+                                   shared_from_this(),
+                                   asio::placeholders::error,
+                                   asio::placeholders::bytes_transferred));
+
+    run_context();
+}
+
 void Client::async_delete_channel(unsigned long long channel_id) {
     connection_.out_stream_ << DELETE_CHANNEL_REQUEST << "\n";
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, channel_id);
@@ -409,6 +423,20 @@ void Client::async_add_chat_participant_request(unsigned long long chat_id) {
 void Client::async_get_chat_messages(unsigned long long chat_id) {
     connection_.out_stream_ << GET_CHAT_MSG_REQUEST << "\n";
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, chat_id);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    asio::async_write(connection_.socket_, connection_.buffer_,
+                       boost::bind(&Client::handle_async_write,
+                                   shared_from_this(),
+                                   asio::placeholders::error,
+                                   asio::placeholders::bytes_transferred));
+
+    run_context();
+}
+
+void Client::async_get_chat_participants(unsigned long long group_id) {
+    connection_.out_stream_ << GET_CHAT_PARTICIPANTS_REQUEST << "\n";
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, group_id);
     connection_.out_stream_ << END_OF_REQUEST;
 
     asio::async_write(connection_.socket_, connection_.buffer_,
@@ -775,6 +803,16 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
             emit remove_user_from_chat_result(REMOVE_USER_FROM_CHAT_SUCCESS_ANSWER);
         } else if (answer_type == REMOVE_USER_FROM_CHAT_FAILED) {
             emit remove_user_from_chat_result(REMOVE_USER_FROM_CHAT_FAILED_ANSWER);
+        } else if (answer_type == GET_CHNNL_PARTICIPANTS_SUCCESS) {
+            std::vector<std::string> participants = UtilitySerializator::deserialize_vec_string(connection_.in_stream_).second;
+            emit get_channel_participants_result(GET_CHNNL_PARTICIPANTS_SUCCESS_ANSWER, participants);
+        } else if (answer_type == GET_CHNNL_PARTICIPANTS_FAILED) {
+            emit get_channel_participants_result(GET_CHNNL_PARTICIPANTS_FAILED_ANSWER, std::vector<std::string>());
+        } else if (answer_type == GET_CHAT_PARTICIPANTS_SUCCESS) {
+            std::vector<std::string> participants = UtilitySerializator::deserialize_vec_string(connection_.in_stream_).second;
+            emit get_chat_participants_result(GET_CHAT_PARTICIPANTS_SUCCESS_ANSWER, participants);
+        } else if (answer_type == GET_CHAT_PARTICIPANTS_FAILED) {
+            emit get_chat_participants_result(GET_CHAT_PARTICIPANTS_FAILED_ANSWER, std::vector<std::string>());
         } else {
             std::cerr << "что-то невнятное: " << answer_type << '\n';
         }

@@ -189,6 +189,14 @@ public:
     std::vector<std::shared_ptr<IMessage> > get_channel_messages(unsigned long long channel_id);
 
     /**
+     * <p> Возвращает список никнеймов участников канала. </p>
+     * @brief get_channel_participants
+     * @param channel_id - Идентификатор канала, из которого извлекаются участники.
+     * @return - Список участников канала.
+     */
+    std::vector<std::string> get_channel_participants(unsigned long long channel_id);
+
+    /**
      * <p> Удаляет канал из БД. </p>
      * @brief delete_channel
      * @param channel_id - Идентификатор удаляемого канала.
@@ -287,6 +295,14 @@ public:
      * @return - Вектор сообщений.
      */
     std::vector<std::shared_ptr<IMessage> > get_chat_messages(unsigned long long chat_id);
+
+    /**
+     * <p> Возвращает список никнеймов участников чата (группы). </p>
+     * @brief get_channel_participants
+     * @param group_id - Идентификатор чата (группы), из которого извлекаются участники.
+     * @return - Список участников чата (группы).
+     */
+    std::vector<std::string> get_chat_participants(unsigned long long group_id);
 
     /**
      * <p> Возвращает информацию о пользователе, который соответствует никнейму. </p>

@@ -959,6 +959,27 @@ std::vector<std::shared_ptr<IMessage>> LinkDoveSQLDataBase::get_channel_messages
     }
 }
 
+std::vector<std::string> LinkDoveSQLDataBase::get_channel_participants(unsigned long long channel_id) {
+    QSqlQuery query(data_base_);
+
+    query.prepare(" SELECT participant_id FROM CHANNEL_PARTICIPANTS "
+                  " WHERE channel_id=:channel_id; ");
+
+    query.bindValue(":channel_id", channel_id);
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString() << '\n';
+        throw std::runtime_error("get_channel_participants: cannot get channel participants\n");
+    }
+
+    std::vector<std::string> participants;
+    while (query.next()) {
+        participants.push_back(get_status_info(query.value("participant_id").toULongLong()).username_);
+    }
+
+    return participants;
+}
+
 bool LinkDoveSQLDataBase::delete_channel(unsigned long long channel_id) {
     QSqlQuery query(data_base_);
 
@@ -1372,6 +1393,27 @@ std::vector<std::shared_ptr<IMessage>> LinkDoveSQLDataBase::get_chat_messages(un
 
         return messages;
     }
+}
+
+std::vector<std::string> LinkDoveSQLDataBase::get_chat_participants(unsigned long long group_id) {
+    QSqlQuery query(data_base_);
+
+    query.prepare(" SELECT participant_id FROM CHAT_PARTICIPANTS "
+                  " WHERE chat_id=:chat_id; ");
+
+    query.bindValue(":chat_id", group_id);
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString() << '\n';
+        throw std::runtime_error("get_chat_participants: cannot get chat participants\n");
+    }
+
+    std::vector<std::string> participants;
+    while (query.next()) {
+        participants.push_back(get_status_info(query.value("participant_id").toULongLong()).username_);
+    }
+
+    return participants;
 }
 
 StatusInfo LinkDoveSQLDataBase::get_status_info(const std::string &username) {

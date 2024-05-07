@@ -193,6 +193,10 @@ void LinkDoveServer::handle_type_request(ConnectionIterator iterator) {
         handle_remove_user_from_channel(iterator);
     } else if (request_type == REMOVE_USER_FROM_CHAT_REQUEST) {
         handle_remove_user_from_chat(iterator);
+    } else if (request_type == GET_CHNNL_PARTICIPANTS_REQUEST) {
+        handle_get_channel_participants_request(iterator);
+    } else if (request_type == GET_CHAT_PARTICIPANTS_REQUEST) {
+        handle_get_chat_participants_request(iterator);
     }
 }
 
@@ -605,6 +609,27 @@ void LinkDoveServer::handle_get_channel_messages_request(ConnectionIterator iter
     async_write(iterator);
 }
 
+void LinkDoveServer::handle_get_channel_participants_request(ConnectionIterator iterator) {
+    unsigned long long channel_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    try {
+        std::vector<std::string> participants = data_base_.get_channel_participants(channel_id);
+
+        answer << GET_CHNNL_PARTICIPANTS_SUCCESS << "\n";
+        UtilitySerializator::serialize(answer, participants);
+        answer << END_OF_REQUEST;
+    } catch (std::runtime_error &ex) {
+        std::cerr << ex.what() << '\n';
+        answer << GET_CHNNL_PARTICIPANTS_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
 void LinkDoveServer::handle_delete_channel(ConnectionIterator iterator) {
     unsigned long long channel_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
 
@@ -788,6 +813,27 @@ void LinkDoveServer::handle_get_chat_messages_request(ConnectionIterator iterato
     } catch (std::runtime_error& ex) {
         std::cerr << ex.what() << '\n';
         answer << GET_CHAT_MSG_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_get_chat_participants_request(ConnectionIterator iterator) {
+    unsigned long long group_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    try {
+        std::vector<std::string> participants = data_base_.get_chat_participants(group_id);
+
+        answer << GET_CHAT_PARTICIPANTS_SUCCESS << "\n";
+        UtilitySerializator::serialize(answer, participants);
+        answer << END_OF_REQUEST;
+    } catch (std::runtime_error &ex) {
+        std::cerr << ex.what() << '\n';
+        answer << GET_CHAT_PARTICIPANTS_FAILED << "\n" << END_OF_REQUEST;
     }
 
     iterator->out_stream_ << answer.str();

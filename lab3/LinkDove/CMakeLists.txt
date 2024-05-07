@@ -75,6 +75,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         groupwidget.h groupwidget.cpp groupwidget.ui
         agreedialog.h agreedialog.cpp agreedialog.ui
         removeuserdialog.h removeuserdialog.cpp removeuserdialog.ui
+        listlabeldialog.h listlabeldialog.cpp listlabeldialog.ui
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET LinkDove APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

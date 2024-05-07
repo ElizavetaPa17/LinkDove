@@ -123,6 +123,14 @@ private slots:
      */
     void slotRemoveUserResult(int result);
 
+    /**
+     * <p> Слот, который обрабатывает результат получения списка участников чата (группы). </p>
+     * @brief slotGetParticipantListResult
+     * @param result - Результат получения списка участников чата (группы).
+     * @param participants - Список участников чата (группы).
+     */
+    void slotGetParticipantListResult(int result, std::vector<std::string> participants);
+
 private:
     Ui::GroupWidget *ui;
     ChatInfo chat_info_;
