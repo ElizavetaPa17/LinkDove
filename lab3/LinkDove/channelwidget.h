@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include "channelinfo.h"
+#include "imessage.h"
 
 namespace Ui {
 class ChannelWidget;
@@ -68,7 +69,7 @@ private slots:
      * @brief slotHandleGetMessage
      * @param result - Параметр, содержащий результат получения сообщений.
      */
-    void slotHandleGetMessages(int result);
+    void slotHandleGetMessages(int result, std::vector<std::shared_ptr<IMessage> > messages);
 
     /**
      * <p> Слот, обрабатывающий результат добавление текущего пользователя в канал. </p>

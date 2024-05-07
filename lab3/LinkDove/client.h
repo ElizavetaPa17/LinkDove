@@ -275,46 +275,11 @@ public:
     StatusInfo get_found_user();
 
     /**
-     * <p> Возвращает вектор жалоб. Вызывается после запроса на получение списка жалоб (в противном случае результат не определен). </p>
-     * @brief get_complaints
-     * @return - Вектор жалоб.
-     */
-    std::vector<Complaint> get_complaints();
-
-    /**
-     * <p> Возвращает вектор сообщений. Вызывается после запроса на получение сообщений какого-либо типа. </p>
-     * @brief get_messages
-     * @return - Вектор сообщений.
-     */
-    std::vector<std::shared_ptr<IMessage>> get_messages();
-
-    /**
-     * <p> Возвращает вектор собеседников текущего пользователя. Вызывается после запроса на получение этих собеседников. </p>
-     * @brief get_interlocutors
-     * @return - Вектор собеседников текущего пользователя.
-     */
-    std::vector<StatusInfo> get_interlocutors();
-
-    /**
      * <p> Возвращает информацию о найденном канале. Вызывает после запроса на поиск канала. </p>
      * @brief get_found_channel
      * @return - Структура, содержащая информацию о найденном канале.
      */
     ChannelInfo get_found_channel();
-
-    /**
-     * <p> Возвращает вектор каналов, в которых состоит текущий пользователь. Вызывается после запроса на получение этих каналов. </p>
-     * @brief get_channels
-     * @return - Вектор каналов, в которых состоит текущий пользователь.
-     */
-    std::vector<ChannelInfo> get_channels();
-
-    /**
-     * <p> Возвращает список чатов, в которых состоит текущий пользователь. Вызывается после запроса на получение этих чатов. </p>
-     * @brief get_chats
-     * @return - Вектор чатов, в которых состоит текущий пользоваетль.
-     */
-    std::vector<ChatInfo> get_chats();
 
     /**
      * <p> Возвращает информацию о найденном чате. </p>
@@ -355,8 +320,9 @@ signals:
      * <p> Генерирует сигнал после получения результата извлечения всех жалоб.</p>
      * @brief get_complaints_result
      * @param result - Параметр, содержащий результат получения списка жалоб.
+     * @param complaints - Список жалоб.
      */
-    void get_complaints_result(int result);
+    void get_complaints_result(int result, std::vector<Complaint> complaints);
 
     /**
      * <p> Генерирует сигнал после получения результата обновления данных о пользователе. </p>
@@ -389,16 +355,18 @@ signals:
     /**
      * <p> Генерирует сигнал после получения результата запроса на список сообщений. </p>
      * @brief get_msg_result
-     * @param result
+     * @param result - Параметр, содержащий результат отправки сообщения.
+     * @param messages - Список сообщений
      */
-    void get_ind_msg_result(int result);
+    void get_ind_msg_result(int result, std::vector<std::shared_ptr<IMessage>> messages);
 
     /**
      * <p> Генерирует сигнал после получение результата запроса на информацию о собеседниках. </p>
      * @brief get_interlocutors_result
      * @param result - Параметр, содержащий результат запроса.
+     * @param interlocutors - Список собеседников
      */
-    void get_interlocutors_result(int result);
+    void get_interlocutors_result(int result, std::vector<StatusInfo> interlocutors);
 
     /**
      * <p> Генерирует сигнал после получение результата запроса на удаление чата между собеседниками. </p>
@@ -425,8 +393,9 @@ signals:
      * <p> Генерирует сигнал после получения результата запроса информации о каналах, в которых состоит текущий пользователь. </p>
      * @brief get_channels_result
      * @param result - Параметр, содержащий результат запроса.
+     * @param channels - Список каналов
      */
-    void get_channels_result(int result);
+    void get_channels_result(int result, std::vector<ChannelInfo> channels);
 
     /**
      * <p> Генерирует сигнал после получения результата запроса информации о том, является ли текущий пользователь участником канала. </p>
@@ -447,8 +416,9 @@ signals:
      * <p> Генерирует сигнал после получение результата запроса на получение из канала. </p>
      * @brief get_chnnl_messages_result
      * @param result - Параметр, содеращий результат запроса.
+     * @param messages - Список сообщений
      */
-    void get_channel_msg_result(int result);
+    void get_channel_msg_result(int result, std::vector<std::shared_ptr<IMessage>> messages);
 
     /**
      * <p> Генерирует сигнал после получения результата запроса на получение списка участников канала. </p>
@@ -490,8 +460,9 @@ signals:
      * <p> Генерирует сигнал после получения результата запроса на поиск информации о чатах, в которых состоит текущий пользователь. </p>
      * @brief get_chats_result
      * @param result - Параметр, содержащий результат запроса.
+     * @param chats - Список чатов
      */
-    void get_chats_result(int result);
+    void get_chats_result(int result, std::vector<ChatInfo> chats);
 
     /**
      * <p> Генерирует сигнал после получения результата поиска информации о чате. </p>
@@ -519,8 +490,9 @@ signals:
      * <p> Генерирует сигнал после получения результата запроса на получение списка сообщений из чата (группы). </p>
      * @brief get_chat_msg_result
      * @param result - Параметр, содержащий результат запроса.
+     * @param messages - Список сообщений.
      */
-    void get_chat_msg_result(int result);
+    void get_chat_msg_result(int result, std::vector<std::shared_ptr<IMessage>> messages);
 
     /**
      * <p> Генерирует сигнал после получения результата запроса на получение списка участников чата (группы). </p>
@@ -563,69 +535,7 @@ private:
     ChannelInfo found_channel_info_;
     ChatInfo found_chat_info_;
 
-    std::vector<Complaint> complaints_;
-    std::vector<std::shared_ptr<IMessage>> messages_;
-    std::vector<StatusInfo> status_info_vec_;
-    std::vector<ChannelInfo> channels_;
-    std::vector<ChatInfo> chats_;
-
     void create_account() {}
-
-    /**
-     * <p> Формирует запрос авторизации. </p>
-     * @brief create_login_request
-     * @param login_info - Структура, содержащая информацию для прохождения авторизации.
-     * @return - Строковое представление запроса.
-     */
-    std::string create_login_request(const LoginInfo& login_info);
-
-    /**
-     * <p> Формирует запрос регистрации. </p>
-     * @brief create_register_request
-     * @return - Строковое представление запроса.
-     */
-    std::string create_register_request(const UserInfo& user_info);
-
-    /**
-     * <p> Формирует запрос отправки жалобы от обычного пользователя администратору. </p>
-     * @brief create_send_complaint_request
-     * @param complaint - Структура, содержащая информацию о жалобе
-     * @return - Строковое представление запроса.
-     */
-    std::string create_send_complaint_request(const Complaint& complaint);
-
-    /**
-     * <p> Формирует запрос на удаление жалобы. </p>
-     * @brief create_del_request
-     * @param complaint_id - Идентификатор удаляемой жалобы.
-     * @return - Строковое представление запроса.
-     */
-    std::string create_del_request(unsigned long long complaint_id);
-
-    /**
-     * <p> Формирует запрос обновления данных о пользователе. </p>
-     * @brief create_update_user_request
-     * @param status_info - Структура, содержащая отредактированные данные пользователя.
-     * @return - Строковое представление запроса.
-     */
-    std::string create_update_user_request(const StatusInfo& status_info);
-
-    /**
-     * Формирует запрос на блокировку/разблокировку пользователя.
-     * @brief create_ban_user_request
-     * @param username - Никнейм пользователя.
-     * @param is_ban - Флаг блокировки/разблокировки пользователя.
-     * @return - Строковое представление запроса.
-     */
-    std::string create_ban_user_request(const std::string &username, bool is_ban);
-
-    /**
-     * <p> Формирует запрос на получение сообщений из чата с одним собеседником с идентификатором other_id. </p>
-     * @brief create_get_message_request
-     * @param other_id - Идентификатор собеседника.
-     * @return - Строковое представление запроса.
-     */
-    std::string create_get_ind_message_request(unsigned long long other_id);
 
     /**
      * <p> Асинхронно читает ответ от сервера. </p>
@@ -654,6 +564,12 @@ private:
      * @param bytes_transfered - Количество прочитанных байтов.
      */
     void handle_async_read(boost::system::error_code error, size_t bytes_transferred);
+
+    /**
+     * <p> Отправляет серверу запрос. </p>
+     * @brief write_to_server
+     */
+    void write_to_server();
 
     /** <p> Запускает в отдельном потоке контекст для обработки асинхронных функций. </p>
      * @brief run_context

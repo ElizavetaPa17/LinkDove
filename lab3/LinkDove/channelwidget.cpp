@@ -120,11 +120,10 @@ void ChannelWidget::slotHandleSendMessage(int result) {
 }
 
 
-void ChannelWidget::slotHandleGetMessages(int result) {
+void ChannelWidget::slotHandleGetMessages(int result, std::vector<std::shared_ptr<IMessage>> messages) {
     slotClear();
 
     if (result == GET_CHNNL_MSG_SUCCESS_ANSWER){
-        std::vector<std::shared_ptr<IMessage>> messages = ClientSingleton::get_client()->get_messages();
         for (auto& elem : messages) {
             QHBoxLayout *phboxLayout = new QHBoxLayout();
             switch(elem->get_msg_content()->get_msg_content_type()) {
@@ -222,6 +221,7 @@ void ChannelWidget::slotRemoveUser() {
         if (dialog_ptr->getUsername() == ClientSingleton::get_client()->get_status_info().username_) {
             std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Вы не можете удалить себя из канала. ");
             dialog_ptr->exec();
+            return;
         }
 
         ClientSingleton::get_client()->async_remove_user_from_channel(channel_info_.id_, dialog_ptr->getUsername());
@@ -240,11 +240,8 @@ void ChannelWidget::slotRemoveUserResult(int result) {
 
 void ChannelWidget::slotGetParticipantListResult(int result, std::vector<std::string> participants) {
     if (result == GET_CHNNL_PARTICIPANTS_SUCCESS_ANSWER) {
-        for (int i = 0; i < participants.size(); ++i) {
-            std::unique_ptr<ListLabelDialog> dialog_ptr = std::make_unique<ListLabelDialog>(nullptr);
-            dialog_ptr->setLabels(participants);
-            dialog_ptr->exec();
-        }
+        std::unique_ptr<ListLabelDialog> dialog_ptr = std::make_unique<ListLabelDialog>(nullptr, participants);
+        dialog_ptr->exec();
     } else {
         std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Что-то пошло не так при попытке получить список участников канала.");
         dialog_ptr->exec();

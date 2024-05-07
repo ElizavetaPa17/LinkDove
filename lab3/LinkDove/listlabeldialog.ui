@@ -25,7 +25,7 @@ QLabel {
 	color: rgb(65, 47, 50);
 	background-color: rgb(245, 245, 245);
 	padding-left: 10px;
-	font-size: 17px;
+	font-size: 27px;
 	font-family: 'Ubuntu';
 }</string>
   </property>

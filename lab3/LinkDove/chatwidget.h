@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include "StatusInfo.h"
+#include "imessage.h"
 
 namespace Ui {
 class ChatWidget;
@@ -60,7 +61,7 @@ private slots:
      * @brief slotHandleGetMessage
      * @param result - Параметр, содержащий результат получения сообщений.
      */
-    void slotHandleGetMessages(int result);
+    void slotHandleGetMessages(int result, std::vector<std::shared_ptr<IMessage>> messages);
 
     /**
      * <p> Слот, который открывает диалоговое окно ддя выбора фотографии с целью его отправления в чат. </p>

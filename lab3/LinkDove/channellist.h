@@ -67,7 +67,7 @@ private slots:
      * @brief slotGetChannelsResult
      * @param result - Результат получения информации о таких каналах.
      */
-    void slotGetChannelsResult(int result);
+    void slotGetChannelsResult(int result, std::vector<ChannelInfo> channels);
 
     /**
      * <p> Слот, принимающий события нажатия на виджет результата поиска канала. </p>

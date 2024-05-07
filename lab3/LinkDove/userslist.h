@@ -10,6 +10,10 @@ namespace Ui {
 class UsersList;
 }
 
+/**
+ * @brief The UsersList class
+ * Виджет, отображающий список пользователей.
+ */
 class UsersList : public QWidget
 {
     Q_OBJECT
@@ -65,7 +69,7 @@ private slots:
      * @brief slotGetInterlocutorsResult
      * @param result - Результат получения информации.
      */
-    void slotGetInterlocutorsResult(int result);
+    void slotGetInterlocutorsResult(int result, std::vector<StatusInfo> interlocutors);
 
     /**
      * <p> Слот, принимающий события нажатия на виджет результата поиска пользователя. </p>

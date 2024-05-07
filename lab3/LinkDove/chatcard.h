@@ -9,9 +9,14 @@ namespace Ui {
 class ChatCard;
 }
 
+/**
+ * @brief The ChatCard class
+ * Виджет, который хранит информацию о чате (группе) и отображает ее название.
+ */
 class ChatCard : public QWidget
 {
     Q_OBJECT
+
 
 public:
     explicit ChatCard(QWidget *parent, const ChatInfo &chat_info);

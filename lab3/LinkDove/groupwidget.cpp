@@ -45,7 +45,11 @@ void GroupWidget::slotHandleIsGroupParticipantResult(int result, bool is_partici
             if (chat_info_.owner_id_ == ClientSingleton::get_client()->get_status_info().id_) {
                 ui->deleteButton->show();
                 ui->removeUserButton->show();
+            } else {
+                ui->removeUserButton->hide();
+                ui->deleteButton->hide();
             }
+
         } else {
             ui->stackedWidget->setCurrentIndex(1); // NOT_PARTICIPANT_PAGE
             ui->deleteButton->hide();
@@ -115,11 +119,10 @@ void GroupWidget::slotHandleSendMessage(int result) {
     }
 }
 
-void GroupWidget::slotHandleGetMessages(int result) {
+void GroupWidget::slotHandleGetMessages(int result, std::vector<std::shared_ptr<IMessage>> messages) {
     slotClear();
 
     if (result == GET_CHAT_MSG_SUCCESS_ANSWER){
-        std::vector<std::shared_ptr<IMessage>> messages = ClientSingleton::get_client()->get_messages();
         unsigned long long user_id = ClientSingleton::get_client()->get_status_info().id_;
         std::string user_name;
 
@@ -235,6 +238,7 @@ void GroupWidget::slotRemoveUser() {
         if (dialog_ptr->getUsername() == ClientSingleton::get_client()->get_status_info().username_) {
             std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Вы не можете удалить себя из группы. ");
             dialog_ptr->exec();
+            return;
         }
 
         ClientSingleton::get_client()->async_remove_user_from_chat(chat_info_.id_, dialog_ptr->getUsername());
@@ -253,11 +257,8 @@ void GroupWidget::slotRemoveUserResult(int result) {
 
 void GroupWidget::slotGetParticipantListResult(int result, std::vector<std::string> participants) {
     if (result == GET_CHAT_PARTICIPANTS_SUCCESS_ANSWER) {
-        for (int i = 0; i < participants.size(); ++i) {
-            std::unique_ptr<ListLabelDialog> dialog_ptr = std::make_unique<ListLabelDialog>(nullptr);
-            dialog_ptr->setLabels(participants);
-            dialog_ptr->exec();
-        }
+        std::unique_ptr<ListLabelDialog> dialog_ptr = std::make_unique<ListLabelDialog>(nullptr, participants);
+        dialog_ptr->exec();
     } else {
         std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Что-то пошло не так при попытке получить список участников канала.");
         dialog_ptr->exec();

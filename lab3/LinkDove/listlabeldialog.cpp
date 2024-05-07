@@ -1,11 +1,11 @@
 #include "listlabeldialog.h"
 #include "ui_listlabeldialog.h"
 
-#include "QLabel"
+#include <QLabel>
 
 //#include "utility.h"
 
-ListLabelDialog::ListLabelDialog(QWidget *parent) :
+ListLabelDialog::ListLabelDialog(QWidget *parent, const std::vector<std::string> &messages) :
     QDialog(parent),
     ui(new Ui::ListLabelDialog)
 {
@@ -16,6 +16,8 @@ ListLabelDialog::ListLabelDialog(QWidget *parent) :
     ui->scrollArea->setWidget(new QWidget());
     ui->scrollArea->widget()->setLayout(pvboxLayout);
     ui->scrollArea->setWidgetResizable(true);
+
+    setLabels(messages);
 }
 
 ListLabelDialog::~ListLabelDialog()
@@ -23,8 +25,8 @@ ListLabelDialog::~ListLabelDialog()
     delete ui;
 }
 
-void ListLabelDialog::setLabels(std::vector<std::string> messages) {
-    QLayout *layout = ui->scrollArea->widget()->layout();
+void ListLabelDialog::setLabels(const std::vector<std::string> &messages) {
+    QHBoxLayout *layout = static_cast<QHBoxLayout*>(ui->scrollArea->widget()->layout());
 
     QLabel *label = nullptr;
     for (const auto &message : messages) {
@@ -33,4 +35,6 @@ void ListLabelDialog::setLabels(std::vector<std::string> messages) {
 
         layout->addWidget(label);
     }
+
+    layout->addStretch();
 }

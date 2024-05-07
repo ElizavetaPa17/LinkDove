@@ -10,6 +10,10 @@ namespace Ui {
 class ChannelCard;
 }
 
+/**
+ * @brief The ChannelCard class
+ * Виджет, который хранит информацию о канале и отображает его название.
+ */
 class ChannelCard : public QWidget
 {
     Q_OBJECT

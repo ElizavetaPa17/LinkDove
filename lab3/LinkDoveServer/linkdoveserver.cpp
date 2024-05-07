@@ -78,14 +78,14 @@ void LinkDoveServer::async_write(ConnectionIterator iterator) {
 }
 
 void LinkDoveServer::async_close_write(ConnectionIterator iterator) {
-    //iterator->out_stream_ << "CLOSE\n";
     asio::async_write(iterator->socket_, iterator->buffer_,
-                      boost::bind(&LinkDoveServer::handle_async_write,
+                      boost::bind(&LinkDoveServer::handle_async_close_write,
                                   shared_from_this(),
                                   iterator,
                                   asio::placeholders::error,
                                   asio::placeholders::bytes_transferred));
 
+    iterator->socket_.close();
     run_context();
 }
 
@@ -94,7 +94,7 @@ void LinkDoveServer::handle_async_accept(ConnectionIterator iterator, boost::sys
         std::cerr << "Failed to accept new connection: " << error.message() << '\n';
         async_close_write(iterator);
     } else {
-        std::cout << "Connection from: " << iterator->socket_.remote_endpoint().address() << "\n";
+        std::cout << "Received connection from: " << iterator->socket_.remote_endpoint().address() << "\n";
     }
 
     async_read(iterator);
@@ -103,7 +103,7 @@ void LinkDoveServer::handle_async_accept(ConnectionIterator iterator, boost::sys
 
 void LinkDoveServer::handle_async_read(ConnectionIterator iterator, boost::system::error_code error, size_t bytes_transfered) {
     if (error) {
-        std::cerr << "Failed to read from socket: " << error.value() << ' ' << error.message() << '\n';
+        std::cerr << "Failed to read from socket: " << error.value() << ' ' << error.message() << ". Closing it.\n";
         async_close_write(iterator);
     }
 
@@ -114,7 +114,7 @@ void LinkDoveServer::handle_async_read(ConnectionIterator iterator, boost::syste
 
 void LinkDoveServer::handle_async_write(ConnectionIterator iterator, boost::system::error_code error, size_t bytes_transfered) {
     if (error) {
-        std::cerr << "Failed to write to socket: " << error.value() << ' ' << error.message() << '\n';
+        std::cerr << "Failed to write to socket: " << error.value() << ' ' << error.message() << ". Closing it.";
         async_close_write(iterator);
     }
 
@@ -214,12 +214,12 @@ void LinkDoveServer::handle_login_request(ConnectionIterator iterator) {
 
                 iterator->out_stream_ << LOGIN_SUCCESS << "\n";
 
-                // ДОБАВИТЬ TRY_CATCH (С ОТПРАВКОЙ КЛИЕНТУ INTERNAL_ERROR)
                 StatusInfo status_info = data_base_.get_status_info(login_info.username_);
                 status_info.serialize(iterator->out_stream_);
             }
 
         } catch (std::runtime_error &error) {
+            std::cerr << "Failed to login user: " << error.what() << '\n';
             iterator->out_stream_ << LOGIN_FAILED << "\n";
         }
     } else {
@@ -303,7 +303,7 @@ void LinkDoveServer::handle_get_complaints_request(ConnectionIterator iterator) 
             UtilitySerializator::serialize(answer, complaints);
             answer << END_OF_REQUEST;
         } catch (std::runtime_error& ex) {
-            std::cerr << ex.what() << '\n';
+            std::cerr << "Failed to get complaints: " << ex.what() << '\n';
             answer << GET_COMPLAINTS_FAILED << "\n" << END_OF_REQUEST;
         }
 
@@ -343,7 +343,7 @@ void LinkDoveServer::handle_find_user_request(ConnectionIterator iterator) {
         status_info.serialize(answer);
         answer << END_OF_REQUEST;
     } catch(std::runtime_error& ex) {
-        std::cerr << ex.what() << '\n';
+        std::cerr << "Failed to find user: " << ex.what() << '\n';
         answer << FIND_USER_FAILED << "\n" << END_OF_REQUEST;
     }
 
@@ -440,7 +440,7 @@ void LinkDoveServer::handle_get_msg_request(ConnectionIterator iterator) {
         answer << END_OF_REQUEST;
 
     } catch (std::runtime_error& ex) {
-        std::cerr << ex.what() << '\n';
+        std::cerr << "Failed to get messages: " << ex.what() << '\n';
         answer << GET_IND_MSG_FAILED << "\n" << END_OF_REQUEST;
     }
 
@@ -461,6 +461,7 @@ void LinkDoveServer::handle_get_interlocutors_request(ConnectionIterator iterato
         UtilitySerializator::serialize(answer, interlocutors);
         answer << END_OF_REQUEST;
     } catch (std::runtime_error &ex) {
+        std::cerr << "Failed to get interlocutors: " << ex.what() << '\n';
         answer << GET_INTERLOCUTORS_FAILED << "\n" << END_OF_REQUEST;
     }
 
@@ -516,7 +517,7 @@ void LinkDoveServer::handle_find_channel_request(ConnectionIterator iterator) {
         channel_info.serialize(answer);
         answer << END_OF_REQUEST;
     } catch (std::runtime_error& ex) {
-        std::cerr << ex.what() << '\n';
+        std::cerr << "Failed to find channel: " << ex.what() << '\n';
         answer << FIND_CHANNEL_FAILED << "\n" << END_OF_REQUEST;
     }
 
@@ -537,7 +538,7 @@ void LinkDoveServer::handle_get_channels_request(ConnectionIterator iterator) {
         UtilitySerializator::serialize(answer, channels);
         answer << END_OF_REQUEST;
     } catch (std::runtime_error &ex) {
-        std::cerr << ex.what();
+        std::cerr << "Failed to get channels: " << ex.what();
         answer << GET_CHANNELS_FAILED << "\n" << END_OF_REQUEST;
     }
 
@@ -559,7 +560,7 @@ void LinkDoveServer::handle_is_channel_participant_request(ConnectionIterator it
         UtilitySerializator::serialize_fundamental<bool>(answer, is_participant);
         answer << END_OF_REQUEST;
     } catch (std::runtime_error &ex) {
-        std::cerr << ex.what();
+        std::cerr << "Failed to determine channel participant: " << ex.what();
         answer << IS_CHANNEL_PARTICIPANT_FAILED << "\n" << END_OF_REQUEST;
     }
 
@@ -601,7 +602,7 @@ void LinkDoveServer::handle_get_channel_messages_request(ConnectionIterator iter
         answer << END_OF_REQUEST;
 
     } catch (std::runtime_error& ex) {
-        std::cerr << ex.what() << '\n';
+        std::cerr << "Failed to get channel messages: " << ex.what() << '\n';
         answer << GET_CHNNL_MSG_FAILED << "\n" << END_OF_REQUEST;
     }
 
@@ -622,7 +623,7 @@ void LinkDoveServer::handle_get_channel_participants_request(ConnectionIterator 
         UtilitySerializator::serialize(answer, participants);
         answer << END_OF_REQUEST;
     } catch (std::runtime_error &ex) {
-        std::cerr << ex.what() << '\n';
+        std::cerr << "Failed to get channel participants: " << ex.what() << '\n';
         answer << GET_CHNNL_PARTICIPANTS_FAILED << "\n" << END_OF_REQUEST;
     }
 
@@ -682,7 +683,7 @@ void LinkDoveServer::handle_remove_user_from_channel(ConnectionIterator iterator
             answer << REMOVE_USER_FROM_CHANNEL_FAILED << "\n" << END_OF_REQUEST;
         }
     } catch (std::runtime_error &ex) {
-        std::cerr << ex.what();
+        std::cerr << "Failed to remove user from channel: " << ex.what();
         answer << REMOVE_USER_FROM_CHANNEL_FAILED << "\n" << END_OF_REQUEST;
     }
 
@@ -722,7 +723,7 @@ void LinkDoveServer::handle_get_chats_request(ConnectionIterator iterator) {
         UtilitySerializator::serialize(answer, channels);
         answer << END_OF_REQUEST;
     } catch (std::runtime_error &ex) {
-        std::cerr << ex.what();
+        std::cerr << "Failed to get chats: " << ex.what();
         answer << GET_CHATS_FAILED << "\n" << END_OF_REQUEST;
     }
 
@@ -744,7 +745,7 @@ void LinkDoveServer::handle_find_chat_request(ConnectionIterator iterator) {
         chat_info.serialize(answer);
         answer << END_OF_REQUEST;
     } catch (std::runtime_error& ex) {
-        std::cerr << ex.what() << '\n';
+        std::cerr << "Failed to find chat: " << ex.what() << '\n';
         answer << FIND_CHAT_FAILED << "\n" << END_OF_REQUEST;
     }
 
@@ -765,10 +766,8 @@ void LinkDoveServer::handle_is_chat_participant_request(ConnectionIterator itera
         answer << IS_CHAT_PARTICIPANT_SUCCESS << "\n";
         UtilitySerializator::serialize_fundamental<bool>(answer, is_participant);
         answer << END_OF_REQUEST;
-        std::cerr << "нет ошибки\n";
     } catch (std::runtime_error &ex) {
-        std::cerr << ex.what();
-        std::cerr << "Ощибочка\n";
+        std::cerr << "Failed to determine chat participant: " << ex.what();
         answer << IS_CHAT_PARTICIPANT_FAILED << "\n" << END_OF_REQUEST;
     }
 
@@ -811,7 +810,7 @@ void LinkDoveServer::handle_get_chat_messages_request(ConnectionIterator iterato
         answer << END_OF_REQUEST;
 
     } catch (std::runtime_error& ex) {
-        std::cerr << ex.what() << '\n';
+        std::cerr << "Failed to get chat messages:" << ex.what() << '\n';
         answer << GET_CHAT_MSG_FAILED << "\n" << END_OF_REQUEST;
     }
 
@@ -832,7 +831,7 @@ void LinkDoveServer::handle_get_chat_participants_request(ConnectionIterator ite
         UtilitySerializator::serialize(answer, participants);
         answer << END_OF_REQUEST;
     } catch (std::runtime_error &ex) {
-        std::cerr << ex.what() << '\n';
+        std::cerr << "Failed to get chat participants: " << ex.what() << '\n';
         answer << GET_CHAT_PARTICIPANTS_FAILED << "\n" << END_OF_REQUEST;
     }
 
@@ -890,7 +889,7 @@ void LinkDoveServer::handle_remove_user_from_chat(ConnectionIterator iterator) {
             answer << REMOVE_USER_FROM_CHAT_FAILED << "\n" << END_OF_REQUEST;
         }
     } catch (std::runtime_error &ex) {
-        std::cerr << ex.what();
+        std::cerr << "Failed to remove user from chat: " << ex.what();
         answer << REMOVE_USER_FROM_CHAT_FAILED << "\n" << END_OF_REQUEST;
     }
 

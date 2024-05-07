@@ -10,6 +10,10 @@ namespace Ui {
 class UserCard;
 }
 
+/**
+ * @brief The UserCard class
+ * Виджет, хранящий информацию о пользователе и отображающий его никнейм.
+ */
 class UserCard : public QWidget
 {
     Q_OBJECT

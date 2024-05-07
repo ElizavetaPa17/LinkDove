@@ -4,6 +4,7 @@
 #include <QWidget>
 
 #include "chatinfo.h"
+#include "imessage.h"
 
 namespace Ui {
 class GroupWidget;
@@ -69,7 +70,7 @@ private slots:
      * @brief slotHandleGetMessage
      * @param result - Параметр, содержащий результат получения сообщений.
      */
-    void slotHandleGetMessages(int result);
+    void slotHandleGetMessages(int result, std::vector<std::shared_ptr<IMessage>> messages);
 
     /**
      * <p> Слот, обрабатывающий результат добавление текущего пользователя в группу. </p>

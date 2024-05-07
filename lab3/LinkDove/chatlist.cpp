@@ -63,11 +63,10 @@ void ChatList::slotFindChatResult(int result) {
     }
 }
 
-void ChatList::slotGetChatsResult(int result) {
+void ChatList::slotGetChatsResult(int result, std::vector<ChatInfo> chats) {
     if (result == GET_CHATS_SUCCESS_ANSWER) {
         removeChats();
 
-        std::vector<ChatInfo> chats = ClientSingleton::get_client()->get_chats();
         for (int i = 0; i < chats.size(); ++i) {
             addChat(chats[i]);
         }

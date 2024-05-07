@@ -63,11 +63,10 @@ void ChannelList::slotFindChannelResult(int result) {
     }
 }
 
-void ChannelList::slotGetChannelsResult(int result) {
+void ChannelList::slotGetChannelsResult(int result, std::vector<ChannelInfo> channels) {
     if (result == GET_CHANNELS_SUCCESS_ANSWER) {
         removeChannels();
 
-        std::vector<ChannelInfo> channels = ClientSingleton::get_client()->get_channels();
         for (int i = 0; i < channels.size(); ++i) {
             addChannel(channels[i]);
         }

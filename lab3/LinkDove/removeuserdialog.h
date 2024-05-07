@@ -9,7 +9,7 @@ class RemoveUserDialog;
 
 /**
  * @brief The RemoveUserDialog class
- * Виджет,
+ * Виджет, позволяющий ввести никнейм удаляемого пользователя.
  */
 class RemoveUserDialog : public QDialog
 {

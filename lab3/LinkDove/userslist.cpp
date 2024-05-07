@@ -76,11 +76,10 @@ void UsersList::slotFindUserResult(int result) {
     }
 }
 
-void UsersList::slotGetInterlocutorsResult(int result) {
+void UsersList::slotGetInterlocutorsResult(int result, std::vector<StatusInfo> interlocutors) {
      removeUsers();
 
     if (result == GET_INTERLOCUTORS_SUCCESS_ANSWER) {
-        std::vector<StatusInfo> interlocutors = ClientSingleton::get_client()->get_interlocutors();
         for (int i = 0; i < interlocutors.size(); ++i) {
             addUser(interlocutors[i]);
         }

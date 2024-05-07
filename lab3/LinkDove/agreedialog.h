@@ -7,6 +7,10 @@ namespace Ui {
 class AgreeDialog;
 }
 
+/**
+ * @brief The AgreeDialog class
+ * Диалоговое окно согласия на принятие какого-то решения.
+ */
 class AgreeDialog : public QDialog
 {
     Q_OBJECT

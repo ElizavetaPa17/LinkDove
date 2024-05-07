@@ -67,8 +67,9 @@ private slots:
      * <p> Слот, отображающий список жалоб админу. </p>
      * @brief slotDisplayComplaintList
      * @param get_complaints_result - Результат получения списка жалоб.
+     * @param complaints - Список жалоб.
      */
-    void slotDisplayComplaintList(int complaints_result);
+    void slotDisplayComplaintList(int complaints_result, std::vector<Complaint> complaints);
 
     /**
      * <p> Отображает модальное окно с информацией о приложении. </p>

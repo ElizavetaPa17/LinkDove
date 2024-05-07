@@ -7,6 +7,10 @@ namespace Ui {
 class MessageCard;
 }
 
+/**
+ * @brief The MessageCard class
+ * Виджет, отображающий сообщение.
+ */
 class MessageCard : public QWidget
 {
     Q_OBJECT

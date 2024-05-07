@@ -376,7 +376,7 @@ bool LinkDoveSQLDataBase::get_user_banned_status(const std::string &username) {
 
     if (!query.exec() || !query.next()) {
         std::cerr << query.lastError().text().toStdString() << '\n';
-        throw std::runtime_error("failed to check user banned status");
+        throw std::runtime_error("Failed to check user banned status");
     } else {
         return query.value("is_banned").toBool();
     }
@@ -411,7 +411,6 @@ bool LinkDoveSQLDataBase::del_complaint(unsigned long long complaint_id) {
         return false;
     } else {
         // если удаление было успешным, то row affected > 0, иначе row affected == 0 (false).
-        std::cerr << query.numRowsAffected() << '\n';
         return query.numRowsAffected();
     }
 }
@@ -425,7 +424,6 @@ int LinkDoveSQLDataBase::get_complaints_count() {
         return -1;
     } else {
         if (!query.next()) {
-            std::cerr << "Can't get complaint count\n";
             return -1;
         } else {
             return query.value("COUNT(*)").toInt();
@@ -440,7 +438,7 @@ std::vector<Complaint> LinkDoveSQLDataBase::get_complaints(int count) {
     std::vector<Complaint> complaints;
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString() << '\n';
-        throw std::runtime_error("get_complaints failed: query.exec");
+        throw std::runtime_error("get_complaints failed due to query.exec");
     } else {
         if (!query.next()) {
             return std::vector<Complaint>(); // в БД нет жалоб
@@ -483,7 +481,6 @@ bool LinkDoveSQLDataBase::add_ind_message(const IMessage& msg) {
             return false;
         } else {
             if (!query.next()) {
-                std::cerr << "Can't retrieve message\n";
                 return false;
             } else {
                 msg_id = query.value("ID").toULongLong();
@@ -572,11 +569,11 @@ bool LinkDoveSQLDataBase::add_ind_message(const IMessage& msg) {
         }
 
         if (!data_base_.commit()) {
-            std::cerr << "Failed to commit\n";
+            std::cerr << "Failed to commit adding new individual message.\n";
             return false;
         }
     } else {
-        std::cerr << "Failed to start transaction\n";
+        std::cerr << "Failed to start transaction during adding new individual message.\n";
         return false;
     }
 
@@ -615,7 +612,6 @@ bool LinkDoveSQLDataBase::add_chnnl_message(const IMessage& msg) {
             return false;
         } else {
             if (!query.next()) {
-                std::cerr << "Can't retrieve message\n";
                 return false;
             } else {
                 msg_id = query.value("ID").toULongLong();
@@ -705,11 +701,11 @@ bool LinkDoveSQLDataBase::add_chnnl_message(const IMessage& msg) {
         }
 
         if (!data_base_.commit()) {
-            std::cerr << "Failed to commit\n";
+            std::cerr << "Failed to commit adding new channel message.\n";
             return false;
         }
     } else {
-        std::cerr << "Failed to start transaction\n";
+        std::cerr << "Failed to start transaction during adding new channel message.\n";
         return false;
     }
 
@@ -728,7 +724,7 @@ std::vector<std::shared_ptr<IMessage>> LinkDoveSQLDataBase::get_ind_messages(uns
 
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString() << '\n';
-        throw std::runtime_error("get_ind_messages failed: cannot get individual messages\n");
+        throw std::runtime_error("get_ind_messages failed due to query.exec\n");
     }
 
     if (!query.next()) {
@@ -751,7 +747,7 @@ std::vector<StatusInfo> LinkDoveSQLDataBase::get_interlocutors(unsigned long lon
     std::vector<StatusInfo> interlocutors;
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString() << '\n';
-        throw std::runtime_error("get_interlocutors: cannot get info user interlocutors from theirs messages.\n");
+        throw std::runtime_error("get_interlocutors failed due to query.exec");
     } else {
         while (query.next()) {
             interlocutors.push_back(get_status_info(query.value("sender_id").toULongLong()));
@@ -766,7 +762,7 @@ std::vector<StatusInfo> LinkDoveSQLDataBase::get_interlocutors(unsigned long lon
 
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString() << '\n';
-        throw std::runtime_error("get_interlocutors: cannot get info user interlocutors from theirs messages.\n");
+        throw std::runtime_error("get_interlocutors failed due to query.exec");
     } else {
         while (query.next()) {
             interlocutors.push_back(get_status_info(query.value("receiver_id").toULongLong()));
@@ -823,7 +819,7 @@ bool LinkDoveSQLDataBase::add_channel(const ChannelInfo &channel_info) {
                     ChannelInfo updated_channel_info = get_channel(channel_info.name_);
                     if (add_participant_to_channel(updated_channel_info.owner_id_, updated_channel_info.id_)) {
                         if (!data_base_.commit()) {
-                            std::cerr << "Failed to commit\n";
+                            std::cerr << "Failed to commit adding new channel.\n";
                             return false;
                         } else {
                             return true;
@@ -840,7 +836,7 @@ bool LinkDoveSQLDataBase::add_channel(const ChannelInfo &channel_info) {
             }
         }
     } else {
-        std::cerr << "Failed to start transaction\n";
+        std::cerr << "Failed to start transaction during adding new channel\n";
         return false;
     }
 }
@@ -854,7 +850,7 @@ std::vector<ChannelInfo> LinkDoveSQLDataBase::get_channels(unsigned long long id
 
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString() << '\n';
-        throw std::runtime_error("get_channels.\n");
+        throw std::runtime_error("get_channels failed due to query.exec");
     }
 
     std::vector<ChannelInfo> channels;
@@ -875,7 +871,7 @@ ChannelInfo LinkDoveSQLDataBase::get_channel(const std::string &channel_name) {
         throw std::runtime_error(query.lastError().text().toStdString());
     } else {
         if (!query.next()) {
-            throw std::runtime_error("No such object in DataBase");
+            throw std::runtime_error("get_channel failed: no such channel in DataBase");
         } else {
             return link_dove_database_details__::retrieve_channel_info(query);
         }
@@ -892,7 +888,7 @@ ChannelInfo LinkDoveSQLDataBase::get_channel(unsigned long long channel_id) {
         throw std::runtime_error(query.lastError().text().toStdString());
     } else {
         if (!query.next()) {
-            throw std::runtime_error("No such object in DataBase");
+            throw std::runtime_error("get_channel failed: no such channel in DataBase");
         } else {
             return link_dove_database_details__::retrieve_channel_info(query);
         }
@@ -928,7 +924,7 @@ bool LinkDoveSQLDataBase::is_channel_participant(unsigned long long participant_
 
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString();
-        throw std::runtime_error("Cannot retrieve info about channel participants");
+        throw std::runtime_error("is_channel_participant failed due to query.exec");
     } else {
         if (query.next()) {
             return true;
@@ -948,7 +944,7 @@ std::vector<std::shared_ptr<IMessage>> LinkDoveSQLDataBase::get_channel_messages
 
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString() << '\n';
-        throw std::runtime_error("get_channel_messages failed: cannot get channel messages\n");
+        throw std::runtime_error("get_channel_messages failed due to query.exec");
     }
 
     if (!query.next()) {
@@ -969,7 +965,7 @@ std::vector<std::string> LinkDoveSQLDataBase::get_channel_participants(unsigned 
 
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString() << '\n';
-        throw std::runtime_error("get_channel_participants: cannot get channel participants\n");
+        throw std::runtime_error("get_channel_participants failed due to query.exec");
     }
 
     std::vector<std::string> participants;
@@ -1035,7 +1031,7 @@ bool LinkDoveSQLDataBase::add_chat(const ChatInfo &chat_info) {
                     ChatInfo updated_chat_info = get_chat(chat_info.name_);
                     if (add_participant_to_chat(updated_chat_info.owner_id_, updated_chat_info.id_)) {
                         if (!data_base_.commit()) {
-                            std::cerr << "Failed to commit\n";
+                            std::cerr << "Failed to commit adding new chat.\n";
                             return false;
                         } else {
                             return true;
@@ -1052,7 +1048,7 @@ bool LinkDoveSQLDataBase::add_chat(const ChatInfo &chat_info) {
             }
         }
     } else {
-        std::cerr << "Failed to start transaction\n";
+        std::cerr << "Failed to start transaction during adding new chat.\n";
         return false;
     }
 }
@@ -1067,7 +1063,7 @@ ChatInfo LinkDoveSQLDataBase::get_chat(const std::string &chat_name) {
         throw std::runtime_error(query.lastError().text().toStdString());
     } else {
         if (!query.next()) {
-            throw std::runtime_error("No such CHAT by name in DataBase");
+            throw std::runtime_error("get_chat failed: no such chat in DataBase");
         } else {
             return link_dove_database_details__::retrieve_chat_info(query);
         }
@@ -1084,7 +1080,7 @@ ChatInfo LinkDoveSQLDataBase::get_chat(unsigned long long id) {
         throw std::runtime_error(query.lastError().text().toStdString());
     } else {
         if (!query.next()) {
-            throw std::runtime_error("No such CHAT by id in DataBase");
+            throw std::runtime_error("get_chat failed: no such chat in DataBase");
         } else {
             return link_dove_database_details__::retrieve_chat_info(query);
         }
@@ -1120,7 +1116,7 @@ bool LinkDoveSQLDataBase::is_chat_participant(unsigned long long participant_id,
 
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString();
-        throw std::runtime_error("Cannot retrieve info about channel participants");
+        throw std::runtime_error("is_chat_participant failed due to query.exec");
     } else {
         if (query.next()) {
             return true;
@@ -1139,7 +1135,7 @@ std::vector<ChatInfo> LinkDoveSQLDataBase::get_chats(unsigned long long id) {
 
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString() << '\n';
-        throw std::runtime_error("get_chats.\n");
+        throw std::runtime_error("get_chats failed due to query.exec");
     }
 
     std::vector<ChatInfo> chats;
@@ -1198,8 +1194,6 @@ bool LinkDoveSQLDataBase::add_chat_message(const IMessage& msg) {
                       " (chat_id, send_datetime, owner_id) "
                       " VALUES (:chat_id, NOW(), :owner_id); ");
 
-        std::cerr << "insert\n" << static_cast<const GroupMessage&>(msg).get_group_id() << '\n';
-
         query.bindValue(":chat_id", static_cast<const GroupMessage&>(msg).get_group_id());
         query.bindValue(":owner_id", static_cast<const GroupMessage&>(msg).get_owner_id());
 
@@ -1213,13 +1207,12 @@ bool LinkDoveSQLDataBase::add_chat_message(const IMessage& msg) {
                       " chat_id=:chat_id AND content_id=0; ");
         query.bindValue(":chat_id", static_cast<const GroupMessage&>(msg).get_group_id());
 
-        std::cerr << "select\n";
         if (!query.exec()) {
             std::cerr << query.lastError().text().toStdString() << '\n';
             return false;
         } else {
             if (!query.next()) {
-                std::cerr << "Can't retrieve message\n";
+                std::cerr << "Failed to add chat message due to incorrect inserting in CHAT_MESSAGES.";
                 return false;
             } else {
                 msg_id = query.value("ID").toULongLong();
@@ -1309,11 +1302,11 @@ bool LinkDoveSQLDataBase::add_chat_message(const IMessage& msg) {
         }
 
         if (!data_base_.commit()) {
-            std::cerr << "Failed to commit\n";
+            std::cerr << "Failed to commit adding new chat message.\n";
             return false;
         }
     } else {
-        std::cerr << "Failed to start transaction\n";
+        std::cerr << "Failed to start transaction during adding new chat message.\n";
         return false;
     }
 
@@ -1346,7 +1339,6 @@ std::vector<std::shared_ptr<IMessage>> LinkDoveSQLDataBase::get_chat_messages(un
 
         do {
             user_info = get_status_info(query.value("owner_id").toULongLong());
-            std::cerr << user_info.username_ << '\n';
 
             std::shared_ptr<GroupMessage> message_ptr = std::make_shared<GroupMessage>();
             message_ptr->set_id(query.value("ID").toULongLong());
@@ -1405,7 +1397,7 @@ std::vector<std::string> LinkDoveSQLDataBase::get_chat_participants(unsigned lon
 
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString() << '\n';
-        throw std::runtime_error("get_chat_participants: cannot get chat participants\n");
+        throw std::runtime_error("get_chat_participants failed due to query.exec");
     }
 
     std::vector<std::string> participants;
@@ -1428,7 +1420,7 @@ StatusInfo LinkDoveSQLDataBase::get_status_info(const std::string &username) {
         throw std::runtime_error(query.lastError().text().toStdString());
     } else {
         if (!query.next()) {
-            throw std::runtime_error("No such object in DataBase");
+            throw std::runtime_error("get_status_info failed: no such user in DataBase");
         } else {
             return link_dove_database_details__::retrieve_status_info(query);
         }
@@ -1447,7 +1439,7 @@ StatusInfo LinkDoveSQLDataBase::get_status_info(unsigned long long id) {
         throw std::runtime_error(query.lastError().text().toStdString());
     } else {
         if (!query.next()) {
-            throw std::runtime_error("No such object in DataBase");
+            throw std::runtime_error("get_status_info failed: no such user in DataBase");
         } else {
             return link_dove_database_details__::retrieve_status_info(query);
         }

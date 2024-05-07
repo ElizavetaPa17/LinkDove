@@ -9,8 +9,8 @@ class InterlocutorProfileDialog;
 }
 
 /**
- * <p> Отображает информацию о собеседнике. </p>
  * @brief The InterlocutorProfileDialog class
+ * Отображает информацию о собеседнике.
  */
 class InterlocutorProfileDialog : public QDialog
 {

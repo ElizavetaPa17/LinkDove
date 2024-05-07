@@ -68,7 +68,7 @@ private slots:
      * @brief slotGetChatsResult
      * @param result - Результат получения информации о таких чатах.
      */
-    void slotGetChatsResult(int result);
+    void slotGetChatsResult(int result, std::vector<ChatInfo> chats);
 
     /**
      * <p> Слот, обрабатывающий событие нажатие кнопки создания чата. </p>

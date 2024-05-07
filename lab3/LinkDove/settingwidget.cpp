@@ -67,7 +67,7 @@ void SettingWidget::slotDisplayComplaintDialog() {
     }
 }
 
-void SettingWidget::slotDisplayComplaintList(int get_complaints_result) {
+void SettingWidget::slotDisplayComplaintList(int get_complaints_result, std::vector<Complaint> complaints) {
     if (get_complaints_result == GET_COMPLAINTS_FAILED_ANSWER) {
         std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Ошибка получения списка жалоб. Попытайтесь позже.");
         dialog_ptr->exec();
@@ -75,7 +75,6 @@ void SettingWidget::slotDisplayComplaintList(int get_complaints_result) {
     }
 
     complaint_dialog_.removeAllComplaints();
-    std::vector<Complaint> complaints = ClientSingleton::get_client()->get_complaints();
     size_t sz = complaints.size();
 
     if (sz == 0) {

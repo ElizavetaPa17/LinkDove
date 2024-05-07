@@ -81,9 +81,8 @@ void ChatWidget::slotHandleSendMessage(int result) {
     }
 }
 
-void ChatWidget::slotHandleGetMessages(int result) {
+void ChatWidget::slotHandleGetMessages(int result, std::vector<std::shared_ptr<IMessage>> messages) {
     if (result == GET_IND_MSG_SUCCESS_ANSWER){
-        std::vector<std::shared_ptr<IMessage>> messages = ClientSingleton::get_client()->get_messages();
         for (auto& elem : messages) {
             QHBoxLayout *phboxLayout = new QHBoxLayout();
             switch(elem->get_msg_content()->get_msg_content_type()) {
