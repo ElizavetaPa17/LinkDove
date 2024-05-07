@@ -14,7 +14,7 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="9">
+   <item row="0" column="10">
     <widget class="QPushButton" name="deleteButton">
      <property name="maximumSize">
       <size>
@@ -51,36 +51,7 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="7">
-    <widget class="QPushButton" name="quitButton">
-     <property name="maximumSize">
-      <size>
-       <width>40</width>
-       <height>40</height>
-      </size>
-     </property>
-     <property name="cursor">
-      <cursorShape>PointingHandCursor</cursorShape>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset resource="client.qrc">
-       <normaloff>:/resources/quit_icon.png</normaloff>:/resources/quit_icon.png</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>25</width>
-       <height>25</height>
-      </size>
-     </property>
-     <property name="flat">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="0" colspan="10">
+   <item row="2" column="0" colspan="11">
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="minimumSize">
       <size>
@@ -303,7 +274,7 @@ QPushButton:hover {
      </widget>
     </widget>
    </item>
-   <item row="1" column="0" colspan="10">
+   <item row="1" column="0" colspan="11">
     <widget class="QScrollArea" name="scrollArea">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -351,7 +322,7 @@ QPushButton:hover {
      </widget>
     </widget>
    </item>
-   <item row="0" column="8">
+   <item row="0" column="9">
     <widget class="QPushButton" name="removeUserButton">
      <property name="maximumSize">
       <size>
@@ -380,7 +351,36 @@ QPushButton:hover {
      </property>
     </widget>
    </item>
-   <item row="0" column="6">
+   <item row="0" column="8">
+    <widget class="QPushButton" name="quitButton">
+     <property name="maximumSize">
+      <size>
+       <width>40</width>
+       <height>40</height>
+      </size>
+     </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="client.qrc">
+       <normaloff>:/resources/quit_icon.png</normaloff>:/resources/quit_icon.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>25</width>
+       <height>25</height>
+      </size>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="7">
     <widget class="QPushButton" name="participantsButton">
      <property name="maximumSize">
       <size>
@@ -409,7 +409,7 @@ QPushButton:hover {
      </property>
     </widget>
    </item>
-   <item row="0" column="0" colspan="6">
+   <item row="0" column="0" colspan="7">
     <widget class="ClickableLabel" name="infoLabel">
      <property name="font">
       <font>

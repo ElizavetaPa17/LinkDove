@@ -7,6 +7,7 @@
 #include "clientsingleton.h"
 #include "infodialog.h"
 #include "agreedialog.h"
+#include "removeuserdialog.h"
 #include "messagecard.h"
 #include "utility.h"
 
@@ -42,11 +43,13 @@ void GroupWidget::slotHandleIsGroupParticipantResult(int result, bool is_partici
 
             if (chat_info_.owner_id_ == ClientSingleton::get_client()->get_status_info().id_) {
                 ui->deleteButton->show();
+                ui->removeUserButton->show();
             }
         } else {
             ui->stackedWidget->setCurrentIndex(1); // NOT_PARTICIPANT_PAGE
             ui->deleteButton->hide();
             ui->quitButton->hide();
+            ui->removeUserButton->hide();
         }
     } else {
         std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Ошибка получения информации об участниках группы. Попытайтесь позже. ");
@@ -55,6 +58,7 @@ void GroupWidget::slotHandleIsGroupParticipantResult(int result, bool is_partici
         ui->stackedWidget->setCurrentIndex(1); // NOT_PARTICIPANT_PAGE
         ui->deleteButton->hide();
         ui->quitButton->hide();
+        ui->removeUserButton->hide();
     }
 
     ClientSingleton::get_client()->async_get_chat_messages(chat_info_.id_);
@@ -224,6 +228,28 @@ void GroupWidget::slotQuitGroupResult(int result) {
     }
 }
 
+void GroupWidget::slotRemoveUser() {
+    std::unique_ptr<RemoveUserDialog> dialog_ptr = std::make_unique<RemoveUserDialog>(nullptr);
+    if (dialog_ptr->exec() == QDialog::Accepted) {
+        if (dialog_ptr->getUsername() == ClientSingleton::get_client()->get_status_info().username_) {
+            std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Вы не можете удалить себя из группы. ");
+            dialog_ptr->exec();
+        }
+
+        ClientSingleton::get_client()->async_remove_user_from_chat(chat_info_.id_, dialog_ptr->getUsername());
+    }
+}
+
+void GroupWidget::slotRemoveUserResult(int result) {
+    if (result == REMOVE_USER_FROM_CHAT_SUCCESS_ANSWER) {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Пользователь удален из группы. ");
+        dialog_ptr->exec();
+    } else {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Что-то пошло не так при попытке удалить пользователя из группы. ");
+        dialog_ptr->exec();
+    }
+}
+
 void GroupWidget::setupConnection() {
     connect(ui->messageEdit,       &QLineEdit::returnPressed, this, &GroupWidget::slotSendMessage);
     connect(ui->sendButton,        &QPushButton::clicked,     this, &GroupWidget::slotSendMessage);
@@ -235,6 +261,7 @@ void GroupWidget::setupConnection() {
     connect(ClientSingleton::get_client(), &Client::add_participant_to_chat_result, this, &GroupWidget::slotHandleAddParticipantGroupResult);
     connect(ClientSingleton::get_client(), &Client::delete_chat_result, this, &GroupWidget::slotHandleDeleteResult);
     connect(ClientSingleton::get_client(), &Client::quit_chat_result, this, &GroupWidget::slotQuitGroupResult);
+    connect(ClientSingleton::get_client(), &Client::remove_user_from_chat_result, this, &GroupWidget::slotRemoveUserResult);
 
     connect(ui->joinButton, &QPushButton::clicked, ClientSingleton::get_client(), [this] () {
                                                                                     ClientSingleton::get_client()->async_add_chat_participant_request(chat_info_.id_);
@@ -242,4 +269,5 @@ void GroupWidget::setupConnection() {
 
     connect(ui->deleteButton, &QPushButton::clicked, this, &GroupWidget::slotDeleteGroup);
     connect(ui->quitButton, &QPushButton::clicked, this, &GroupWidget::slotQuitGroup);
+    connect(ui->removeUserButton, &QPushButton::clicked, this, &GroupWidget::slotRemoveUser);
 }

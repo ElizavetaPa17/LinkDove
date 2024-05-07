@@ -191,6 +191,8 @@ void LinkDoveServer::handle_type_request(ConnectionIterator iterator) {
         handle_quit_channel(iterator);
     } else if (request_type == REMOVE_USER_FROM_CHANNEL_REQUEST) {
         handle_remove_user_from_channel(iterator);
+    } else if (request_type == REMOVE_USER_FROM_CHAT_REQUEST) {
+        handle_remove_user_from_chat(iterator);
     }
 }
 
@@ -819,6 +821,31 @@ void LinkDoveServer::handle_quit_chat(ConnectionIterator iterator) {
         answer << QUIT_CHAT_SUCCESS << "\n" << END_OF_REQUEST;
     } else {
         answer << QUIT_CHAT_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_remove_user_from_chat(ConnectionIterator iterator) {
+    std::string user_name = UtilitySerializator::deserialize_string(iterator->in_stream_).second;
+    unsigned long long group_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    try {
+        StatusInfo status_info;
+        status_info = data_base_.get_status_info(user_name);
+
+        if (data_base_.quit_chat(status_info.id_, group_id)) {
+            answer << REMOVE_USER_FROM_CHAT_SUCCESS << "\n" << END_OF_REQUEST;
+        } else {
+            answer << REMOVE_USER_FROM_CHAT_FAILED << "\n" << END_OF_REQUEST;
+        }
+    } catch (std::runtime_error &ex) {
+        std::cerr << ex.what();
+        answer << REMOVE_USER_FROM_CHAT_FAILED << "\n" << END_OF_REQUEST;
     }
 
     iterator->out_stream_ << answer.str();

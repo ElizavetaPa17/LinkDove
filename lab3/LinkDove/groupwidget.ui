@@ -14,7 +14,7 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="2" column="0" colspan="4">
+   <item row="2" column="0" colspan="6">
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="minimumSize">
       <size>
@@ -237,28 +237,36 @@ QPushButton:hover {
      </widget>
     </widget>
    </item>
-   <item row="0" column="0" colspan="2">
-    <widget class="ClickableLabel" name="infoLabel">
-     <property name="font">
-      <font>
-       <pointsize>17</pointsize>
-       <bold>true</bold>
-      </font>
+   <item row="0" column="3">
+    <widget class="QPushButton" name="quitButton">
+     <property name="maximumSize">
+      <size>
+       <width>40</width>
+       <height>40</height>
+      </size>
      </property>
      <property name="cursor">
       <cursorShape>PointingHandCursor</cursorShape>
      </property>
-     <property name="styleSheet">
-      <string notr="true">QLabel {
-	color: rgb(60, 45, 50);
-}</string>
-     </property>
      <property name="text">
       <string/>
      </property>
+     <property name="icon">
+      <iconset resource="client.qrc">
+       <normaloff>:/resources/quit_icon.png</normaloff>:/resources/quit_icon.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>25</width>
+       <height>25</height>
+      </size>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
     </widget>
    </item>
-   <item row="0" column="3">
+   <item row="0" column="5">
     <widget class="QPushButton" name="deleteButton">
      <property name="maximumSize">
       <size>
@@ -295,7 +303,7 @@ QPushButton:hover {
      </property>
     </widget>
    </item>
-   <item row="1" column="0" colspan="4">
+   <item row="1" column="0" colspan="6">
     <widget class="QScrollArea" name="scrollArea">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -343,8 +351,8 @@ QPushButton:hover {
      </widget>
     </widget>
    </item>
-   <item row="0" column="2">
-    <widget class="QPushButton" name="quitButton">
+   <item row="0" column="4">
+    <widget class="QPushButton" name="removeUserButton">
      <property name="maximumSize">
       <size>
        <width>40</width>
@@ -359,7 +367,7 @@ QPushButton:hover {
      </property>
      <property name="icon">
       <iconset resource="client.qrc">
-       <normaloff>:/resources/quit_icon.png</normaloff>:/resources/quit_icon.png</iconset>
+       <normaloff>:/resources/remove_user_icon.png</normaloff>:/resources/remove_user_icon.png</iconset>
      </property>
      <property name="iconSize">
       <size>
@@ -369,6 +377,27 @@ QPushButton:hover {
      </property>
      <property name="flat">
       <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="3">
+    <widget class="ClickableLabel" name="infoLabel">
+     <property name="font">
+      <font>
+       <pointsize>17</pointsize>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QLabel {
+	color: rgb(60, 45, 50);
+}</string>
+     </property>
+     <property name="text">
+      <string/>
      </property>
     </widget>
    </item>

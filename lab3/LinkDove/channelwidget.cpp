@@ -45,14 +45,17 @@ void ChannelWidget::slotHandleIsChannelParticipantResult(int result, bool is_par
             if (channel_info_.owner_id_ == ClientSingleton::get_client()->get_status_info().id_) { // если текущий пользователь - владелец канала,
                 ui->stackedWidget->show();                                                         // отображаем панель для отправки сообщений
                 ui->deleteButton->show();
+                ui->removeUserButton->show();
             } else {
                 ui->stackedWidget->hide();
                 ui->deleteButton->hide();
+                ui->removeUserButton->hide();
             }
         } else {
             ui->stackedWidget->show();
             ui->deleteButton->hide();
             ui->quitButton->hide();
+            ui->removeUserButton->hide();
             ui->stackedWidget->setCurrentIndex(1); // NOT_PARTICIPANT_PAGE
         }
 

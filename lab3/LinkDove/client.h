@@ -239,6 +239,14 @@ public:
     void async_quit_chat(unsigned long long user_id, unsigned long long group_id);
 
     /**
+     * <p> Отправляет запрос на удаление пользователя из чата (группы) владельцем чата (группы). </p>
+     * @brief async_remove_user_from_chat
+     * @param group_id - Идентификатор чата (группы), из которого удаляется пользователь.
+     * @param user_name - Никнейм пользователя, который удаляется.
+     */
+    void async_remove_user_from_chat(unsigned long long group_id, const std::string &user_name);
+
+    /**
      * <p> Возвращает информацию о пользователе. </p>
      * @brief get_status_info
      * @return - Структура, содержащая информацию о пользователе.
@@ -505,6 +513,13 @@ signals:
      * @param result - Параметр, содеращий результат запроса.
      */
     void delete_chat_result(int result);
+
+    /**
+     * <p> Генерирует сигнал после получения результата удаления пользователя из чата владельцем чата. </p>
+     * @brief remove_user_from_chat_result
+     * @param result - Параметр, содержащий результат запроса.
+     */
+    void remove_user_from_chat_result(int result);
 
 private:
     std::shared_ptr<asio::io_context> io_context_ptr_;

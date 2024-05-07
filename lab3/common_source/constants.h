@@ -113,6 +113,9 @@ enum ResponseTypes {
 
     QUIT_CHAT_SUCCESS_ANSWER,
     QUIT_CHAT_FAILED_ANSWER,
+
+    REMOVE_USER_FROM_CHAT_SUCCESS_ANSWER,
+    REMOVE_USER_FROM_CHAT_FAILED_ANSWER,
 };
 
 enum MessageType {
@@ -389,3 +392,10 @@ extern const char *QUIT_CHAT_REQUEST;
 extern const char *QUIT_CHAT_SUCCESS;
 // Ответ сервера на неудачное удаление пользователя из чата
 extern const char *QUIT_CHAT_FAILED;
+
+// Запрос на удаление пользователя из канала владельцем чата (группы)
+extern const char *REMOVE_USER_FROM_CHAT_REQUEST;
+// Ответ сервера на успешное удаление пользователя из канала владельцем чата (группы)
+extern const char *REMOVE_USER_FROM_CHAT_SUCCESS;
+// Ответ сервера на неудачное удаление пользователя из канала владельцем чата (группы)
+extern const char *REMOVE_USER_FROM_CHAT_FAILED;

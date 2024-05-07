@@ -450,6 +450,21 @@ void Client::async_quit_chat(unsigned long long user_id, unsigned long long grou
     run_context();
 }
 
+void Client::async_remove_user_from_chat(unsigned long long group_id, const std::string &user_name) {
+    connection_.out_stream_ << REMOVE_USER_FROM_CHAT_REQUEST << "\n";
+    UtilitySerializator::serialize(connection_.out_stream_, user_name);
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, group_id);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    asio::async_write(connection_.socket_, connection_.buffer_,
+                       boost::bind(&Client::handle_async_write,
+                                   shared_from_this(),
+                                   asio::placeholders::error,
+                                   asio::placeholders::bytes_transferred));
+
+    run_context();
+}
+
 StatusInfo Client::get_status_info() {
     return status_info_;
 }
@@ -756,6 +771,10 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
             emit remove_user_from_channel_result(REMOVE_USER_FROM_CHANNEL_SUCCESS_ANSWER);
         } else if (answer_type == REMOVE_USER_FROM_CHANNEL_FAILED) {
             emit remove_user_from_channel_result(REMOVE_USER_FROM_CHANNEL_FAILED_ANSWER);
+        } else if (answer_type == REMOVE_USER_FROM_CHAT_SUCCESS) {
+            emit remove_user_from_chat_result(REMOVE_USER_FROM_CHAT_SUCCESS_ANSWER);
+        } else if (answer_type == REMOVE_USER_FROM_CHAT_FAILED) {
+            emit remove_user_from_chat_result(REMOVE_USER_FROM_CHAT_FAILED_ANSWER);
         } else {
             std::cerr << "что-то невнятное: " << answer_type << '\n';
         }
