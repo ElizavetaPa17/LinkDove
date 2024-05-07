@@ -109,6 +109,19 @@ private slots:
      */
     void slotQuitChannelResult(int result);
 
+    /**
+     * <p> Слот, который обрабатывает нажатие на кнопку удаление пользователя. </p>
+     * @brief slotRemoveUser
+     */
+    void slotRemoveUser();
+
+    /**
+     * <p> Слот, который обрабатывает результат удаление из канала пользователя владельцем канала. </p>
+     * @brief slotRemoveUserResult
+     * @param result - Результат удаления.
+     */
+    void slotRemoveUserResult(int result);
+
 private:
     Ui::ChannelWidget *ui;
     ChannelInfo channel_info_;

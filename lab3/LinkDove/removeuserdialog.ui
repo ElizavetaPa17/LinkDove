@@ -1,28 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ComplaintDialog</class>
- <widget class="QDialog" name="ComplaintDialog">
-  <property name="windowModality">
-   <enum>Qt::WindowModal</enum>
-  </property>
+ <class>RemoveUserDialog</class>
+ <widget class="QDialog" name="RemoveUserDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>573</width>
-    <height>175</height>
+    <width>600</width>
+    <height>176</height>
    </rect>
   </property>
   <property name="maximumSize">
    <size>
     <width>16777215</width>
-    <height>175</height>
+    <height>176</height>
    </size>
-  </property>
-  <property name="font">
-   <font>
-    <pointsize>8</pointsize>
-   </font>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
@@ -36,28 +28,7 @@
 }</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0" colspan="2">
-    <widget class="QLabel" name="descriptionLabel">
-     <property name="font">
-      <font>
-       <pointsize>17</pointsize>
-       <italic>false</italic>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">QLabel {
-	color: rgb(65, 47, 50);
-	padding-left: 10px;
-	height: 30px;
-}</string>
-     </property>
-     <property name="text">
-      <string>Опишите жалобу в поле ниже.</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="0">
+   <item row="3" column="0">
     <widget class="QPushButton" name="cancelButton">
      <property name="minimumSize">
       <size>
@@ -92,7 +63,7 @@ QPushButton:hover {
      </property>
     </widget>
    </item>
-   <item row="2" column="1">
+   <item row="3" column="1">
     <widget class="QPushButton" name="sendButton">
      <property name="minimumSize">
       <size>
@@ -131,7 +102,28 @@ QPushButton:hover {
     </widget>
    </item>
    <item row="1" column="0" colspan="2">
-    <widget class="QLineEdit" name="complaintEdit">
+    <widget class="QLabel" name="descriptionLabel">
+     <property name="font">
+      <font>
+       <pointsize>17</pointsize>
+       <italic>false</italic>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QLabel {
+	color: rgb(65, 47, 50);
+	padding-left: 10px;
+	height: 30px;
+}</string>
+     </property>
+     <property name="text">
+      <string>Введите никнейм пользователя.</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="2">
+    <widget class="QLineEdit" name="usernameEdit">
      <property name="styleSheet">
       <string notr="true">QLineEdit {
 	background-color: rgb(245, 245, 245);

@@ -87,6 +87,9 @@ enum ResponseTypes {
     QUIT_CHANNEL_SUCCESS_ANSWER,
     QUIT_CHANNEL_FAILED_ANSWER,
 
+    REMOVE_USER_FROM_CHANNEL_SUCCESS_ANSWER,
+    REMOVE_USER_FROM_CHANNEL_FAILED_ANSWER,
+
     CREATE_CHAT_SUCCESS_ANSWER,
     CREATE_CHAT_FAILED_ANSWER,
 
@@ -323,6 +326,13 @@ extern const char *QUIT_CHANNEL_REQUEST;
 extern const char *QUIT_CHANNEL_SUCCESS;
 // Ответ сервера на неудачное удаление пользователя из канала
 extern const char *QUIT_CHANNEL_FAILED;
+
+// Запрос на удаление пользователя из канала владельцем канала
+extern const char *REMOVE_USER_FROM_CHANNEL_REQUEST;
+// Ответ сервера на успешное удаление пользователя из канала владельцем канала
+extern const char *REMOVE_USER_FROM_CHANNEL_SUCCESS;
+// Ответ сервера на неудачное удаление пользователя из канала владельцем канала
+extern const char *REMOVE_USER_FROM_CHANNEL_FAILED;
 
 // Запрос на создание чата
 extern const char *CREATE_CHAT_REQUEST;

@@ -167,6 +167,14 @@ public:
     void async_delete_channel(unsigned long long channel_id);
 
     /**
+     * <p> Отправляет запрос на удаление пользователя из канала. </p>
+     * @brief async_remove_user_from_channel
+     * @param channel_id - Идентификатор канала, из которого удаляется пользователь.
+     * @param user_name - Никнейм пользователя, который удаляется из канала.
+     */
+    void async_remove_user_from_channel(unsigned long long channel_id, const std::string &user_name);
+
+    /**
      * <p> Удаляет пользователя из канала. </p>
      * @brief async_quit_channel
      * @param user_id - Идентификатор удаляемого из канала пользователя.
@@ -433,6 +441,13 @@ signals:
      * @param result - Параметр, содеращий результат запроса.
      */
     void quit_channel_result(int result);
+
+    /**
+     * <p> Генерирует сигнал после получения результата удаления пользователя из канала владельцем канала. </p>
+     * @brief remove_user_from_channel_result
+     * @param result - Параметр, содеращий результат запроса.
+     */
+    void remove_user_from_channel_result(int result);
 
     /**
      * <p> Генерирует сигнал после получения результата запроса на создание чата.  </p>

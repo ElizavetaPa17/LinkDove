@@ -297,6 +297,21 @@ void Client::async_delete_channel(unsigned long long channel_id) {
     run_context();
 }
 
+void Client::async_remove_user_from_channel(unsigned long long channel_id, const std::string &user_name) {
+    connection_.out_stream_ << REMOVE_USER_FROM_CHANNEL_REQUEST << "\n";
+    UtilitySerializator::serialize(connection_.out_stream_, user_name);
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, channel_id);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    asio::async_write(connection_.socket_, connection_.buffer_,
+                       boost::bind(&Client::handle_async_write,
+                                   shared_from_this(),
+                                   asio::placeholders::error,
+                                   asio::placeholders::bytes_transferred));
+
+    run_context();
+}
+
 void Client::async_quit_channel(unsigned long long user_id, unsigned long long channel_id) {
     connection_.out_stream_ << QUIT_CHANNEL_REQUEST << "\n";
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, user_id);
@@ -737,6 +752,10 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
             emit quit_channel_result(QUIT_CHANNEL_SUCCESS_ANSWER);
         } else if (answer_type == QUIT_CHANNEL_FAILED) {
             emit quit_channel_result(QUIT_CHANNEL_FAILED_ANSWER);
+        } else if (answer_type == REMOVE_USER_FROM_CHANNEL_SUCCESS) {
+            emit remove_user_from_channel_result(REMOVE_USER_FROM_CHANNEL_SUCCESS_ANSWER);
+        } else if (answer_type == REMOVE_USER_FROM_CHANNEL_FAILED) {
+            emit remove_user_from_channel_result(REMOVE_USER_FROM_CHANNEL_FAILED_ANSWER);
         } else {
             std::cerr << "что-то невнятное: " << answer_type << '\n';
         }

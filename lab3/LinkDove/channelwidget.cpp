@@ -9,6 +9,7 @@
 #include "channelmessage.h"
 #include "messagecard.h"
 #include "agreedialog.h"
+#include "removeuserdialog.h"
 #include <ctime>
 
 ChannelWidget::ChannelWidget(QWidget *parent) :
@@ -211,6 +212,28 @@ void ChannelWidget::slotQuitChannelResult(int result) {
     }
 }
 
+void ChannelWidget::slotRemoveUser() {
+    std::unique_ptr<RemoveUserDialog> dialog_ptr = std::make_unique<RemoveUserDialog>(nullptr);
+    if (dialog_ptr->exec() == QDialog::Accepted) {
+        if (dialog_ptr->getUsername() == ClientSingleton::get_client()->get_status_info().username_) {
+            std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Вы не можете удалить себя из канала. ");
+            dialog_ptr->exec();
+        }
+
+        ClientSingleton::get_client()->async_remove_user_from_channel(channel_info_.id_, dialog_ptr->getUsername());
+    }
+}
+
+void ChannelWidget::slotRemoveUserResult(int result) {
+    if (result == REMOVE_USER_FROM_CHANNEL_SUCCESS_ANSWER) {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Пользователь удален из канала. ");
+        dialog_ptr->exec();
+    } else {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Что-то пошло не так при попытке удалить пользователя из канала. ");
+        dialog_ptr->exec();
+    }
+}
+
 void ChannelWidget::setupConnection() {
     connect(ui->messageEdit,       &QLineEdit::returnPressed, this, &ChannelWidget::slotSendMessage);
     connect(ui->sendButton,        &QPushButton::clicked,     this, &ChannelWidget::slotSendMessage);
@@ -222,10 +245,12 @@ void ChannelWidget::setupConnection() {
     connect(ClientSingleton::get_client(), &Client::add_participant_to_channel_result, this, &ChannelWidget::slotHandleAddParticipantChannelResult);
     connect(ClientSingleton::get_client(), &Client::delete_channel_result, this, &ChannelWidget::slotHandleDeleteResult);
     connect(ClientSingleton::get_client(), &Client::quit_channel_result, this, &ChannelWidget::slotQuitChannelResult);
+    connect(ClientSingleton::get_client(), &Client::remove_user_from_channel_result, this, &ChannelWidget::slotRemoveUserResult);
 
     connect(ui->joinButton, &QPushButton::clicked, ClientSingleton::get_client(), [this] () {
                                                                                     ClientSingleton::get_client()->async_add_channel_participant_request(channel_info_.id_);
                                                                                   });
     connect(ui->deleteButton, &QPushButton::clicked, this, &ChannelWidget::slotDeleteChannel);
     connect(ui->quitButton, &QPushButton::clicked, this, &ChannelWidget::slotQuitChannel);
+    connect(ui->removeUserButton, &QPushButton::clicked, this, &ChannelWidget::slotRemoveUser);
 }
