@@ -2,7 +2,7 @@
 #include "ui_settingwidget.h"
 
 #include "infodialog.h"
-#include "complaintdialog.h"
+#include "typestringdialog.h"
 #include "constants.h"
 #include "clientsingleton.h"
 #include "bandialog.h"
@@ -27,7 +27,7 @@ void SettingWidget::setPrivilegedMode(bool flag) {
         privileged_mode_ = SIMPLE_MODE;
 
         ui->complaintButton->setText("Жалоба");
-        ui->privateButton->show();
+        ui->notifyButton->show();
         ui->banButton->hide();
 
         disconnect(ui->complaintButton, &QPushButton::clicked, this, nullptr);
@@ -36,7 +36,7 @@ void SettingWidget::setPrivilegedMode(bool flag) {
         privileged_mode_ = PRIVILEGED_MODE;
 
         ui->complaintButton->setText("Жалобы");
-        ui->privateButton->hide();
+        ui->notifyButton->hide();
         ui->banButton->show();
 
         disconnect(ui->complaintButton, &QPushButton::clicked, this, nullptr);
@@ -61,9 +61,9 @@ void SettingWidget::slotComplaintResult(int complaint_result) {
 }
 
 void SettingWidget::slotDisplayComplaintDialog() {
-    std::unique_ptr<ComplaintDialog> dialog_ptr = std::make_unique<ComplaintDialog>();
+    std::unique_ptr<TypeStringDialog> dialog_ptr = std::make_unique<TypeStringDialog>(nullptr, "Введите описание жалобы: ");
     if (dialog_ptr->exec() == QDialog::Accepted) {
-        ClientSingleton::get_client()->async_send_complaint(dialog_ptr->getComplaintText());
+        ClientSingleton::get_client()->async_send_complaint(dialog_ptr->getString());
     }
 }
 

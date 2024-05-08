@@ -10,7 +10,7 @@
 #include "channelmessage.h"
 #include "messagecard.h"
 #include "agreedialog.h"
-#include "removeuserdialog.h"
+#include "typestringdialog.h"
 #include <ctime>
 
 ChannelWidget::ChannelWidget(QWidget *parent) :
@@ -216,15 +216,15 @@ void ChannelWidget::slotQuitChannelResult(int result) {
 }
 
 void ChannelWidget::slotRemoveUser() {
-    std::unique_ptr<RemoveUserDialog> dialog_ptr = std::make_unique<RemoveUserDialog>(nullptr);
+    std::unique_ptr<TypeStringDialog> dialog_ptr = std::make_unique<TypeStringDialog>(nullptr, "Введите никнейм пользователя: ");
     if (dialog_ptr->exec() == QDialog::Accepted) {
-        if (dialog_ptr->getUsername() == ClientSingleton::get_client()->get_status_info().username_) {
+        if (dialog_ptr->getString() == ClientSingleton::get_client()->get_status_info().username_) {
             std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Вы не можете удалить себя из канала. ");
             dialog_ptr->exec();
             return;
         }
 
-        ClientSingleton::get_client()->async_remove_user_from_channel(channel_info_.id_, dialog_ptr->getUsername());
+        ClientSingleton::get_client()->async_remove_user_from_channel(channel_info_.id_, dialog_ptr->getString());
     }
 }
 

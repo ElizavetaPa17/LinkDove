@@ -78,7 +78,7 @@ QPushButton:hover {
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="privateButton">
+       <widget class="QPushButton" name="notifyButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -116,7 +116,7 @@ QPushButton:hover {
 }</string>
         </property>
         <property name="text">
-         <string>Приватность</string>
+         <string>Уведомления</string>
         </property>
        </widget>
       </item>

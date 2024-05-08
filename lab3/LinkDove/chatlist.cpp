@@ -4,7 +4,7 @@
 #include <QStyleOption>
 #include <QPainter>
 
-#include "createchanneldialog.h"
+#include "typestringdialog.h"
 #include "clientsingleton.h"
 #include "infodialog.h"
 #include "chatcard.h"
@@ -77,9 +77,9 @@ void ChatList::slotGetChatsResult(int result, std::vector<ChatInfo> chats) {
 }
 
 void ChatList::slotCreateChat() {
-    std::unique_ptr<CreateChannelDialog> dialog_ptr = std::make_unique<CreateChannelDialog>(); // Воспользуемся именно этим классом, т.к. он просто возвращает название.
+    std::unique_ptr<TypeStringDialog> dialog_ptr = std::make_unique<TypeStringDialog>(nullptr, "Введите название чата: ");
     if (dialog_ptr->exec() == QDialog::Accepted) {
-        ClientSingleton::get_client()->async_create_chat(dialog_ptr->getChannelName());
+        ClientSingleton::get_client()->async_create_chat(dialog_ptr->getString());
     }
 }
 

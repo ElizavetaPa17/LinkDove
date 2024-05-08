@@ -7,7 +7,7 @@
 #include "clientsingleton.h"
 #include "infodialog.h"
 #include "agreedialog.h"
-#include "removeuserdialog.h"
+#include "typestringdialog.h"
 #include "listlabeldialog.h"
 #include "messagecard.h"
 #include "utility.h"
@@ -132,7 +132,6 @@ void GroupWidget::slotHandleGetMessages(int result, std::vector<std::shared_ptr<
 
             switch(elem->get_msg_content()->get_msg_content_type()) {
                 case TEXT_MSG_TYPE: {
-                    std::cerr << std::dynamic_pointer_cast<GroupMessage>(elem)->get_owner_id() << '\n';
                     if (std::dynamic_pointer_cast<GroupMessage>(elem)->get_owner_id() == user_id) {
                         phboxLayout->addStretch();
                         phboxLayout->addWidget(new MessageCard(nullptr, elem->get_msg_content()->get_raw_data(), user_name));
@@ -233,15 +232,15 @@ void GroupWidget::slotQuitGroupResult(int result) {
 }
 
 void GroupWidget::slotRemoveUser() {
-    std::unique_ptr<RemoveUserDialog> dialog_ptr = std::make_unique<RemoveUserDialog>(nullptr);
+    std::unique_ptr<TypeStringDialog> dialog_ptr = std::make_unique<TypeStringDialog>(nullptr, "Введите никнейм пользователя: ");
     if (dialog_ptr->exec() == QDialog::Accepted) {
-        if (dialog_ptr->getUsername() == ClientSingleton::get_client()->get_status_info().username_) {
+        if (dialog_ptr->getString() == ClientSingleton::get_client()->get_status_info().username_) {
             std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Вы не можете удалить себя из группы. ");
             dialog_ptr->exec();
             return;
         }
 
-        ClientSingleton::get_client()->async_remove_user_from_chat(chat_info_.id_, dialog_ptr->getUsername());
+        ClientSingleton::get_client()->async_remove_user_from_chat(chat_info_.id_, dialog_ptr->getString());
     }
 }
 

@@ -50,7 +50,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         clickablelabel.h clickablelabel.cpp
         registrationwidget.h registrationwidget.cpp registrationwidget.ui
         mainwidget.h mainwidget.cpp mainwidget.ui
-        complaintdialog.h complaintdialog.cpp complaintdialog.ui
         profilewidget.h profilewidget.cpp profilewidget.ui
         settingwidget.h settingwidget.cpp settingwidget.ui
         infodialog.h infodialog.cpp infodialog.ui
@@ -68,14 +67,13 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         channelwidget.h channelwidget.cpp channelwidget.ui
         channellist.h channellist.cpp channellist.ui
         channelcard.h channelcard.cpp channelcard.ui
-        createchanneldialog.h createchanneldialog.cpp createchanneldialog.ui
         imagedisplayingdialog.h imagedisplayingdialog.cpp imagedisplayingdialog.ui
         chatlist.h chatlist.cpp chatlist.ui
         chatcard.h chatcard.cpp chatcard.ui
         groupwidget.h groupwidget.cpp groupwidget.ui
         agreedialog.h agreedialog.cpp agreedialog.ui
-        removeuserdialog.h removeuserdialog.cpp removeuserdialog.ui
         listlabeldialog.h listlabeldialog.cpp listlabeldialog.ui
+        typestringdialog.h typestringdialog.cpp typestringdialog.ui
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET LinkDove APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

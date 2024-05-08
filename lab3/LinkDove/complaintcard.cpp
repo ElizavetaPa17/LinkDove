@@ -34,6 +34,10 @@ unsigned long long ComplaintCard::getComplaintId() {
     return complaint_id_;
 }
 
+void ComplaintCard::slotAnswerUser() {
+
+}
+
 void ComplaintCard::paintEvent(QPaintEvent *)
 {
     QStyleOption opt;
@@ -43,6 +47,7 @@ void ComplaintCard::paintEvent(QPaintEvent *)
 }
 
 void ComplaintCard::setupConnections() {
+    connect(ui->answerButton, &QPushButton::clicked, this, &ComplaintCard::slotAnswerUser);
     connect(ui->delButton, &QPushButton::clicked, this, [this]() { ClientSingleton::get_client()->async_del_complaint(complaint_id_);
                                                                    emit removed(complaint_id_);
                                                                   });

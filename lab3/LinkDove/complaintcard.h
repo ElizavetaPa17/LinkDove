@@ -36,6 +36,13 @@ signals:
      */
     void removed(unsigned long long id);
 
+private slots:
+    /**
+     * <p> Слот, обрабатыващий нажатие кнопки отправления ответа на жалобу пользователю. </p>
+     * @brief slotAnswerUser
+     */
+    void slotAnswerUser();
+
 protected:
     // Переопределяем метод отрисовки, т.к. иначе с виджетом
     // не работают css-таблицы (проблема самого  Qt)

@@ -5,7 +5,7 @@
 #include <QPainter>
 
 #include "channelcard.h"
-#include "createchanneldialog.h"
+#include "typestringdialog.h"
 #include "clientsingleton.h"
 #include "infodialog.h"
 #include "utility.h"
@@ -81,9 +81,9 @@ void ChannelList::slotHandleChannelCardClicked(const ChannelInfo &channel_info) 
 }
 
 void ChannelList::slotCreateChannel() {
-    std::unique_ptr<CreateChannelDialog> dialog_ptr = std::make_unique<CreateChannelDialog>();
+    std::unique_ptr<TypeStringDialog> dialog_ptr = std::make_unique<TypeStringDialog>(nullptr, "Введите название канала: ");
     if (dialog_ptr->exec() == QDialog::Accepted) {
-        ClientSingleton::get_client()->async_create_channel(dialog_ptr->getChannelName());
+        ClientSingleton::get_client()->async_create_channel(dialog_ptr->getString());
     }
 }
 
