@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ListLabelDialog</class>
- <widget class="QDialog" name="ListLabelDialog">
+ <class>NotificationListDialog</class>
+ <widget class="QDialog" name="NotificationListDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -10,32 +10,28 @@
     <height>300</height>
    </rect>
   </property>
+  <property name="maximumSize">
+   <size>
+    <width>400</width>
+    <height>600</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QDialog {
-	background-color: rgb(245, 245, 245);
-	border-radius: 20px;
-	height: 200px;
-	width: 300px;
-}
-
-QLabel {
-	color: rgb(65, 47, 50);
-	background-color: rgb(245, 245, 245);
-	padding-left: 10px;
-	font-size: 27px;
-	font: bold;
-	font-family: 'Ubuntu';
+   <string notr="true">QWidget {
+	background-color: rgb(245, 245, 245); 
+    border-radius: 51;
 }</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
     <widget class="QScrollArea" name="scrollArea">
      <property name="styleSheet">
-      <string notr="true">QWidget  {
-    background-color: rgb(245, 245, 245);
+      <string notr="true">QWidget {
+	background-color: rgb(245, 245, 245); 
+    border-radius: 51;
 }</string>
      </property>
      <property name="widgetResizable">
@@ -46,10 +42,15 @@ QLabel {
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>376</width>
-        <height>276</height>
+        <width>378</width>
+        <height>278</height>
        </rect>
       </property>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0">
+        <layout class="QVBoxLayout" name="verticalLayout"/>
+       </item>
+      </layout>
      </widget>
     </widget>
    </item>

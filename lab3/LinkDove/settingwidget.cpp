@@ -99,10 +99,34 @@ void SettingWidget::slotDisplayBanDialog() {
     dialog_ptr->exec();
 }
 
+void SettingWidget::slotGetNotificationsResult(int result, std::vector<Notification> notifications) {
+    if (result == GET_NOTIFICATIONS_FAILED_ANSWER) {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Что-то пошло не так при попытке получить уведомления. ");
+        dialog_ptr->exec();
+        return;
+    }
+
+    notification_dialog_.removeAllNotifications();
+    size_t sz = notifications.size();
+
+    if (sz == 0) {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Список уведомлений пуст.");
+        dialog_ptr->exec();
+    } else {
+        for (int i = 0; i < sz; ++i) {
+            notification_dialog_.addNotification(notifications[i]);
+        }
+        notification_dialog_.exec();
+    }
+}
+
 void SettingWidget::setupConnections() {
     connect(ui->quitButton,  &QPushButton::clicked, this, &SettingWidget::slotQuitAccount);
     connect(ui->aboutButton, &QPushButton::clicked, this, &SettingWidget::slotDisplayAboutDialog);
     connect(ui->banButton,   &QPushButton::clicked, this, &SettingWidget::slotDisplayBanDialog);
+    connect(ui->notifyButton, &QPushButton::clicked, this, [this]() { ClientSingleton::get_client()->async_get_notifications(); });
+
     connect(ClientSingleton::get_client(), &Client::get_complaints_result, this, &SettingWidget::slotDisplayComplaintList);
     connect(ClientSingleton::get_client(), &Client::send_complaint_result, this, &SettingWidget::slotComplaintResult);
+    connect(ClientSingleton::get_client(), &Client::get_notifications_result, this, &SettingWidget::slotGetNotificationsResult);
 }

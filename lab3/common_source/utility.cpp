@@ -110,6 +110,40 @@ std::pair<size_t, std::vector<Complaint>> UtilitySerializator::deserialize_compl
     return std::make_pair(static_cast<size_t>(len), vec);
 }
 
+size_t UtilitySerializator::serialize(std::ostream &os, const std::vector<Notification>& value) {
+    const auto pos = os.tellp();
+
+    // Приводим к типу uint32_t, т.к. на разных машинах размер машинного слова отличается,
+    // что может привести к проблемам.
+    const auto len = static_cast<uint32_t>(value.size());
+
+    // Сериализуем сначала размер вектора, а потом сам вектор.
+    os.write(reinterpret_cast<const char*>(&len), sizeof(len));
+    if (len > 0) {
+        for (int i = 0; i < len; ++i) {
+            value[i].serialize(os);
+        }
+    }
+
+    return static_cast<size_t>(os.tellp() - pos);
+}
+
+std::pair<size_t, std::vector<Notification>> UtilitySerializator::deserialize_not_vec(std::istream& is) {
+    std::vector<Notification> vec;
+    uint32_t len = 0; // Размер сериализованной строки был записан в формате uint32_t
+
+    is.read(reinterpret_cast<char*>(&len), sizeof(len));
+    if (len > 0) {
+        vec.resize(len);
+
+        for (int i = 0; i < len; ++i) {
+            vec[i].deserialize(is);
+        }
+    }
+
+    return std::make_pair(static_cast<size_t>(len), vec);
+}
+
 size_t UtilitySerializator::serialize(std::ostream &os, const IMessage& msg) {
     const auto pos = os.tellp();
 

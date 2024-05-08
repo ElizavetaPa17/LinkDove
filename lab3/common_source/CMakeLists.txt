@@ -33,5 +33,6 @@ add_library(common_library ${LIB_FILES}
     channelinfo.h channelinfo.cpp
     channelmessage.h channelmessage.cpp
     chatinfo.h chatinfo.cpp
-    groupmessage.h groupmessage.cpp)
+    groupmessage.h groupmessage.cpp
+    notification.h notification.cpp)
 target_link_libraries(common_library PRIVATE Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Widgets)

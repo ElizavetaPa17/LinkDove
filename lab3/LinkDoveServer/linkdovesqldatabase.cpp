@@ -74,6 +74,17 @@ bool LinkDoveSQLDataBase::setup_tables() {
         return false;
     }
 
+    is_ok = query.exec("CREATE TABLE IF NOT EXISTS ANSWERS "
+                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
+                       "  receiver_id MEDIUMINT NOT NULL, "
+                       "  text TEXT NOT NULL, "
+                       "  FOREIGN KEY (receiver_id) REFERENCES USERS (ID) ON DELETE CASCADE); ");
+
+    if (!is_ok) {
+        std::cerr << "Failed to setup ANSWERS table: " << query.lastError().text().toStdString() << '\n';
+        return false;
+    }
+
     is_ok = query.exec("CREATE TABLE IF NOT EXISTS INDIVIDUAL_MESSAGES "
                        "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY , "
                        " sender_id MEDIUMINT NOT NULL, "
@@ -405,7 +416,6 @@ bool LinkDoveSQLDataBase::del_complaint(unsigned long long complaint_id) {
                   "WHERE ID=:id; ");
 
     query.bindValue(":id", complaint_id);
-    std::cerr << "id: " << complaint_id << '\n';
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString() << '\n';
         return false;
@@ -445,6 +455,61 @@ std::vector<Complaint> LinkDoveSQLDataBase::get_complaints(int count) {
         } else {
             return link_dove_database_details__::retrieve_complaints(query, count);
         }
+    }
+}
+
+bool LinkDoveSQLDataBase::add_answer(unsigned long long user_id, const std::string &text) {
+    QSqlQuery query(data_base_);
+
+    query.prepare(" INSERT INTO ANSWERS "
+                  " (receiver_id, text) "
+                  " VALUES (:user_id, :text); ");
+
+    query.bindValue(":user_id", user_id);
+    query.bindValue(":text", text.c_str());
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString() << '\n';
+        return false;
+    } else {
+        // если вставка была успешна, то row affected > 0, иначе row affected == 0 (false).
+        return query.numRowsAffected();
+    }
+}
+
+std::vector<Notification> LinkDoveSQLDataBase::get_notifications(unsigned long long user_id, int count) {
+    QSqlQuery query(data_base_);
+    query.prepare(" SELECT * FROM ANSWERS "
+                  " WHERE receiver_id=:user_id; ");
+
+    query.bindValue(":user_id", user_id);
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString() << '\n';
+        throw std::runtime_error("get_notifications failed due to query.exec");
+    } else {
+        if (!query.next()) {
+            return std::vector<Notification>(); // в БД нет уведомлений
+        } else {
+            return link_dove_database_details__::retrieve_notifications(query, count);
+        }
+    }
+}
+
+bool LinkDoveSQLDataBase::delete_notification(unsigned long long id) {
+    QSqlQuery query(data_base_);
+
+    query.prepare(" DELETE FROM ANSWERS "
+                  " where ID=:id; ");
+
+    query.bindValue(":id", id);
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString() << '\n';
+        return false;
+    } else {
+        // если удаление было успешно, то row affected > 0, иначе row affected == 0 (false).
+        return query.numRowsAffected();
     }
 }
 
@@ -1494,6 +1559,23 @@ namespace link_dove_database_details__ {
         } while (query.next() && count);
 
         return complaints;
+    }
+
+    std::vector<Notification> retrieve_notifications(QSqlQuery& query, int count) {
+        std::vector<Notification> notifications;
+        Notification notification;
+
+        do {
+            notification.id_ = query.value("ID").toInt();
+            notification.receiver_id_ = query.value("receiver_id").toInt();
+            notification.text_ = query.value("text").toString().toStdString();
+
+            notifications.push_back(notification);
+            --count;
+
+        } while (query.next() && count);
+
+        return notifications;
     }
 
     std::vector<std::shared_ptr<IMessage>> retrieve_ind_messages(QSqlQuery &query, QSqlQuery &content_query) {

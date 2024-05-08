@@ -122,6 +122,15 @@ enum ResponseTypes {
 
     GET_CHAT_PARTICIPANTS_SUCCESS_ANSWER,
     GET_CHAT_PARTICIPANTS_FAILED_ANSWER,
+
+    SEND_USER_ANSWER_SUCCESS_ANSWER,
+    SEND_USER_ANSWER_FAILED_ANSWER,
+
+    GET_NOTIFICATIONS_SUCCESS_ANSWER,
+    GET_NOTIFICATIONS_FAILED_ANSWER,
+
+    DEL_NOTIFICATION_SUCCESS_ANSWER,
+    DEL_NOTIFICATION_FAILED_ANSWER,
 };
 
 enum MessageType {
@@ -152,6 +161,9 @@ const unsigned long long ADMIN_ID = 1;
 
 // Ограничение на размер списка жалоб, который отправляется администратору при запросе на его получение
 const int GET_COMPLAINTS_LIMIT = 100;
+
+// Ограничение на размер списка уведомлений, который отправляется пользователю
+const int GET_NOTIFICATIONS_LIMIT = 100;
 
 // Адрес хоста, к которому подключается клиент
 #define LOCAL_ADDRESS "127.0.0.1"
@@ -419,3 +431,24 @@ extern const char *REMOVE_USER_FROM_CHAT_REQUEST;
 extern const char *REMOVE_USER_FROM_CHAT_SUCCESS;
 // Ответ сервера на неудачное удаление пользователя из канала владельцем чата (группы)
 extern const char *REMOVE_USER_FROM_CHAT_FAILED;
+
+// Запрос на отправку ответа на жалобу пользователю
+extern const char *SEND_USER_ANSWER_REQUEST;
+// Ответ сервера на успешную отправку ответа на жалобу пользователя
+extern const char *SEND_USER_ANSWER_SUCCESS;
+// Ответ сервера на неудачную отправку ответа на жалобу пользователя
+extern const char *SEND_USER_ANSWER_FAILED;
+
+// Запрос на получение уведомлений от администратора
+extern const char *GET_NOTIFICATIONS_REQUEST;
+// Ответ сервера на успешное получение уведомлений
+extern const char *GET_NOTIFICATIONS_SUCCESS;
+// Ответ сервера на неудачное получение уведомлений
+extern const char *GET_NOTIFICATIONS_FAILED;
+
+// Запрос на удаление уведомления
+extern const char *DEL_NOTIFICATION_REQUEST;
+// Ответ сервера на успешное удаление уведомления
+extern const char *DEL_NOTIFICATION_SUCCESS;
+// Ответ сервера на неудачное удаление уведомления
+extern const char *DEL_NOTIFICATION_FAILED;

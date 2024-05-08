@@ -43,6 +43,13 @@ private slots:
      */
     void slotAnswerUser();
 
+    /**
+     * <p> Слот, обрабатывающий результат отправления ответа на жалобу пользователю. </p>
+     * @brief slotAnswerUserResult
+     * @param result - Параметр, содержащий результат запроса.
+     */
+    void slotAnswerUserResult(int result);
+
 protected:
     // Переопределяем метод отрисовки, т.к. иначе с виджетом
     // не работают css-таблицы (проблема самого  Qt)

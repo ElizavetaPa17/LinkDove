@@ -197,6 +197,12 @@ void LinkDoveServer::handle_type_request(ConnectionIterator iterator) {
         handle_get_channel_participants_request(iterator);
     } else if (request_type == GET_CHAT_PARTICIPANTS_REQUEST) {
         handle_get_chat_participants_request(iterator);
+    } else if (request_type == SEND_USER_ANSWER_REQUEST) {
+        handle_answer_user(iterator);
+    } else if (request_type == GET_NOTIFICATIONS_REQUEST) {
+        handle_get_notifications(iterator);
+    } else if (request_type == DEL_NOTIFICATION_REQUEST) {
+        handle_del_notification(iterator);
     }
 }
 
@@ -891,6 +897,61 @@ void LinkDoveServer::handle_remove_user_from_chat(ConnectionIterator iterator) {
     } catch (std::runtime_error &ex) {
         std::cerr << "Failed to remove user from chat: " << ex.what();
         answer << REMOVE_USER_FROM_CHAT_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_answer_user(ConnectionIterator iterator) {
+    unsigned long long user_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+    std::string text = UtilitySerializator::deserialize_string(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    if (data_base_.add_answer(user_id, text)) {
+        answer << SEND_USER_ANSWER_SUCCESS << "\n" << END_OF_REQUEST;
+    } else {
+        answer << SEND_USER_ANSWER_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_get_notifications(ConnectionIterator iterator) {
+    unsigned long long user_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    try {
+        std::vector<Notification> notifications = data_base_.get_notifications(user_id, GET_NOTIFICATIONS_LIMIT);
+        std::cerr << notifications.size() << '\n';
+
+        answer << GET_NOTIFICATIONS_SUCCESS << "\n";
+        UtilitySerializator::serialize(answer, notifications);
+        answer << END_OF_REQUEST;
+    } catch (std::runtime_error &ex) {
+        std::cerr << ex.what() << '\n';
+        answer << GET_NOTIFICATIONS_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_del_notification(ConnectionIterator iterator) {
+    unsigned long long id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    if (data_base_.delete_notification(id)) {
+        answer << DEL_NOTIFICATION_SUCCESS << "\n" << END_OF_REQUEST;
+    } else {
+        answer << DEL_NOTIFICATION_FAILED << "\n" << END_OF_REQUEST;
     }
 
     iterator->out_stream_ << answer.str();

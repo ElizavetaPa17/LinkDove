@@ -4,6 +4,8 @@
 #include <QWidget>
 
 #include "complaintslistdialog.h"
+#include "notificationlistdialog.h"
+#include "notification.h"
 
 namespace Ui {
 class SettingWidget;
@@ -83,9 +85,18 @@ private slots:
      */
     void slotDisplayBanDialog();
 
+    /**
+     * <p> Слот, обрабатывающий результат запроса получения списка уведомлений. </p>
+     * @brief slotGetNotificationsResult
+     * @param result - Парметр, содержащий результат запроса.
+     * @param notifications - Список уведомлений.
+     */
+    void slotGetNotificationsResult(int result, std::vector<Notification> notifications);
+
 private:
     Ui::SettingWidget *ui;
     ComplaintsListDialog complaint_dialog_;
+    NotificationListDialog notification_dialog_;
 
     int privileged_mode_;
 

@@ -19,6 +19,12 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">QDialog {
+	background-color: rgb(245, 245, 245);
+	border-radius: 20px;
+}</string>
+  </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="3" column="0">
     <widget class="QPushButton" name="cancelButton">
@@ -110,7 +116,7 @@ QPushButton:hover {
 }</string>
      </property>
      <property name="text">
-      <string>Опишите жалобу в поле ниже.</string>
+      <string>Описание.</string>
      </property>
     </widget>
    </item>

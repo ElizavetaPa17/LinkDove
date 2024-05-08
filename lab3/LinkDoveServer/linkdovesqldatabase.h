@@ -9,6 +9,7 @@
 #include "chatinfo.h"
 #include "complaint.h"
 #include "imessage.h"
+#include "notification.h"
 
 class LinkDoveSQLDataBase
 {
@@ -84,9 +85,35 @@ public:
      * <p> Извлекает первые count жалоб. </p>
      * @brief get_complaints
      * @param count - Количество жалоб для извлечения.
-     * @return - Вектор, содержащий count жалоб.
+     * @return - Вектор, содержащий не более count жалоб.
      */
     std::vector<Complaint> get_complaints(int count);
+
+    /**
+     * <p> Добавляет в БД ответ на жалобу пользователя. </p>
+     * @brief add_answer
+     * @param user_id - Идентификатор пользователя, которому отправляется ответ на жалобу.
+     * @param text - Текстовое содержимое ответа.
+     * @return - В случае успеха возвращает true, иначе - false.
+     */
+    bool add_answer(unsigned long long user_id, const std::string &text);
+
+    /**
+     * <p> Извлекает первые count уведомлений пользователя. </p>
+     * @brief get_notifications
+     * @param user_id - Идентификатор пользователя, чьи уведомления извлекаются.
+     * @param count - Количество уведомлений для извлечения
+     * @return - Вектор, содержащий не более count уведомлений.
+     */
+    std::vector<Notification> get_notifications(unsigned long long user_id, int count);
+
+    /**
+     * <p> Удаляет уведомление из БД. </p>
+     * @brief delete_notification
+     * @param id - Идентификатор удаляемого уведомления.
+     * @return - В случае успеха возвращает true, иначе - false.
+     */
+    bool delete_notification(unsigned long long id);
 
     /**
      * <p> Добавляет сообщение между двумя собеседниками в БД. </p>
@@ -368,9 +395,18 @@ namespace link_dove_database_details__ {
      * @brief retrieve_complaints
      * @param query - Запрос, содержащий жалобы
      * @param count - Количество жалоб для извлечения
-     * @return - Вектор жалоб размером, которое равно заданному количеству жалоб.
+     * @return - Вектор жалоб размером размером не более count
      */
     std::vector<Complaint> retrieve_complaints(QSqlQuery& query, int count);
+
+    /**
+     * <p> Извлекает заданное количество уведомлений. </p>
+     * @brief retrieve_notifications
+     * @param query - Запрос, содержащий уведомления
+     * @param count - Количество увдомлений для извлечения
+     * @return - Вектор уведомлений размером не более count
+     */
+    std::vector<Notification> retrieve_notifications(QSqlQuery& query, int count);
 
     /**
      * <p> Извлекает список сообщений между двумя пользователями, котороый возвращает объект query. </p>

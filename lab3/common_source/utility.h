@@ -13,6 +13,7 @@
 #include "StatusInfo.h"
 #include "channelinfo.h"
 #include "chatinfo.h"
+#include "notification.h"
 
 #include "individualmessage.h"
 #include "channelmessage.h"
@@ -79,6 +80,23 @@ public:
      * @return - Пара - <размер десериализованных данных, десериализованный вектор жалоб>.
      */
     static std::pair<size_t, std::vector<Complaint>> deserialize_compl_vec(std::istream& is);
+
+    /**
+     * <p> Сериализует вектор уведомлений в поток. </p>
+     * @brief serialize
+     * @param os - Поток, в который осуществляется сериализация.
+     * @param value - Сериализуемый вектор уведомлений.
+     * @return - Размер сериализованных данных.
+     */
+    static size_t serialize(std::ostream &os, const std::vector<Notification>& value);
+
+    /**
+     * <p> Десериализует вектор уведомлений из потока. </p>
+     * @brief deserialize_not_vec
+     * @param is - Поток, из которого осуществляется десериализация.
+     * @return - Пара - <размер десериализованных данных, десериализованный вектор уведомлений>.
+     */
+    static std::pair<size_t, std::vector<Notification>> deserialize_not_vec(std::istream& is);
 
     /**
      * <p> Сериализует сообщение в поток. </p>

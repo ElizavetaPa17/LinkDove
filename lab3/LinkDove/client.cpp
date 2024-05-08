@@ -338,6 +338,31 @@ void Client::async_remove_user_from_chat(unsigned long long group_id, const std:
     write_to_server();
 }
 
+void Client::async_answer_user(unsigned long long user_id, const std::string &text) {
+    connection_.out_stream_ << SEND_USER_ANSWER_REQUEST << "\n";
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, user_id);
+    UtilitySerializator::serialize(connection_.out_stream_, text);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    write_to_server();
+}
+
+void Client::async_get_notifications() {
+    connection_.out_stream_ << GET_NOTIFICATIONS_REQUEST << "\n";
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, status_info_.id_);
+
+    connection_.out_stream_ << END_OF_REQUEST;
+    write_to_server();
+}
+
+void Client::async_del_notification(unsigned long long id) {
+    connection_.out_stream_ << DEL_NOTIFICATION_REQUEST << "\n";
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, id);
+
+    connection_.out_stream_ << END_OF_REQUEST;
+    write_to_server();
+}
+
 StatusInfo Client::get_status_info() {
     return status_info_;
 }
@@ -562,6 +587,19 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
             emit get_chat_participants_result(GET_CHAT_PARTICIPANTS_SUCCESS_ANSWER, participants);
         } else if (answer_type == GET_CHAT_PARTICIPANTS_FAILED) {
             emit get_chat_participants_result(GET_CHAT_PARTICIPANTS_FAILED_ANSWER, std::vector<std::string>());
+        } else if (answer_type == SEND_USER_ANSWER_SUCCESS) {
+            emit answer_user_result(SEND_USER_ANSWER_SUCCESS_ANSWER);
+        } else if (answer_type == SEND_USER_ANSWER_FAILED) {
+            emit answer_user_result(SEND_USER_ANSWER_FAILED_ANSWER);
+        } else if (answer_type == GET_NOTIFICATIONS_SUCCESS) {
+            std::vector<Notification> notifications = UtilitySerializator::deserialize_not_vec(connection_.in_stream_).second;
+            emit get_notifications_result(GET_NOTIFICATIONS_SUCCESS_ANSWER, notifications);
+        } else if (answer_type == GET_NOTIFICATIONS_FAILED) {
+            emit get_notifications_result(GET_NOTIFICATIONS_FAILED_ANSWER, std::vector<Notification>());
+        } else if (answer_type == DEL_NOTIFICATION_SUCCESS) {
+            emit del_notification_result(DEL_NOTIFICATION_SUCCESS_ANSWER);
+        } else if (answer_type == DEL_NOTIFICATION_FAILED) {
+            emit del_notification_result(DEL_NOTIFICATION_FAILED_ANSWER);
         } else {
             std::cerr << "Unkown server answer: " << answer_type << '\n';
         }

@@ -328,6 +328,27 @@ private:
      */
     void handle_remove_user_from_chat(ConnectionIterator iterator);
 
+    /**
+     * <p> Обрабатывает запрос на отправку ответа на жалобу пользователю. </p>
+     * @brief handle_answer_user
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_answer_user(ConnectionIterator iterator);
+
+    /**
+     * <p> Обрабатывает запрос на получение уведомлений. </p>
+     * @brief handle_get_notifications
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_get_notifications(ConnectionIterator iterator);
+
+    /**
+     * <p> Обрабатывает запрос на удаление уведомления. </p>
+     * @brief handle_del_notification
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_del_notification(ConnectionIterator iterator);
+
     /** <p> Запускает в отдельном потоке контекст для обработки асинхронных функций. </p>
      * @brief run_context
      */

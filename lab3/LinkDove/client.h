@@ -14,6 +14,7 @@
 #include "chatinfo.h"
 #include "complaint.h"
 #include "constants.h"
+#include "notification.h"
 #include "imessage.h"
 
 namespace asio = boost::asio;
@@ -259,6 +260,27 @@ public:
      * @param user_name - Никнейм пользователя, который удаляется.
      */
     void async_remove_user_from_chat(unsigned long long group_id, const std::string &user_name);
+
+    /**
+     * <p> Отправляет запрос на отправку ответа на жалобу пользователю. </p>
+     * @brief async_answer_user
+     * @param user_id - Идентификатор пользователя, которому отправляется жалоба.
+     * @param text - Сообщение ответа.
+     */
+    void async_answer_user(unsigned long long user_id, const std::string &text);
+
+    /**
+     * <p> Отправляет запрос на получение уведомлений от администратора. </p>
+     * @brief async_get_notifications
+     */
+    void async_get_notifications();
+
+    /**
+     * <p> Отправляет запрос на удаление уведомления. </p>
+     * @brief async_del_notification
+     * @param id - Идентификатор удаляемого уведомления.
+     */
+    void async_del_notification(unsigned long long id);
 
     /**
      * <p> Возвращает информацию о пользователе. </p>
@@ -522,6 +544,28 @@ signals:
      * @param result - Параметр, содержащий результат запроса.
      */
     void remove_user_from_chat_result(int result);
+
+    /**
+     * <p> Генерирует сигнал после получения результата отправки ответа на жалобу пользователя. </p>
+     * @brief answer_user_result
+     * @param result - Параметр, содержащий результат запроса.
+     */
+    void answer_user_result(int result);
+
+    /**
+     * <p> Генерирует сигнал после получения результата получения списка уведомлений. </p>
+     * @brief get_notifications_result
+     * @param result - Параметр, содержащий результат запроса.
+     * @param notifications - Список уведомлений.
+     */
+    void get_notifications_result(int result, std::vector<Notification> notifications);
+
+    /**
+     * <p> Генерирует сигнал после получение результата запроса на удаление уведомления. </p>
+     * @brief del_notification_result
+     * @param result - Параметр, содержащий результат запроса.
+     */
+    void del_notification_result(int result);
 
 private:
     std::shared_ptr<asio::io_context> io_context_ptr_;
