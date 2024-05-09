@@ -356,6 +356,20 @@ void QtUtility::clean_complex_layout(QLayout *layout) {
     }
 }
 
+QString QtUtility::get_random_string(size_t length) {
+    static const QString possible_characters("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
+
+   QString random_string;
+   for(int i=0; i < length; ++i)
+   {
+       int index = random() % possible_characters.length();
+       QChar nextChar = possible_characters.at(index);
+       random_string.append(nextChar);
+   }
+
+   return random_string;
+}
+
 std::shared_ptr<IndividualMessage> MessageUtility::create_individual_text_message(unsigned long long sender_id,
                                                                                unsigned long long receiver_id,
                                                                                const std::string& text)

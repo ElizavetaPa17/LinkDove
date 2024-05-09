@@ -20,20 +20,20 @@ NotificationListDialog::~NotificationListDialog()
     delete ui;
 }
 
-void NotificationListDialog::addNotification(const Notification &notification) {
+void NotificationListDialog::addNotification(const Notification &notification) {/*
     NotificationCard *notification_card = new NotificationCard(this, notification);
     ui->scrollArea->widget()->layout()->addWidget(notification_card);
 
-    connect(notification_card, &NotificationCard::removed, this, &NotificationListDialog::slotRemoveNotification);
+    connect(notification_card, &NotificationCard::removed, this, &NotificationListDialog::slotRemoveNotification);*/
 }
 
 
-void NotificationListDialog::removeAllNotifications() {
+void NotificationListDialog::removeAllNotifications() {/*
     QLayout *pvboxLayout = ui->scrollArea->widget()->layout();
-    QtUtility::clean_layout(pvboxLayout);
+    QtUtility::clean_layout(pvboxLayout);*/
 }
 
-void NotificationListDialog::slotDeleteNotificationResult(int result) {
+void NotificationListDialog::slotDeleteNotificationResult(int result) {/*
     std::string text;
     if (result == DEL_NOTIFICATION_SUCCESS_ANSWER) {
         text = "Уведомление было успешно удалено.";
@@ -43,14 +43,14 @@ void NotificationListDialog::slotDeleteNotificationResult(int result) {
     }
 
     std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, text);
-    dialog_ptr->exec();
+    dialog_ptr->exec();*/
 }
 
 void NotificationListDialog::slotRemoveNotification(unsigned long long id) {
     removed_notification_id_ = id;
 }
 
-void NotificationListDialog::removeNotification(unsigned long long notification_id) {
+void NotificationListDialog::removeNotification(unsigned long long notification_id) {/*
     QLayout *layout = ui->scrollArea->widget()->layout();
 
     QLayoutItem *widget_item = nullptr;
@@ -63,5 +63,5 @@ void NotificationListDialog::removeNotification(unsigned long long notification_
                 break;
             }
         }
-    }
+    }*/
 }

@@ -251,6 +251,14 @@ public:
      * @param layout - Очищаемый компоновщик.
      */
     static void clean_complex_layout(QLayout *layout);
+
+    /**
+     * <p> Генерирует случайную строку заданной длины. </p>
+     * @brief get_random_string
+     * @param length - Длина генерируемой строки.
+     * @return - Случайно сгенерированная строка.
+     */
+    static QString get_random_string(size_t length);
 };
 
 class MessageUtility final {

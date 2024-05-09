@@ -4,6 +4,9 @@
 #include <iostream>
 #include <QSpacerItem>
 #include <QFileDialog>
+#include <QtMultimedia>
+#include <QAudioFormat>
+#include <QAudio>
 
 #include "infodialog.h"
 #include "agreedialog.h"
@@ -18,6 +21,7 @@
 ChatWidget::ChatWidget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::ChatWidget)
+    , audio_dir_(qApp->applicationDirPath() + "/" + MEDIA_IND_AUDIO_PATH)
 {
     ui->setupUi(this);
 
@@ -145,6 +149,21 @@ void ChatWidget::slotChooseImage() {
     }
 }
 
+void ChatWidget::slotRecordAudio() {    
+    if (is_recording_) {
+        ui->microphoneButton->setIcon(QIcon(":/recources/../resources/microphone_icon.png"));
+        is_recording_ = false;
+
+        audio_manager_.stop_recording();
+    } else {
+        audio_file_ = audio_dir_ + QtUtility::get_random_string(20);
+        audio_manager_.start_recording(audio_file_);
+
+        ui->microphoneButton->setIcon(QIcon(":/recources/../resources/record_icon.png"));
+        is_recording_ = true;
+    }
+}
+
 void ChatWidget::slotDisplayInterlocutorProfile() {
     if (!ui->infoLabel->text().isEmpty()) {
         std::unique_ptr<InterlocutorProfileDialog> dialog_ptr = std::make_unique<InterlocutorProfileDialog>(nullptr, interlocutor_);
@@ -177,8 +196,9 @@ void ChatWidget::slotClear() {
 void ChatWidget::setupConnection() {
     connect(ui->messageEdit,       &QLineEdit::returnPressed, this, &ChatWidget::slotSendMessage);
     connect(ui->sendButton,        &QPushButton::clicked,     this, &ChatWidget::slotSendMessage);
-    connect(ui->cameraButton,       &QPushButton::clicked,     this, &ChatWidget::slotChooseImage);
-    connect(ui->infoLabel, &ClickableLabel::clicked,  this, &ChatWidget::slotDisplayInterlocutorProfile);
+    connect(ui->cameraButton,      &QPushButton::clicked,     this, &ChatWidget::slotChooseImage);
+    connect(ui->microphoneButton,  &QPushButton::clicked,     this, &ChatWidget::slotRecordAudio);
+    connect(ui->infoLabel,         &ClickableLabel::clicked,  this, &ChatWidget::slotDisplayInterlocutorProfile);
 
     connect(ClientSingleton::get_client(), &Client::send_msg_result, this, &ChatWidget::slotHandleSendMessage);
     connect(ClientSingleton::get_client(), &Client::get_ind_msg_result, this, &ChatWidget::slotHandleGetMessages);

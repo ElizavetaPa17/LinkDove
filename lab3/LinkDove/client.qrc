@@ -24,5 +24,6 @@
     <file alias="remove_user_icon.png">../resources/remove_user_icon.png</file>
     <file alias="participant_list_icon.png">../resources/participant_list_icon.png</file>
     <file alias="answer_icon.png">../resources/answer_icon.png</file>
+    <file alias="record_icon.png">../resources/record_icon.png</file>
 </qresource>
 </RCC>

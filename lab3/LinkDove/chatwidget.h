@@ -2,8 +2,10 @@
 #define CHATWIDGET_H
 
 #include <QWidget>
+
 #include "StatusInfo.h"
 #include "imessage.h"
+#include "audiomanager.h"
 
 namespace Ui {
 class ChatWidget;
@@ -69,6 +71,11 @@ private slots:
      */
     void slotChooseImage();
 
+    /** <p> Слот, начинающий запись звука с микрофона устройства для отправки сообщения </p>
+     * @brief slotRecordAudio
+     */
+    void slotRecordAudio();
+
     /**
      * <p> Отображает профиль собеседника. </p>
      * @brief slotDisplayInterlocutorProfile
@@ -91,9 +98,14 @@ private slots:
 private:
     Ui::ChatWidget    *ui;
     StatusInfo interlocutor_;
+    AudioManager audio_manager_;
 
     int                send_msg_type_;  // Тип крайнего отправленного сообщения
     std::string        image_path_;
+
+    bool is_recording_ = false;
+    QString audio_dir_;
+    QString audio_file_;
 
     /**
      * <p> Настраивает соединения c виджетом авторизации (логин-формы). </p>

@@ -25,7 +25,7 @@ EditProfileWidget::~EditProfileWidget()
     delete ui;
 }
 
-void EditProfileWidget::setStatusInfo(const StatusInfo& status_info) {
+void EditProfileWidget::setStatusInfo(const StatusInfo& status_info) {/*
     status_info_ = status_info;
 
     ui->usernameEdit->setText(status_info.username_.c_str());
@@ -35,14 +35,14 @@ void EditProfileWidget::setStatusInfo(const StatusInfo& status_info) {
 
     QPixmap pix(status_info_.image_path_.c_str());
     pix = pix.scaled(300, 300);
-    ui->profileIconLabel->setPixmap(pix);
+    ui->profileIconLabel->setPixmap(pix);*/
 }
 
 StatusInfo EditProfileWidget::getStatusInfo() {
     return status_info_;
 }
 
-void EditProfileWidget::slotEditFinished() {
+void EditProfileWidget::slotEditFinished() {/*
     if (ui->usernameEdit->text().isEmpty() ||
         ui->emailEdit->text().isEmpty())
     {
@@ -57,10 +57,10 @@ void EditProfileWidget::slotEditFinished() {
     status_info_.text_status_ = ui->textEdit->toPlainText().toStdString();
 
     ClientSingleton::get_client()->async_update_user(status_info_);
-    emit editFinished();
+    emit editFinished();*/
 }
 
-void EditProfileWidget::slotChooseUserIcon() {
+void EditProfileWidget::slotChooseUserIcon() {/*
     QString file_path = QFileDialog::getOpenFileName(nullptr, "Икона пользователя", "", "*.png ;; *.jpg");
 
     file_path = MessageUtility::copy_image_to_avatars_folder(file_path).c_str();
@@ -71,7 +71,7 @@ void EditProfileWidget::slotChooseUserIcon() {
         ui->profileIconLabel->setPixmap(pixmap);
 
         status_info_.image_path_ = file_path.toStdString();
-    }
+    }*/
 }
 
 void EditProfileWidget::setupConnection() {

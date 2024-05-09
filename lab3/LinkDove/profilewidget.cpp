@@ -18,7 +18,7 @@ ProfileWidget::~ProfileWidget()
     delete ui;
 }
 
-void ProfileWidget::setStatusInfo(const StatusInfo &status_info) {
+void ProfileWidget::setStatusInfo(const StatusInfo &status_info) {/*
     status_info_ = status_info;
 
     ui->usernameLabel->setText(QString::fromUtf8(status_info.username_));
@@ -28,7 +28,7 @@ void ProfileWidget::setStatusInfo(const StatusInfo &status_info) {
 
     QPixmap pix(status_info_.image_path_.c_str());
     pix = pix.scaled(300, 300);
-    ui->profileIconLabel->setPixmap(pix);
+    ui->profileIconLabel->setPixmap(pix);*/
 }
 
 StatusInfo ProfileWidget::getStatusInfo() {
