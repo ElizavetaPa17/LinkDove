@@ -40,6 +40,13 @@ void MainWidget::slotRedirectClick(QWidget *sender) {
     } else if (sender == ui->chatLabel) {
         ui->stackedWidget->setCurrentIndex(CHAT_PAGE);
 
+        if (ClientSingleton::get_client()->get_status_info().is_banned_) {
+            std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Ваш аккаунт был заблокирован. Для выяснения причины свяжитесь с администратором. ");
+            dialog_ptr->exec();
+
+            return;
+        }
+
         if (ui->tabWidget->currentIndex() == 0) { // FIX MAGIC INT
             ClientSingleton::get_client()->async_get_interlocutors();
         } else if (ui->tabWidget->currentIndex() == 2) { // FIX MAGIN INT
@@ -158,7 +165,7 @@ void MainWidget::setupConnection() {
     connect(ClientSingleton::get_client(), &Client::quit_channel_result,    this, &MainWidget::slotRedirectTabWidget);
 
 
-    connect(ui->usersList, &UsersList::userCardClicked, ui->chatWidget, &ChatWidget::slotOpenChatWith);
+    connect(ui->usersList,   &UsersList::userCardClicked,      ui->chatWidget,    &ChatWidget::slotOpenChatWith);
     connect(ui->channelList, &ChannelList::channelCardClicked, ui->channelWidget, &ChannelWidget::slotOpenChannel);
-    connect(ui->chatList, &ChatList::chatCardClicked, ui->groupWidget, &GroupWidget::slotOpenGroup);
+    connect(ui->chatList,    &ChatList::chatCardClicked,       ui->groupWidget,   &GroupWidget::slotOpenGroup);
 }

@@ -214,15 +214,10 @@ void LinkDoveServer::handle_login_request(ConnectionIterator iterator) {
 
     if (data_base_.login_user(login_info)) {
         try {
-            if (data_base_.get_user_banned_status(login_info.username_)) {
-                iterator->out_stream_ << LOGIN_BANNED << "\n";
-            } else {
+            iterator->out_stream_ << LOGIN_SUCCESS << "\n";
 
-                iterator->out_stream_ << LOGIN_SUCCESS << "\n";
-
-                StatusInfo status_info = data_base_.get_status_info(login_info.username_);
-                status_info.serialize(iterator->out_stream_);
-            }
+            StatusInfo status_info = data_base_.get_status_info(login_info.username_);
+            status_info.serialize(iterator->out_stream_);
 
         } catch (std::runtime_error &error) {
             std::cerr << "Failed to login user: " << error.what() << '\n';
@@ -683,7 +678,8 @@ void LinkDoveServer::handle_remove_user_from_channel(ConnectionIterator iterator
         StatusInfo status_info;
         status_info = data_base_.get_status_info(user_name);
 
-        if (data_base_.quit_channel(status_info.id_, channel_id)) {
+        // Запрет на удаление администратора из канала
+        if (status_info.id_ != ADMIN_ID && data_base_.quit_channel(status_info.id_, channel_id)) {
             answer << REMOVE_USER_FROM_CHANNEL_SUCCESS << "\n" << END_OF_REQUEST;
         } else {
             answer << REMOVE_USER_FROM_CHANNEL_FAILED << "\n" << END_OF_REQUEST;
@@ -889,7 +885,8 @@ void LinkDoveServer::handle_remove_user_from_chat(ConnectionIterator iterator) {
         StatusInfo status_info;
         status_info = data_base_.get_status_info(user_name);
 
-        if (data_base_.quit_chat(status_info.id_, group_id)) {
+        // Запрет на удаление администратора из чата
+        if (status_info.id_ != ADMIN_ID && data_base_.quit_chat(status_info.id_, group_id)) {
             answer << REMOVE_USER_FROM_CHAT_SUCCESS << "\n" << END_OF_REQUEST;
         } else {
             answer << REMOVE_USER_FROM_CHAT_FAILED << "\n" << END_OF_REQUEST;
