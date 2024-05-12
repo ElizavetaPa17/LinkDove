@@ -12,9 +12,10 @@
 #include "messagecard.h"
 #include "utility.h"
 
-GroupWidget::GroupWidget(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::GroupWidget)
+GroupWidget::GroupWidget(QWidget *parent)
+    : QWidget(parent)
+    , ui(new Ui::GroupWidget)
+    , audio_dir_(qApp->applicationDirPath() + "/" + MEDIA_CHANNEL_AUDIO_PATH)
 {
     ui->setupUi(this);
 
@@ -112,6 +113,16 @@ void GroupWidget::slotHandleSendMessage(int result) {
                 ui->verticalLayout->addStretch();
                 break;
             }
+            case AUDIO_MSG_TYPE: {
+                QHBoxLayout *phboxLayout = new QHBoxLayout();
+                phboxLayout->addStretch();
+                phboxLayout->addWidget(new MessageCard(nullptr, AUDIO_MSG_TYPE, audio_file_ + ".m4a", ClientSingleton::get_client()->get_status_info().username_.c_str()));
+
+                ui->verticalLayout->addLayout(phboxLayout);
+                ui->verticalLayout->addStretch();
+                ui->messageEdit->setText("");
+                break;
+            }
         }
     } else if (result == SEND_CHAT_MSG_FAILED_ANSWER){
         std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Ошибка отправки сообщения в группу. Попытайтесь снова. ");
@@ -156,6 +167,16 @@ void GroupWidget::slotHandleGetMessages(int result, std::vector<std::shared_ptr<
 
                     break;
                 }
+                case AUDIO_MSG_TYPE: {
+                    if (std::dynamic_pointer_cast<GroupMessage>(elem)->get_owner_id() == user_id) {
+                        phboxLayout->addStretch();
+                        phboxLayout->addWidget(new MessageCard(nullptr, AUDIO_MSG_TYPE, elem->get_msg_content()->get_raw_data(), user_name.c_str()));
+                    } else {
+                        phboxLayout->addWidget(new MessageCard(nullptr, AUDIO_MSG_TYPE, elem->get_msg_content()->get_raw_data(), user_name.c_str()));
+                        phboxLayout->addStretch();
+                    }
+                    break;
+                }
             }
 
             ui->verticalLayout->addLayout(phboxLayout);
@@ -184,8 +205,8 @@ void GroupWidget::slotChooseImage() {
         try {
             image_path_ = MessageUtility::copy_image_to_chat_folder(str);
             std::shared_ptr<GroupMessage> ind_message = MessageUtility::create_group_image_message(chat_info_.id_,
-                                                                                                     ClientSingleton::get_client()->get_status_info().id_,
-                                                                                                     image_path_);
+                                                                                                   ClientSingleton::get_client()->get_status_info().id_,
+                                                                                                   image_path_);
             ClientSingleton::get_client()->async_send_message(*ind_message);
             send_msg_type_ = IMAGE_MSG_TYPE;
 
@@ -202,6 +223,28 @@ void GroupWidget::slotDeleteGroup() {
     std::unique_ptr<AgreeDialog> dialog_ptr = std::make_unique<AgreeDialog>(nullptr, "Вы точно хотите удалить группу?");
     if (dialog_ptr->exec() == QDialog::Accepted) {
         ClientSingleton::get_client()->async_delete_chat(chat_info_.id_);
+    }
+}
+
+void GroupWidget::slotRecordAudio() {
+    if (is_recording_) {
+        ui->microphoneButton->setIcon(QIcon(":/recources/../resources/microphone_icon.png"));
+        is_recording_ = false;
+
+        audio_manager_.stop_recording();
+
+        std::shared_ptr<GroupMessage> ind_message = MessageUtility::create_group_audio_message(chat_info_.id_,
+                                                                                                 ClientSingleton::get_client()->get_status_info().id_,
+                                                                                                 audio_file_.toStdString() + ".m4a");
+        ClientSingleton::get_client()->async_send_message(*ind_message);
+        send_msg_type_ = AUDIO_MSG_TYPE;
+
+    } else {
+        ui->microphoneButton->setIcon(QIcon(":/recources/../resources/record_icon.png"));
+        is_recording_ = true;
+
+        audio_file_ = audio_dir_ + QtUtility::get_random_string(20);
+        audio_manager_.start_recording(audio_file_);
     }
 }
 
@@ -268,15 +311,16 @@ void GroupWidget::setupConnection() {
     connect(ui->messageEdit,       &QLineEdit::returnPressed, this, &GroupWidget::slotSendMessage);
     connect(ui->sendButton,        &QPushButton::clicked,     this, &GroupWidget::slotSendMessage);
     connect(ui->cameraButton,      &QPushButton::clicked,     this, &GroupWidget::slotChooseImage);
+    connect(ui->microphoneButton,  &QPushButton::clicked,     this, &GroupWidget::slotRecordAudio);
 
-    connect(ClientSingleton::get_client(), &Client::send_msg_result, this, &GroupWidget::slotHandleSendMessage);
-    connect(ClientSingleton::get_client(), &Client::get_chat_msg_result, this, &GroupWidget::slotHandleGetMessages);
-    connect(ClientSingleton::get_client(), &Client::is_chat_participant_result, this, &GroupWidget::slotHandleIsGroupParticipantResult);
+    connect(ClientSingleton::get_client(), &Client::send_msg_result,                this, &GroupWidget::slotHandleSendMessage);
+    connect(ClientSingleton::get_client(), &Client::get_chat_msg_result,            this, &GroupWidget::slotHandleGetMessages);
+    connect(ClientSingleton::get_client(), &Client::is_chat_participant_result,     this, &GroupWidget::slotHandleIsGroupParticipantResult);
     connect(ClientSingleton::get_client(), &Client::add_participant_to_chat_result, this, &GroupWidget::slotHandleAddParticipantGroupResult);
-    connect(ClientSingleton::get_client(), &Client::delete_chat_result, this, &GroupWidget::slotHandleDeleteResult);
-    connect(ClientSingleton::get_client(), &Client::quit_chat_result, this, &GroupWidget::slotQuitGroupResult);
-    connect(ClientSingleton::get_client(), &Client::remove_user_from_chat_result, this, &GroupWidget::slotRemoveUserResult);
-    connect(ClientSingleton::get_client(), &Client::get_chat_participants_result, this, &GroupWidget::slotGetParticipantListResult);
+    connect(ClientSingleton::get_client(), &Client::delete_chat_result,             this, &GroupWidget::slotHandleDeleteResult);
+    connect(ClientSingleton::get_client(), &Client::quit_chat_result,               this, &GroupWidget::slotQuitGroupResult);
+    connect(ClientSingleton::get_client(), &Client::remove_user_from_chat_result,   this, &GroupWidget::slotRemoveUserResult);
+    connect(ClientSingleton::get_client(), &Client::get_chat_participants_result,   this, &GroupWidget::slotGetParticipantListResult);
 
     connect(ui->joinButton, &QPushButton::clicked, ClientSingleton::get_client(), [this] () {
                                                                                     ClientSingleton::get_client()->async_add_chat_participant_request(chat_info_.id_);

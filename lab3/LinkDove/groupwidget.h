@@ -5,6 +5,7 @@
 
 #include "chatinfo.h"
 #include "imessage.h"
+#include "audiomanager.h"
 
 namespace Ui {
 class GroupWidget;
@@ -85,6 +86,11 @@ private slots:
      */
     void slotChooseImage();
 
+    /** <p> Слот, начинающий запись звука с микрофона устройства для отправки сообщения </p>
+     * @brief slotRecordAudio
+     */
+    void slotRecordAudio();
+
     /**
      * <p> Слот, который вызывается при нажатии кнопки удаления чата (группы). </p>
      * @brief slotDeleteGroup
@@ -135,9 +141,14 @@ private slots:
 private:
     Ui::GroupWidget *ui;
     ChatInfo chat_info_;
+    AudioManager audio_manager_;
 
     int                send_msg_type_;  // Тип крайнего отправленного сообщения
     std::string        image_path_;
+
+    QString audio_file_;
+    QString audio_dir_;
+    bool is_recording_ = false;
 
     /**
      * <p> Настраивает соединения c виджетом авторизации (логин-формы). </p>

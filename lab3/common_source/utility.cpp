@@ -472,8 +472,8 @@ std::shared_ptr<GroupMessage> MessageUtility::create_group_text_message(unsigned
 }
 
 std::shared_ptr<GroupMessage> MessageUtility::create_group_image_message(unsigned long long group_id,
-                                                           unsigned long long owner_id,
-                                                           const std::string &image_path)
+                                                                         unsigned long long owner_id,
+                                                                         const std::string &image_path)
 {
     std::shared_ptr<GroupMessage> message = std::make_shared<GroupMessage>();
     message->set_group_id(group_id);
@@ -481,6 +481,21 @@ std::shared_ptr<GroupMessage> MessageUtility::create_group_image_message(unsigne
 
     std::shared_ptr<ImageMessageContent> text_msg_content_ptr = std::make_shared<ImageMessageContent>();
     text_msg_content_ptr->set_image_path(image_path);
+    message->set_msg_content(text_msg_content_ptr);
+
+    return message;
+}
+
+std::shared_ptr<GroupMessage> MessageUtility::create_group_audio_message(unsigned long long group_id,
+                                                                         unsigned long long owner_id,
+                                                                         const std::string &audio_path)
+{
+    std::shared_ptr<GroupMessage> message = std::make_shared<GroupMessage>();
+    message->set_group_id(group_id);
+    message->set_owner_id(owner_id);
+
+    std::shared_ptr<AudioMessageContent> text_msg_content_ptr = std::make_shared<AudioMessageContent>();
+    text_msg_content_ptr->set_audio_path(audio_path);
     message->set_msg_content(text_msg_content_ptr);
 
     return message;

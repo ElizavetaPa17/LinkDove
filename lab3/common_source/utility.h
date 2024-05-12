@@ -343,15 +343,27 @@ public:
 
     /**
      * <p> Создает сообщение группы с содержанием картинки. </p>
-     * @brief cerate_group_image_message
+     * @brief create_group_image_message
      * @param group_id - Идентификатор группы.
      * @param group_id - Идентификатор владельца сообщения.
      * @param image_path - Путь к картинке.
-     * @return  - Умный указатель на сообщение.
+     * @return - Умный указатель на сообщение.
      */
     static std::shared_ptr<GroupMessage> create_group_image_message(unsigned long long group_id,
                                                                       unsigned long long owner_id,
                                                                       const std::string &image_path);
+
+    /**
+     * <p> Создает сообщение группы с содержанием аудио. </p>
+     * @brief create_group_audio_message
+     * @param group_id - Идентификатор группы.
+     * @param group_id - Идентификатор владельца сообщения.
+     * @param audio_path - Путь к аудио.
+     * @return - Умный указатель на сообщение.
+     */
+    static std::shared_ptr<GroupMessage> create_group_audio_message(unsigned long long group_id,
+                                                                      unsigned long long owner_id,
+                                                                      const std::string &audio_path);
 
     /**
      * <p> Копирует изображение из места, куда указывает image_path, в MEDIA_IND_IMAGE_PATH. </p>

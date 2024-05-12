@@ -289,14 +289,14 @@ void ChannelWidget::setupConnection() {
     connect(ui->microphoneButton,  &QPushButton::clicked,     this, &ChannelWidget::slotRecordAudio);
     connect(ui->cameraButton,      &QPushButton::clicked,     this, &ChannelWidget::slotChooseImage);
 
-    connect(ClientSingleton::get_client(), &Client::send_msg_result, this,                   &ChannelWidget::slotHandleSendMessage);
-    connect(ClientSingleton::get_client(), &Client::get_channel_msg_result, this,            &ChannelWidget::slotHandleGetMessages);
-    connect(ClientSingleton::get_client(), &Client::is_channel_participant_result, this,     &ChannelWidget::slotHandleIsChannelParticipantResult);
+    connect(ClientSingleton::get_client(), &Client::send_msg_result,                   this, &ChannelWidget::slotHandleSendMessage);
+    connect(ClientSingleton::get_client(), &Client::get_channel_msg_result,            this, &ChannelWidget::slotHandleGetMessages);
+    connect(ClientSingleton::get_client(), &Client::is_channel_participant_result,     this, &ChannelWidget::slotHandleIsChannelParticipantResult);
     connect(ClientSingleton::get_client(), &Client::add_participant_to_channel_result, this, &ChannelWidget::slotHandleAddParticipantChannelResult);
-    connect(ClientSingleton::get_client(), &Client::delete_channel_result, this,             &ChannelWidget::slotHandleDeleteResult);
-    connect(ClientSingleton::get_client(), &Client::quit_channel_result, this,               &ChannelWidget::slotQuitChannelResult);
-    connect(ClientSingleton::get_client(), &Client::remove_user_from_channel_result, this,   &ChannelWidget::slotRemoveUserResult);
-    connect(ClientSingleton::get_client(), &Client::get_channel_participants_result, this,   &ChannelWidget::slotGetParticipantListResult);
+    connect(ClientSingleton::get_client(), &Client::delete_channel_result,             this, &ChannelWidget::slotHandleDeleteResult);
+    connect(ClientSingleton::get_client(), &Client::quit_channel_result,               this, &ChannelWidget::slotQuitChannelResult);
+    connect(ClientSingleton::get_client(), &Client::remove_user_from_channel_result,   this, &ChannelWidget::slotRemoveUserResult);
+    connect(ClientSingleton::get_client(), &Client::get_channel_participants_result,   this, &ChannelWidget::slotGetParticipantListResult);
 
     connect(ui->joinButton, &QPushButton::clicked, ClientSingleton::get_client(), [this] () {
                                                                                     ClientSingleton::get_client()->async_add_channel_participant_request(channel_info_.id_);
