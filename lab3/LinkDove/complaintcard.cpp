@@ -68,7 +68,7 @@ void ComplaintCard::setupConnections() {
     connect(ClientSingleton::get_client(), &Client::answer_user_result, this, &ComplaintCard::slotAnswerUserResult);
 
     connect(ui->answerButton, &QPushButton::clicked, this, &ComplaintCard::slotAnswerUser);
-    connect(ui->delButton, &QPushButton::clicked, this, [this]() { ClientSingleton::get_client()->async_del_complaint(complaint_id_);
+    connect(ui->delButton,    &QPushButton::clicked, this, [this]() { ClientSingleton::get_client()->async_del_complaint(complaint_id_);
                                                                    emit removed(complaint_id_);
                                                                   });
 }

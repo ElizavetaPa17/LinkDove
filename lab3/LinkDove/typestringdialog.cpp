@@ -42,7 +42,7 @@ void TypeStringDialog::setEnabledSendButton(bool mode) {
 }
 
 void TypeStringDialog::setupConnection() {
-    connect(ui->complaintEdit, &QLineEdit::textChanged, this, &TypeStringDialog::slotEnableSendButton);
-    connect(ui->cancelButton,  &QPushButton::clicked,   this, &QDialog::reject);
+    connect(ui->complaintEdit,  &QLineEdit::textChanged, this, &TypeStringDialog::slotEnableSendButton);
+    connect(ui->cancelButton,   &QPushButton::clicked,   this, &QDialog::reject);
     connect(ui->readyButton,    &QPushButton::clicked,   this, &TypeStringDialog::accept);
 }

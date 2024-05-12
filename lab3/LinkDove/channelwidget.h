@@ -2,8 +2,10 @@
 #define CHANNELWIDGET_H
 
 #include <QWidget>
+
 #include "channelinfo.h"
 #include "imessage.h"
+#include "audiomanager.h"
 
 namespace Ui {
 class ChannelWidget;
@@ -84,6 +86,11 @@ private slots:
      */
     void slotChooseImage();
 
+    /** <p> Слот, начинающий запись звука с микрофона устройства для отправки сообщения </p>
+     * @brief slotRecordAudio
+     */
+    void slotRecordAudio();
+
     /**
      * <p> Слот, который вызывается при нажатии кнопки удаления канала. </p>
      * @brief slotDeleteChannel
@@ -134,9 +141,14 @@ private slots:
 private:
     Ui::ChannelWidget *ui;
     ChannelInfo channel_info_;
+    AudioManager audio_manager_;
 
-    int                send_msg_type_;  // Тип крайнего отправленного сообщения
-    std::string        image_path_;
+    int         send_msg_type_;  // Тип крайнего отправленного сообщения
+    std::string image_path_;
+
+    QString audio_file_;
+    QString audio_dir_;
+    bool is_recording_ = false;
 
     /**
      * <p> Настраивает соединения c виджетом авторизации (логин-формы). </p>

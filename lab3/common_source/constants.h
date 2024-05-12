@@ -180,7 +180,9 @@ const int GET_NOTIFICATIONS_LIMIT = 100;
 #define MEDIA_IND_IMAGE_PATH "media/ind_images/"
 #define MEDIA_IND_AUDIO_PATH "media/ind_audio/"
 #define MEDIA_CHANNEL_IMAGE_PATH "media/channel_images/"
+#define MEDIA_CHANNEL_AUDIO_PATH "media/channel_audio/"
 #define MEDIA_CHAT_IMAGE_PATH "media/chat_images/"
+#define MEDIA_CHAT_AUDIO_PATH "media/chat_audio/"
 #define MEDIA_AVATARS_IMAGE_PATH "media/avatars/"
 
 // Идентификатор для идентификатора сущности, которая создана, но еще не инициализирована или не сохранена в БД.

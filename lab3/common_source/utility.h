@@ -320,6 +320,16 @@ public:
                                                                         const std::string &image_path);
 
     /**
+     * <p> Создает сообщение канала с содержанием аудио. </p>
+     * @brief create_channel_audio_message
+     * @param channel_id - Идентификатор канала.
+     * @param audio_path - Путь к аудио.
+     * @return - Умный указатель на сообщение.
+     */
+    static std::shared_ptr<ChannelMessage> create_channel_audio_message(unsigned long long channel_id,
+                                                                        const std::string &audio_path);
+
+    /**
      * <p> Создает сообщение группы с текстовым содержимым. </p>
      * @brief create_group_text_message
      * @param group_id - Идентификатор группы.

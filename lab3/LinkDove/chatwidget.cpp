@@ -228,8 +228,8 @@ void ChatWidget::setupConnection() {
     connect(ui->microphoneButton,  &QPushButton::clicked,     this, &ChatWidget::slotRecordAudio);
     connect(ui->infoLabel,         &ClickableLabel::clicked,  this, &ChatWidget::slotDisplayInterlocutorProfile);
 
-    connect(ClientSingleton::get_client(), &Client::send_msg_result, this, &ChatWidget::slotHandleSendMessage);
-    connect(ClientSingleton::get_client(), &Client::get_ind_msg_result, this, &ChatWidget::slotHandleGetMessages);
+    connect(ClientSingleton::get_client(), &Client::send_msg_result,        this, &ChatWidget::slotHandleSendMessage);
+    connect(ClientSingleton::get_client(), &Client::get_ind_msg_result,     this, &ChatWidget::slotHandleGetMessages);
     connect(ClientSingleton::get_client(), &Client::delete_ind_chat_result, this, &ChatWidget::slotHandleDeleteResult);
 
     connect(ui->deleteButton, &QPushButton::clicked, this, &ChatWidget::slotDeleteChat);

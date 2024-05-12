@@ -94,7 +94,7 @@ void UsersList::slotHandleUserCardClicked(const StatusInfo &status_info) {
 }
 
 void UsersList::setupConnection() {
-    connect(ClientSingleton::get_client(), &Client::find_user_result, this, &UsersList::slotFindUserResult);
+    connect(ClientSingleton::get_client(), &Client::find_user_result,         this, &UsersList::slotFindUserResult);
     connect(ClientSingleton::get_client(), &Client::get_interlocutors_result, this, &UsersList::slotGetInterlocutorsResult);
-    connect(ui->searchEdit, &QLineEdit::returnPressed, this, &UsersList::slotsHandleReturnPress);
+    connect(ui->searchEdit,                &QLineEdit::returnPressed,         this, &UsersList::slotsHandleReturnPress);
 }

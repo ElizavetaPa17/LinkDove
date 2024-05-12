@@ -15,7 +15,7 @@
 
 ComplaintsListDialog::ComplaintsListDialog(QWidget *parent)
     : QDialog(parent)
-{/*
+{
     scroll_area_ = new QScrollArea(this);
 
     QVBoxLayout *pvboxLayout = new QVBoxLayout;
@@ -33,17 +33,17 @@ ComplaintsListDialog::ComplaintsListDialog(QWidget *parent)
     setStyleSheet("background-color: rgb(245, 245, 245); \
                    border-radius: 51;");
 
-    connect(ClientSingleton::get_client(), &Client::del_complaint_result, this, &ComplaintsListDialog::slotDeleteComplaintResult);*/
+    connect(ClientSingleton::get_client(), &Client::del_complaint_result, this, &ComplaintsListDialog::slotDeleteComplaintResult);
 }
 
 ComplaintsListDialog::~ComplaintsListDialog() {
 }
 
-void ComplaintsListDialog::addComplaint(const Complaint& complaint) {/*
+void ComplaintsListDialog::addComplaint(const Complaint& complaint) {
     ComplaintCard *complaint_card = new ComplaintCard(this, complaint);
     scroll_area_->widget()->layout()->addWidget(complaint_card);
 
-    connect(complaint_card, &ComplaintCard::removed, this, &ComplaintsListDialog::slotRemoveComplaint);*/
+    connect(complaint_card, &ComplaintCard::removed, this, &ComplaintsListDialog::slotRemoveComplaint);
 }
 
 void ComplaintsListDialog::removeAllComplaints() {
@@ -51,7 +51,7 @@ void ComplaintsListDialog::removeAllComplaints() {
     QtUtility::clean_layout(pvboxLayout);
 }
 
-void ComplaintsListDialog::slotDeleteComplaintResult(int result) {/*
+void ComplaintsListDialog::slotDeleteComplaintResult(int result) {
     std::string text;
     if (result == DEL_COMPLAINT_SUCCESS_ANSWER) {
         text = "Жалоба была успешно удалена.";
@@ -61,14 +61,14 @@ void ComplaintsListDialog::slotDeleteComplaintResult(int result) {/*
     }
 
     std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, text);
-    dialog_ptr->exec();*/
+    dialog_ptr->exec();
 }
 
 void ComplaintsListDialog::slotRemoveComplaint(unsigned long long id) {
     removed_complaint_id_ = id;
 }
 
-void ComplaintsListDialog::removeComplaint(unsigned long long complaint_id) {/*
+void ComplaintsListDialog::removeComplaint(unsigned long long complaint_id) {
     QLayout *layout = scroll_area_->widget()->layout();
 
     QLayoutItem *widget_item = nullptr;
@@ -81,5 +81,5 @@ void ComplaintsListDialog::removeComplaint(unsigned long long complaint_id) {/*
                 break;
             }
         }
-    }*/
+    }
 }

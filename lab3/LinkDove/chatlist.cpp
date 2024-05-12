@@ -108,9 +108,9 @@ void ChatList::paintEvent(QPaintEvent *) {
 }
 
 void ChatList::setupConnection() {
-    connect(ui->searchEdit, &QLineEdit::returnPressed, this, &ChatList::slotsHandleReturnPress);
-    connect(ui->createChatButton, &QPushButton::clicked, this, &ChatList::slotCreateChat);
+    connect(ui->searchEdit,                &QLineEdit::returnPressed,   this, &ChatList::slotsHandleReturnPress);
+    connect(ui->createChatButton,          &QPushButton::clicked,       this, &ChatList::slotCreateChat);
     connect(ClientSingleton::get_client(), &Client::create_chat_result, this, &ChatList::slotCreateChatResult);
-    connect(ClientSingleton::get_client(), &Client::find_chat_result, this, &ChatList::slotFindChatResult);
-    connect(ClientSingleton::get_client(), &Client::get_chats_result, this, &ChatList::slotGetChatsResult);
+    connect(ClientSingleton::get_client(), &Client::find_chat_result,   this, &ChatList::slotFindChatResult);
+    connect(ClientSingleton::get_client(), &Client::get_chats_result,   this, &ChatList::slotGetChatsResult);
 }

@@ -1799,9 +1799,19 @@ namespace link_dove_database_details__ {
                 std::shared_ptr<TextMessageContent> text_msg_content_ptr = std::make_shared<TextMessageContent>();
                 text_msg_content_ptr->set_text(content_query.value("text_data").toString().toStdString());
                 message_ptr->set_msg_content(text_msg_content_ptr);
-            //  ПОВТОР КОДА! УБРАТЬ!
             } else if (msg_type == "audio") {
+                content_query.prepare("SELECT * FROM CHANNEL_AUDIO_MESSAGE_CONTENTS "
+                                      "WHERE msg_id=:msg_id; ");
+                content_query.bindValue(":msg_id", message_ptr->get_id());
 
+                if (!content_query.exec() || !content_query.next()) {
+                    std::cerr << content_query.lastError().text().toStdString() << '\n';
+                    continue;
+                }
+
+                std::shared_ptr<AudioMessageContent> text_msg_content_ptr = std::make_shared<AudioMessageContent>();
+                text_msg_content_ptr->set_audio_path(content_query.value("audio_path").toString().toStdString());
+                message_ptr->set_msg_content(text_msg_content_ptr);
             } else if (msg_type == "image") {
                 content_query.prepare("SELECT * FROM CHANNEL_IMAGE_MESSAGE_CONTENTS "
                                       "WHERE msg_id=:msg_id; ");

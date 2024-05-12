@@ -443,6 +443,19 @@ std::shared_ptr<ChannelMessage> MessageUtility::create_channel_image_message(uns
     return ind_message;
 }
 
+std::shared_ptr<ChannelMessage> MessageUtility::create_channel_audio_message(unsigned long long channel_id,
+                                                                             const std::string &audio_path)
+{
+    std::shared_ptr<ChannelMessage> ind_message = std::make_shared<ChannelMessage>();
+    ind_message->set_channel_id(channel_id);
+
+    std::shared_ptr<AudioMessageContent> text_msg_content_ptr = std::make_shared<AudioMessageContent>();
+    text_msg_content_ptr->set_audio_path(audio_path);
+    ind_message->set_msg_content(text_msg_content_ptr);
+
+    return ind_message;
+}
+
 std::shared_ptr<GroupMessage> MessageUtility::create_group_text_message(unsigned long long group_id,
                                                                         unsigned long long owner_id,
                                                                         const std::string &text)

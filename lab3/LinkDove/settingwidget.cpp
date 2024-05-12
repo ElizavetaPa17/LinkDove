@@ -121,9 +121,9 @@ void SettingWidget::slotGetNotificationsResult(int result, std::vector<Notificat
 }
 
 void SettingWidget::setupConnections() {
-    connect(ui->quitButton,  &QPushButton::clicked, this, &SettingWidget::slotQuitAccount);
-    connect(ui->aboutButton, &QPushButton::clicked, this, &SettingWidget::slotDisplayAboutDialog);
-    connect(ui->banButton,   &QPushButton::clicked, this, &SettingWidget::slotDisplayBanDialog);
+    connect(ui->quitButton,   &QPushButton::clicked, this, &SettingWidget::slotQuitAccount);
+    connect(ui->aboutButton,  &QPushButton::clicked, this, &SettingWidget::slotDisplayAboutDialog);
+    connect(ui->banButton,    &QPushButton::clicked, this, &SettingWidget::slotDisplayBanDialog);
     connect(ui->notifyButton, &QPushButton::clicked, this, [this]() { ClientSingleton::get_client()->async_get_notifications(); });
 
     connect(ClientSingleton::get_client(), &Client::get_complaints_result, this, &SettingWidget::slotDisplayComplaintList);
