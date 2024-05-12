@@ -265,27 +265,39 @@ class MessageUtility final {
 public:
     /**
      * <p> Создает сообщение чата между двумя собеседниками с текстовым содержимым. </p>
-     * @brief createIndividualTextMessage
+     * @brief create_individual_text_message
      * @param sender_id - Идентификатор отправителя.
      * @param receiver_id -  Идентификатор получаталя.
      * @param text - Текст сообщения.
      * @return - Умный указатель на сообщение.
      */
     static std::shared_ptr<IndividualMessage> create_individual_text_message(unsigned long long sender_id,
-                                                                          unsigned long long receiver_id,
-                                                                          const std::string &text);
+                                                                             unsigned long long receiver_id,
+                                                                             const std::string &text);
 
     /**
      * <p> Создает сообщение из чата между двумя собеседниками с содержанием картинки. </p>
-     * @brief createIndividualImageMessage
+     * @brief create_individual_image_message
      * @param sender_id - Идентификатор отправителя.
      * @param receiver_id - Идентификатор получателя.
      * @param image_path - Путь к картинке.
      * @return - Умный указатель на сообщение.
      */
     static std::shared_ptr<IndividualMessage> create_individual_image_message(unsigned long long sender_id,
-                                                                           unsigned long long receiver_id,
-                                                                           const std::string &image_path);
+                                                                              unsigned long long receiver_id,
+                                                                              const std::string &image_path);
+
+    /**
+     * <p> Создает сообщение из чата между двумя собеседниками с содержанием аудио. </p>
+     * @brief create_individual_audio_message
+     * @param sender_id - Идентификатор отправителя.
+     * @param receiver_id - Идентификатор получателя.
+     * @param image_path - Путь к аудио.
+     * @return - Умный указатель на сообщение.
+     */
+    static std::shared_ptr<IndividualMessage> create_individual_audio_message(unsigned long long sender_id,
+                                                                              unsigned long long receiver_id,
+                                                                              const std::string &audio_path);
 
     /**
      * <p> Создает сообщение канала с текстовым содержимым. </p>

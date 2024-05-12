@@ -25,5 +25,7 @@
     <file alias="participant_list_icon.png">../resources/participant_list_icon.png</file>
     <file alias="answer_icon.png">../resources/answer_icon.png</file>
     <file alias="record_icon.png">../resources/record_icon.png</file>
+    <file alias="audio_play_icon.png">../resources/audio_play_icon.png</file>
+    <file alias="audio_wait_icon.png">../resources/audio_wait_icon.png</file>
 </qresource>
 </RCC>

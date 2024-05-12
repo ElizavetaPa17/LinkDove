@@ -6,9 +6,12 @@
 #include <QAudioOutput>
 #include <QMediaCaptureSession>
 #include <QMediaPlayer>
+#include <QObject>
 
-class AudioManager
+class AudioManager : public QObject
 {
+    Q_OBJECT
+
 public:
     AudioManager();
 
@@ -31,6 +34,26 @@ public:
      * @param input - Путь к аудио.
      */
     void play(const QString &input);
+
+    /**
+     * <p> Останавливает воспроизведение аудио. </p>
+     * @brief stop
+     */
+    void stop();
+
+    /**
+     * <p> Возвращает статус проигрывания аудио. </p>
+     * @brief is_playing
+     * @return - Возвращает true, если аудио проигрывается, иначе - false.
+     */
+    bool is_playing();
+
+signals:
+    /**
+     * <p> Генерирует сигнал, когда текущее аудио было полностью проиграно. </p>
+     * @brief playing_stopped
+     */
+    void playing_stopped();
 
 private:
     QMediaCaptureSession session_;

@@ -370,11 +370,9 @@ void LinkDoveServer::handle_ban_user_request(ConnectionIterator iterator) {
 }
 
 void LinkDoveServer::handle_send_msg_request(ConnectionIterator iterator) {
-    std::cerr << "what?\n";
     std::shared_ptr<IMessage> msg_ptr = UtilitySerializator::deserialize_msg(iterator->in_stream_).second;
 
     remove_delimeter(iterator);
-    std::cerr << "send\n";
 
     std::stringstream answer;
     switch (msg_ptr->get_msg_type()) {
@@ -399,7 +397,6 @@ void LinkDoveServer::handle_send_msg_request(ConnectionIterator iterator) {
         }
 
         case GROUP_MSG_TYPE: {
-            std::cerr << "here\n";
             if (data_base_.add_chat_message(*msg_ptr)) {
                 answer << SEND_CHAT_MSG_SUCCESS << "\n" << END_OF_REQUEST;
             } else {

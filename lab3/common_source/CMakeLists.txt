@@ -37,5 +37,7 @@ add_library(common_library ${LIB_FILES}
     groupmessage.h groupmessage.cpp
     notification.h notification.cpp
 
-    audiomanager.h audiomanager.cpp)
+    audiomanager.h audiomanager.cpp
+    audiomessagecontent.h audiomessagecontent.cpp
+    audiomanagersingleton.h)
 target_link_libraries(common_library PRIVATE Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Multimedia)

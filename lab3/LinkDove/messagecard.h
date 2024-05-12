@@ -3,6 +3,8 @@
 
 #include <QWidget>
 
+#include "audiomanager.h"
+
 namespace Ui {
 class MessageCard;
 }
@@ -16,10 +18,10 @@ class MessageCard : public QWidget
     Q_OBJECT
 
 public:
-    explicit MessageCard(QWidget *parent, const QString &text);
+    explicit MessageCard(QWidget *parent, int type, const QString &text);
     explicit MessageCard(QWidget *parent, const QPixmap &pixmap, const QString &pixmap_path);
-    explicit MessageCard(QWidget *parent, const QString &text, const std::string &owner_name);
-    explicit MessageCard(QWidget *parent, const QPixmap &pixmap, const QString &pixmap_path, const std::string &owner_name);
+    explicit MessageCard(QWidget *parent, int type, const QString &text,   const QString &owner_name);
+    explicit MessageCard(QWidget *parent, const QPixmap &pixmap, const QString &pixmap_path, const QString &owner_name);
 
     ~MessageCard();
 
@@ -34,10 +36,30 @@ protected:
     // возможности отображения картинки с отдельном окне
     void mousePressEvent(QMouseEvent *event) override;
 
+private slots:
+    /**
+     * <p> Слот, который обрабатывает событие нажатия на кнопку воспроизведения звука. </p>
+     * @brief slotPlayAudio
+     */
+    void slotPlayAudio();
+
+    /**
+     * <p> Слот, который обрабатывает событие нажатия на кнопку остановки звука. </p>
+     * @brief slotPlayAudio
+     */
+    void slotStopAudio();
+
 private:
     Ui::MessageCard *ui;
-    bool image_displaying_;
-    QString pixmap_path_;
+
+    int type_;
+    QString string_;
+
+    /**
+     * <p> Настраивает соединения в виджете. </p>
+     * @brief setupConnection
+     */
+    void setupConnection();
 };
 
 #endif // MESSAGECARD_H

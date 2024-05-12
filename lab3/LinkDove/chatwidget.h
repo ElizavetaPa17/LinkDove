@@ -103,9 +103,9 @@ private:
     int                send_msg_type_;  // Тип крайнего отправленного сообщения
     std::string        image_path_;
 
-    bool is_recording_ = false;
     QString audio_dir_;
     QString audio_file_;
+    bool is_recording_ = false;
 
     /**
      * <p> Настраивает соединения c виджетом авторизации (логин-формы). </p>

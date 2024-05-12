@@ -2,7 +2,9 @@
 
 #include <iostream>
 
-AudioManager::AudioManager() {
+AudioManager::AudioManager()
+    : QObject()
+{
     setup();
 }
 
@@ -16,8 +18,18 @@ void AudioManager::stop_recording() {
 }
 
 void AudioManager::play(const QString &input) {
+    stop();
     player_.setSource(QUrl::fromLocalFile(input));
+    player_.setPosition(0);
     player_.play();
+}
+
+void AudioManager::stop() {
+    player_.stop();
+}
+
+bool AudioManager::is_playing() {
+    return player_.isPlaying();
 }
 
 void AudioManager::setup() {
@@ -28,4 +40,12 @@ void AudioManager::setup() {
     player_.setAudioOutput(&audio_output_);
 
     recorder_.setQuality(QMediaRecorder::HighQuality);
+
+    connect(&player_, &QMediaPlayer::mediaStatusChanged, this, [this](QMediaPlayer::MediaStatus status) {
+                                                                        std::cerr << status << '\n';
+                                                                        std::cerr << "ERR: " << player_.errorString().toStdString() << '\n';
+                                                                        if (status == QMediaPlayer::EndOfMedia) {
+                                                                            emit playing_stopped();
+                                                                        }
+                                                                       });
 }

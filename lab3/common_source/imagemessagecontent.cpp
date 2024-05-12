@@ -3,9 +3,8 @@
 #include "constants.h"
 #include "utility.h"
 
-ImageMessageContent::ImageMessageContent() {
-
-}
+ImageMessageContent::ImageMessageContent()
+{}
 
 
 size_t ImageMessageContent::serialize(std::ostream &os) const {

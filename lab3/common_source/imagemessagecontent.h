@@ -2,7 +2,6 @@
 #define IMAGEMESSAGECONTENT_H
 
 #include <string>
-
 #include "imessagecontent.h"
 
 class ImageMessageContent : public IMessageContent
@@ -24,7 +23,7 @@ public:
     /**
      * <p> Возвращает тип содержимого сообщения. </p>
      * @brief get_msg_type
-     * @return - Тип сообщения (enum MessageContentType=TEXT_MSG).
+     * @return - Тип сообщения (enum MessageContentType).
      */
     int get_msg_content_type() const override;
 

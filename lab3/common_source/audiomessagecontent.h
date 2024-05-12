@@ -1,14 +1,13 @@
-#ifndef TEXTMESSAGECONTENT_H
-#define TEXTMESSAGECONTENT_H
+#ifndef AUDIOMESSAGECONTENT_H
+#define AUDIOMESSAGECONTENT_H
 
 #include <string>
-
 #include "imessagecontent.h"
 
-class TextMessageContent : public IMessageContent
+class AudioMessageContent : public IMessageContent
 {
 public:
-    TextMessageContent();
+    AudioMessageContent();
 
     size_t serialize(std::ostream &os) const override;
 
@@ -29,14 +28,14 @@ public:
     int get_msg_content_type() const override;
 
     /**
-     * <p> Устанавливает текст в содержимое сообщения. </p>
-     * @brief set_text
-     * @param text_data
+     * <p> Устанавливает путь к аудио и перемещает ее в папку сборки - media/audio. </p>
+     * @brief set_image_path
+     * @param path - Путь к аудио.
      */
-    void set_text(const std::string& text_data);
+    void set_audio_path(std::string path);
 
 private:
-    std::string text_data_;
+    std::string audio_path_;
 };
 
-#endif // TEXTMESSAGECONTENT_H
+#endif // AUDIOMESSAGECONTENT_H

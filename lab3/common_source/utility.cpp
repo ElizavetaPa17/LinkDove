@@ -10,6 +10,7 @@
 
 #include "individualmessage.h"
 #include "textmessagecontent.h"
+#include "audiomessagecontent.h"
 #include "groupmessage.h"
 
 size_t UtilitySerializator::serialize(std::ostream& os, const std::string& value) {
@@ -188,9 +189,12 @@ std::pair<size_t, std::shared_ptr<IMessage>> UtilitySerializator::deserialize_ms
             msg_ptr->set_msg_content(std::make_shared<TextMessageContent>());
             break;
         }
-
         case IMAGE_MSG_TYPE: {
             msg_ptr->set_msg_content(std::make_shared<ImageMessageContent>());
+            break;
+        }
+        case AUDIO_MSG_TYPE: {
+            msg_ptr->set_msg_content(std::make_shared<AudioMessageContent>());
             break;
         }
     }
@@ -357,6 +361,7 @@ void QtUtility::clean_complex_layout(QLayout *layout) {
 }
 
 QString QtUtility::get_random_string(size_t length) {
+    srand(time(nullptr));
     static const QString possible_characters("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
 
    QString random_string;
@@ -393,6 +398,20 @@ std::shared_ptr<IndividualMessage> MessageUtility::create_individual_image_messa
 
     std::shared_ptr<ImageMessageContent> image_msg_content_ptr = std::make_shared<ImageMessageContent>();
     image_msg_content_ptr->set_image_path(image_path);
+    ind_message->set_msg_content(image_msg_content_ptr);
+
+    return ind_message;
+}
+
+std::shared_ptr<IndividualMessage> MessageUtility::create_individual_audio_message(unsigned long long sender_id,
+                                                                                   unsigned long long receiver_id,
+                                                                                   const std::string &audio_path)
+{
+    std::shared_ptr<IndividualMessage> ind_message = std::make_shared<IndividualMessage>();
+    ind_message->set_msg_edges(sender_id, receiver_id);
+
+    std::shared_ptr<AudioMessageContent> image_msg_content_ptr = std::make_shared<AudioMessageContent>();
+    image_msg_content_ptr->set_audio_path(audio_path);
     ind_message->set_msg_content(image_msg_content_ptr);
 
     return ind_message;

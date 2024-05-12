@@ -10,6 +10,7 @@
 #include "individualmessage.h"
 #include "textmessagecontent.h"
 #include "imagemessagecontent.h"
+#include "audiomessagecontent.h"
 #include "channelmessage.h"
 #include "groupmessage.h"
 
@@ -122,6 +123,16 @@ bool LinkDoveSQLDataBase::setup_tables() {
         return false;
     }
 
+    is_ok = query.exec("CREATE TABLE IF NOT EXISTS IND_AUDIO_MESSAGE_CONTENTS "
+                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
+                       " msg_id BIGINT NOT NULL, "
+                       " audio_path TEXT NOT NULL, "
+                       " FOREIGN KEY (msg_id) REFERENCES INDIVIDUAL_MESSAGES (ID) ON DELETE CASCADE); ");
+
+    if (!is_ok) {
+        std::cerr << "Failed to setup IND_AUDIO_MESSAGE_CONTENTS table: " << query.lastError().text().toStdString() << '\n';
+    }
+
     is_ok = query.exec("CREATE TABLE IF NOT EXISTS CHANNELS "
                        "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
                        " owner_id MEDIUMINT NOT NULL, "
@@ -178,6 +189,17 @@ bool LinkDoveSQLDataBase::setup_tables() {
 
     if (!is_ok) {
         std::cerr << "Failed to setup CHANNEL_IMAGE_MESSAGE_CONTENTS table: " << query.lastError().text().toStdString() << '\n';
+        return false;
+    }
+
+    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS CHANNEL_AUDIO_MESSAGE_CONTENTS "
+                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
+                       " msg_id BIGINT NOT NULL, "
+                       " audio_path TEXT NOT NULL, "
+                       " FOREIGN KEY (msg_id) REFERENCES CHANNEL_MESSAGES (ID) ON DELETE CASCADE); ");
+
+    if (!is_ok) {
+        std::cerr << "Failed to setup CHANNEL_AUDIO_MESSAGE_CONTENTS table: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
@@ -238,7 +260,18 @@ bool LinkDoveSQLDataBase::setup_tables() {
                        " FOREIGN KEY (msg_id) REFERENCES CHAT_MESSAGES (ID) ON DELETE CASCADE); ");
 
     if (!is_ok) {
-        std::cerr << "Failed to setup CHAT_TEXT_MESSAGE_CONTENTS table: " << query.lastError().text().toStdString() << '\n';
+        std::cerr << "Failed to setup CHAT_IMAGE_MESSAGE_CONTENTS table: " << query.lastError().text().toStdString() << '\n';
+        return false;
+    }
+
+    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS CHAT_AUDIO_MESSAGE_CONTENTS "
+                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
+                       " msg_id BIGINT NOT NULL, "
+                       " audio_path TEXT NOT NULL, "
+                       " FOREIGN KEY (msg_id) REFERENCES CHAT_MESSAGES (ID) ON DELETE CASCADE); ");
+
+    if (!is_ok) {
+        std::cerr << "Failed to setup CHAT_AUDIO_MESSAGE_CONTENTS table: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
@@ -615,7 +648,38 @@ bool LinkDoveSQLDataBase::add_ind_message(const IMessage& msg) {
 
                 content_enum = "image";
                 break;
+            }
 
+            case AUDIO_MSG_TYPE: {
+                query.prepare(" INSERT INTO IND_AUDIO_MESSAGE_CONTENTS "
+                              " (msg_id, audio_path) "
+                              " VALUES (:msg_id, :audio_path); ");
+                query.bindValue(":msg_id", msg_id);
+                query.bindValue(":audio_path", msg.get_msg_content()->get_raw_data());
+
+                // ПОВТОР КОДА!!!
+                if (!query.exec()) {
+                    std::cerr << query.lastError().text().toStdString() << '\n';
+                    return false;
+                }
+
+                query.prepare(" SELECT * FROM IND_AUDIO_MESSAGE_CONTENTS "
+                              " WHERE msg_id = :msg_id; ");
+                query.bindValue(":msg_id", msg_id);
+
+                if (!query.exec()) {
+                    std::cerr << query.lastError().text().toStdString() << '\n';
+                    return false;
+                } else {
+                    if (!query.next()) {
+                        return false;
+                    } else {
+                        content_id = query.value("ID").toULongLong();
+                    }
+                }
+
+                content_enum = "audio";
+                break;
             }
         }
 
@@ -747,7 +811,37 @@ bool LinkDoveSQLDataBase::add_chnnl_message(const IMessage& msg) {
 
                 content_enum = "image";
                 break;
+            }
+            case AUDIO_MSG_TYPE: {
+                query.prepare(" INSERT INTO CHANNEL_AUDIO_MESSAGE_CONTENTS "
+                              " (msg_id, audio_path) "
+                              " VALUES (:msg_id, :audio_path); ");
+                query.bindValue(":msg_id", msg_id);
+                query.bindValue(":audio_path", msg.get_msg_content()->get_raw_data());
 
+                // ПОВТОР КОДА!!!
+                if (!query.exec()) {
+                    std::cerr << query.lastError().text().toStdString() << '\n';
+                    return false;
+                }
+
+                query.prepare(" SELECT * FROM CHANNEL_AUDIO_MESSAGE_CONTENTS "
+                              " WHERE msg_id = :msg_id; ");
+                query.bindValue(":msg_id", msg_id);
+
+                if (!query.exec()) {
+                    std::cerr << query.lastError().text().toStdString() << '\n';
+                    return false;
+                } else {
+                    if (!query.next()) {
+                        return false;
+                    } else {
+                        content_id = query.value("ID").toULongLong();
+                    }
+                }
+
+                content_enum = "audio";
+                break;
             }
         }
 
@@ -1348,7 +1442,37 @@ bool LinkDoveSQLDataBase::add_chat_message(const IMessage& msg) {
 
                 content_enum = "image";
                 break;
+            }
+            case AUDIO_MSG_TYPE: {
+                query.prepare(" INSERT INTO CHAT_AUDIO_MESSAGE_CONTENTS "
+                              " (msg_id, audio_path) "
+                              " VALUES (:msg_id, :audio_path); ");
+                query.bindValue(":msg_id", msg_id);
+                query.bindValue(":audio_path", msg.get_msg_content()->get_raw_data());
 
+                // ПОВТОР КОДА!!!
+                if (!query.exec()) {
+                    std::cerr << query.lastError().text().toStdString() << '\n';
+                    return false;
+                }
+
+                query.prepare(" SELECT * FROM CHAT_AUDIO_MESSAGE_CONTENTS "
+                              " WHERE msg_id = :msg_id; ");
+                query.bindValue(":msg_id", msg_id);
+
+                if (!query.exec()) {
+                    std::cerr << query.lastError().text().toStdString() << '\n';
+                    return false;
+                } else {
+                    if (!query.next()) {
+                        return false;
+                    } else {
+                        content_id = query.value("ID").toULongLong();
+                    }
+                }
+
+                content_enum = "audio";
+                break;
             }
         }
 
@@ -1610,9 +1734,19 @@ namespace link_dove_database_details__ {
                 std::shared_ptr<TextMessageContent> text_msg_content_ptr = std::make_shared<TextMessageContent>();
                 text_msg_content_ptr->set_text(content_query.value("text_data").toString().toStdString());
                 message_ptr->set_msg_content(text_msg_content_ptr);
-            //  ПОВТОР КОДА! УБРАТЬ!
             } else if (msg_type == "audio") {
+                content_query.prepare("SELECT * FROM IND_AUDIO_MESSAGE_CONTENTS "
+                                      "WHERE msg_id=:msg_id; ");
+                content_query.bindValue(":msg_id", message_ptr->get_id());
 
+                if (!content_query.exec() || !content_query.next()) {
+                    std::cerr << content_query.lastError().text().toStdString() << '\n';
+                    continue;
+                }
+
+                std::shared_ptr<AudioMessageContent> text_msg_content_ptr = std::make_shared<AudioMessageContent>();
+                text_msg_content_ptr->set_audio_path(content_query.value("audio_path").toString().toStdString());
+                message_ptr->set_msg_content(text_msg_content_ptr);
             } else if (msg_type == "image") {
                 content_query.prepare("SELECT * FROM IND_IMAGE_MESSAGE_CONTENTS "
                                       "WHERE msg_id=:msg_id; ");

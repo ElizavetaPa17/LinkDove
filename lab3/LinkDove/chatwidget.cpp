@@ -52,14 +52,13 @@ void ChatWidget::slotSendMessage() {
     }
 }
 
-// ПОВТОР КОДА С КОДОМ ИЗ CHAT_WIDGET! ПЕРЕДЕЛАТЬ!
 void ChatWidget::slotHandleSendMessage(int result) {
     if (result == SEND_IND_MSG_SUCCESS_ANSWER) {
         switch (send_msg_type_) {
             case TEXT_MSG_TYPE: {
                 QHBoxLayout *phboxLayout = new QHBoxLayout();
                 phboxLayout->addStretch();
-                phboxLayout->addWidget(new MessageCard(nullptr, ui->messageEdit->text()));
+                phboxLayout->addWidget(new MessageCard(nullptr, TEXT_MSG_TYPE, ui->messageEdit->text()));
 
                 ui->verticalLayout->addLayout(phboxLayout);
                 ui->verticalLayout->addStretch();
@@ -78,6 +77,15 @@ void ChatWidget::slotHandleSendMessage(int result) {
                 ui->verticalLayout->addLayout(phboxLayout);
                 break;
             }
+            case AUDIO_MSG_TYPE: {
+                QHBoxLayout *phboxLayout = new QHBoxLayout();
+                phboxLayout->addStretch();
+                phboxLayout->addWidget(new MessageCard(nullptr, AUDIO_MSG_TYPE, audio_file_ + ".m4a"));
+
+                ui->verticalLayout->addLayout(phboxLayout);
+                ui->verticalLayout->addStretch();
+                break;
+            }
         }
     } else if (result == SEND_IND_MSG_FAILED_ANSWER){
         std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Ошибка отправки сообщения собеседнику. Попытайтесь снова. ");
@@ -93,9 +101,9 @@ void ChatWidget::slotHandleGetMessages(int result, std::vector<std::shared_ptr<I
                 case TEXT_MSG_TYPE: {
                     if (std::dynamic_pointer_cast<IndividualMessage>(elem)->get_msg_edges().second == interlocutor_.id_) { // убрать dynamic_cast, расширив базовый класс!!!! TODO!!!!
                         phboxLayout->addStretch();
-                        phboxLayout->addWidget(new MessageCard(nullptr, elem->get_msg_content()->get_raw_data()));
+                        phboxLayout->addWidget(new MessageCard(nullptr, TEXT_MSG_TYPE, elem->get_msg_content()->get_raw_data()));
                     } else {
-                        phboxLayout->addWidget(new MessageCard(nullptr, elem->get_msg_content()->get_raw_data()));
+                        phboxLayout->addWidget(new MessageCard(nullptr, TEXT_MSG_TYPE, elem->get_msg_content()->get_raw_data()));
                         phboxLayout->addStretch();
                     }
 
@@ -115,6 +123,19 @@ void ChatWidget::slotHandleGetMessages(int result, std::vector<std::shared_ptr<I
                     }
 
                     break;
+                }
+
+                case AUDIO_MSG_TYPE: {
+                    std::cerr << elem->get_msg_content()->get_raw_data() << '\n';
+                    if (std::dynamic_pointer_cast<IndividualMessage>(elem)->get_msg_edges().second == interlocutor_.id_) { // убрать dynamic_cast, расширив базовый класс!!!! TODO!!!!
+                        phboxLayout->addStretch();
+                        phboxLayout->addWidget(new MessageCard(nullptr, AUDIO_MSG_TYPE, elem->get_msg_content()->get_raw_data()));
+                    } else {
+                        phboxLayout->addWidget(new MessageCard(nullptr, AUDIO_MSG_TYPE, elem->get_msg_content()->get_raw_data()));
+                        phboxLayout->addStretch();
+                    }
+
+                break;
                 }
             }
 
@@ -155,12 +176,19 @@ void ChatWidget::slotRecordAudio() {
         is_recording_ = false;
 
         audio_manager_.stop_recording();
-    } else {
-        audio_file_ = audio_dir_ + QtUtility::get_random_string(20);
-        audio_manager_.start_recording(audio_file_);
 
+        std::shared_ptr<IndividualMessage> ind_message = MessageUtility::create_individual_audio_message(ClientSingleton::get_client()->get_status_info().id_,
+                                                                                                         interlocutor_.id_,
+                                                                                                         audio_file_.toStdString() + ".m4a");
+        ClientSingleton::get_client()->async_send_message(*ind_message);
+        send_msg_type_ = AUDIO_MSG_TYPE;
+
+    } else {
         ui->microphoneButton->setIcon(QIcon(":/recources/../resources/record_icon.png"));
         is_recording_ = true;
+
+        audio_file_ = audio_dir_ + QtUtility::get_random_string(20);
+        audio_manager_.start_recording(audio_file_);
     }
 }
 
