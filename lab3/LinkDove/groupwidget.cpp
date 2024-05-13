@@ -89,41 +89,7 @@ void GroupWidget::slotSendMessage() {
 
 void GroupWidget::slotHandleSendMessage(int result) {
     if (result == SEND_CHAT_MSG_SUCCESS_ANSWER) {
-        switch (send_msg_type_) {
-            case TEXT_MSG_TYPE: {
-                QHBoxLayout *phboxLayout = new QHBoxLayout();
-                phboxLayout->addStretch();
-                phboxLayout->addWidget(new MessageCard(nullptr, TEXT_MSG_TYPE, ui->messageEdit->text(), ClientSingleton::get_client()->get_status_info().username_.c_str()));
-
-                ui->verticalLayout->addLayout(phboxLayout);
-                ui->verticalLayout->addStretch();
-                ui->messageEdit->setText("");
-                break;
-            }
-            case IMAGE_MSG_TYPE: {
-                QPixmap pix;
-                pix.load(image_path_.c_str());
-                pix = pix.scaledToWidth(450);
-
-                QHBoxLayout *phboxLayout = new QHBoxLayout();
-                phboxLayout->addStretch();
-                phboxLayout->addWidget(new MessageCard(nullptr, pix, image_path_.c_str(), ClientSingleton::get_client()->get_status_info().username_.c_str()));
-
-                ui->verticalLayout->addLayout(phboxLayout);
-                ui->verticalLayout->addStretch();
-                break;
-            }
-            case AUDIO_MSG_TYPE: {
-                QHBoxLayout *phboxLayout = new QHBoxLayout();
-                phboxLayout->addStretch();
-                phboxLayout->addWidget(new MessageCard(nullptr, AUDIO_MSG_TYPE, audio_file_ + ".m4a", ClientSingleton::get_client()->get_status_info().username_.c_str()));
-
-                ui->verticalLayout->addLayout(phboxLayout);
-                ui->verticalLayout->addStretch();
-                ui->messageEdit->setText("");
-                break;
-            }
-        }
+        ClientSingleton::get_client()->async_get_chat_messages(chat_info_.id_);
     } else if (result == SEND_CHAT_MSG_FAILED_ANSWER){
         std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Ошибка отправки сообщения в группу. Попытайтесь снова. ");
         dialog_ptr->exec();
@@ -139,44 +105,13 @@ void GroupWidget::slotHandleGetMessages(int result, std::vector<std::shared_ptr<
 
         for (auto& elem : messages) {
             QHBoxLayout *phboxLayout = new QHBoxLayout();
-            user_name = std::dynamic_pointer_cast<GroupMessage>(elem)->get_owner_name();
 
-            switch(elem->get_msg_content()->get_msg_content_type()) {
-                case TEXT_MSG_TYPE: {
-                    if (std::dynamic_pointer_cast<GroupMessage>(elem)->get_owner_id() == user_id) {
-                        phboxLayout->addStretch();
-                        phboxLayout->addWidget(new MessageCard(nullptr, TEXT_MSG_TYPE, elem->get_msg_content()->get_raw_data(), user_name.c_str()));
-                    } else {
-                        phboxLayout->addWidget(new MessageCard(nullptr, TEXT_MSG_TYPE, elem->get_msg_content()->get_raw_data(), user_name.c_str()));
-                        phboxLayout->addStretch();
-                    }
-                    break;
-                }
-                case IMAGE_MSG_TYPE: {
-                    QPixmap pix;
-                    pix.load(elem->get_msg_content()->get_raw_data());
-                    pix = pix.scaledToWidth(450);
-
-                    if (std::dynamic_pointer_cast<GroupMessage>(elem)->get_owner_id() == user_id) {
-                        phboxLayout->addStretch();
-                        phboxLayout->addWidget(new MessageCard(nullptr, pix, elem->get_msg_content()->get_raw_data(), user_name.c_str()));
-                    } else {
-                        phboxLayout->addWidget(new MessageCard(nullptr, pix, elem->get_msg_content()->get_raw_data(), user_name.c_str()));
-                        phboxLayout->addStretch();
-                    }
-
-                    break;
-                }
-                case AUDIO_MSG_TYPE: {
-                    if (std::dynamic_pointer_cast<GroupMessage>(elem)->get_owner_id() == user_id) {
-                        phboxLayout->addStretch();
-                        phboxLayout->addWidget(new MessageCard(nullptr, AUDIO_MSG_TYPE, elem->get_msg_content()->get_raw_data(), user_name.c_str()));
-                    } else {
-                        phboxLayout->addWidget(new MessageCard(nullptr, AUDIO_MSG_TYPE, elem->get_msg_content()->get_raw_data(), user_name.c_str()));
-                        phboxLayout->addStretch();
-                    }
-                    break;
-                }
+            if (std::dynamic_pointer_cast<GroupMessage>(elem)->get_owner_id() == user_id) {
+                phboxLayout->addStretch();
+                phboxLayout->addWidget(new MessageCard(nullptr, elem));
+            } else {
+                phboxLayout->addWidget(new MessageCard(nullptr, elem));
+                phboxLayout->addStretch();
             }
 
             ui->verticalLayout->addLayout(phboxLayout);

@@ -9,6 +9,7 @@
 #include "constants.h"
 #include "imagedisplayingdialog.h"
 #include "audiomanagersingleton.h"
+#include "groupmessage.h"
 
 MessageCard::MessageCard(QWidget *parent)
     : QWidget(parent)
@@ -18,53 +19,48 @@ MessageCard::MessageCard(QWidget *parent)
     setupConnection();
 }
 
-MessageCard::MessageCard(QWidget *parent, int type, const QString &text)
+MessageCard::MessageCard(QWidget *parent, std::shared_ptr<IMessage> msg)
     : MessageCard(parent)
 {
-    switch (type) {
+    msg_ = msg;
+
+    switch (msg->get_msg_content()->get_msg_content_type()) {
         case TEXT_MSG_TYPE: {
-            ui->label->setText(text);
+            ui->label->setText(msg->get_msg_content()->get_raw_data());
             ui->groupBox->hide();
             break;
         }
+        case IMAGE_MSG_TYPE: {
+            QPixmap pix;
+            pix.load(msg_->get_msg_content()->get_raw_data());
+            pix = pix.scaledToWidth(450);
+
+            ui->label->setPixmap(pix);
+            ui->groupBox->hide();
+
+            cursor().setShape(Qt::PointingHandCursor);
+            break;
+        }
         case AUDIO_MSG_TYPE: {
-            string_ = text;
             ui->label->hide();
+            break;
         }
     }
 
-    ui->ownerLabel->hide();
-    ui->line->hide();
-}
-
-MessageCard::MessageCard(QWidget *parent, const QPixmap &pixmap, const QString &pixmap_path)
-    : MessageCard(parent)
-{
-    type_ = IMAGE_MSG_TYPE;
-    string_ = pixmap_path;
-
-    ui->label->setPixmap(pixmap);
-    ui->groupBox->hide();
-    ui->ownerLabel->hide();
-    ui->line->hide();
-
-    cursor().setShape(Qt::PointingHandCursor);
-}
-
-MessageCard::MessageCard(QWidget *parent, int type, const QString &text, const QString &owner_name)
-    : MessageCard(parent, type, text)
-{    
-    ui->ownerLabel->setText(owner_name);
-    ui->ownerLabel->show();
-    ui->line->show();
-}
-
-MessageCard::MessageCard(QWidget *parent, const QPixmap &pixmap, const QString &pixmap_path, const QString &owner_name)
-    : MessageCard(parent, pixmap, pixmap_path)
-{
-    ui->ownerLabel->setText(owner_name);
-    ui->ownerLabel->show();
-    ui->line->show();
+    switch (msg->get_msg_type()) {
+        case CHANNEL_MSG_TYPE:
+        case INDIVIDUAL_MSG_TYPE: {
+            ui->ownerLabel->hide();
+            ui->line->hide();
+            break;
+        }
+        case GROUP_MSG_TYPE: {
+             ui->ownerLabel->setText(std::dynamic_pointer_cast<GroupMessage>(msg)->get_owner_name().c_str());
+             ui->ownerLabel->show();
+             ui->line->show();
+             break;
+        }
+    }
 }
 
 MessageCard::~MessageCard()
@@ -81,9 +77,9 @@ void MessageCard::paintEvent(QPaintEvent *)
 }
 
 void MessageCard::mousePressEvent(QMouseEvent *event) {
-    if (type_ == IMAGE_MSG_TYPE) {
+    if (msg_->get_msg_content()->get_msg_content_type() == IMAGE_MSG_TYPE) {
         QPixmap pixmap;
-        pixmap.load(string_);
+        pixmap.load(msg_->get_msg_content()->get_raw_data());
 
         std::unique_ptr<ImageDisplayingDialog> dialog_ptr = std::make_unique<ImageDisplayingDialog>(nullptr, pixmap);
         dialog_ptr->exec();
@@ -94,7 +90,7 @@ void MessageCard::mousePressEvent(QMouseEvent *event) {
 
 void MessageCard::slotPlayAudio() {
     ui->audioButton->setIcon(QIcon(":/recources/../resources/audio_play_icon.png"));
-    AudioManagerSingleton::get_manager()->play(string_);
+    AudioManagerSingleton::get_manager()->play(msg_->get_msg_content()->get_raw_data());
 }
 
 void MessageCard::slotStopAudio() {

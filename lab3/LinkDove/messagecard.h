@@ -4,6 +4,7 @@
 #include <QWidget>
 
 #include "audiomanager.h"
+#include "imessage.h"
 
 namespace Ui {
 class MessageCard;
@@ -18,11 +19,7 @@ class MessageCard : public QWidget
     Q_OBJECT
 
 public:
-    explicit MessageCard(QWidget *parent, int type, const QString &text);
-    explicit MessageCard(QWidget *parent, const QPixmap &pixmap, const QString &pixmap_path);
-    explicit MessageCard(QWidget *parent, int type, const QString &text,   const QString &owner_name);
-    explicit MessageCard(QWidget *parent, const QPixmap &pixmap, const QString &pixmap_path, const QString &owner_name);
-
+    explicit MessageCard(QWidget *parent, std::shared_ptr<IMessage> msg);
     ~MessageCard();
 
 protected:
@@ -52,8 +49,7 @@ private slots:
 private:
     Ui::MessageCard *ui;
 
-    int type_;
-    QString string_;
+    std::shared_ptr<IMessage> msg_;
 
     /**
      * <p> Настраивает соединения в виджете. </p>

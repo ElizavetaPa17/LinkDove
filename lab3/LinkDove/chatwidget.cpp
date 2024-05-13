@@ -54,39 +54,7 @@ void ChatWidget::slotSendMessage() {
 
 void ChatWidget::slotHandleSendMessage(int result) {
     if (result == SEND_IND_MSG_SUCCESS_ANSWER) {
-        switch (send_msg_type_) {
-            case TEXT_MSG_TYPE: {
-                QHBoxLayout *phboxLayout = new QHBoxLayout();
-                phboxLayout->addStretch();
-                phboxLayout->addWidget(new MessageCard(nullptr, TEXT_MSG_TYPE, ui->messageEdit->text()));
-
-                ui->verticalLayout->addLayout(phboxLayout);
-                ui->verticalLayout->addStretch();
-                ui->messageEdit->setText("");
-                break;
-            }
-            case IMAGE_MSG_TYPE: {
-                QPixmap pix;
-                pix.load(image_path_.c_str());
-                pix = pix.scaledToWidth(450);
-
-                QHBoxLayout *phboxLayout = new QHBoxLayout();
-                phboxLayout->addStretch();
-                phboxLayout->addWidget(new MessageCard(nullptr, pix, image_path_.c_str()));
-
-                ui->verticalLayout->addLayout(phboxLayout);
-                break;
-            }
-            case AUDIO_MSG_TYPE: {
-                QHBoxLayout *phboxLayout = new QHBoxLayout();
-                phboxLayout->addStretch();
-                phboxLayout->addWidget(new MessageCard(nullptr, AUDIO_MSG_TYPE, audio_file_ + ".m4a"));
-
-                ui->verticalLayout->addLayout(phboxLayout);
-                ui->verticalLayout->addStretch();
-                break;
-            }
-        }
+        ClientSingleton::get_client()->async_get_ind_messages(interlocutor_.id_);
     } else if (result == SEND_IND_MSG_FAILED_ANSWER){
         std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Ошибка отправки сообщения собеседнику. Попытайтесь снова. ");
         dialog_ptr->exec();
@@ -97,46 +65,13 @@ void ChatWidget::slotHandleGetMessages(int result, std::vector<std::shared_ptr<I
     if (result == GET_IND_MSG_SUCCESS_ANSWER){
         for (auto& elem : messages) {
             QHBoxLayout *phboxLayout = new QHBoxLayout();
-            switch(elem->get_msg_content()->get_msg_content_type()) {
-                case TEXT_MSG_TYPE: {
-                    if (std::dynamic_pointer_cast<IndividualMessage>(elem)->get_msg_edges().second == interlocutor_.id_) { // убрать dynamic_cast, расширив базовый класс!!!! TODO!!!!
-                        phboxLayout->addStretch();
-                        phboxLayout->addWidget(new MessageCard(nullptr, TEXT_MSG_TYPE, elem->get_msg_content()->get_raw_data()));
-                    } else {
-                        phboxLayout->addWidget(new MessageCard(nullptr, TEXT_MSG_TYPE, elem->get_msg_content()->get_raw_data()));
-                        phboxLayout->addStretch();
-                    }
 
-                    break;
-                }
-                case IMAGE_MSG_TYPE: {
-                    QPixmap pix;
-                    pix.load(elem->get_msg_content()->get_raw_data());
-                    pix = pix.scaledToWidth(450);
-
-                    if (std::dynamic_pointer_cast<IndividualMessage>(elem)->get_msg_edges().second == interlocutor_.id_) { // убрать dynamic_cast, расширив базовый класс!!!! TODO!!!!
-                        phboxLayout->addStretch();
-                        phboxLayout->addWidget(new MessageCard(nullptr, pix, elem->get_msg_content()->get_raw_data()));
-                    } else {
-                        phboxLayout->addWidget(new MessageCard(nullptr, pix, elem->get_msg_content()->get_raw_data()));
-                        phboxLayout->addStretch();
-                    }
-
-                    break;
-                }
-
-                case AUDIO_MSG_TYPE: {
-                    std::cerr << elem->get_msg_content()->get_raw_data() << '\n';
-                    if (std::dynamic_pointer_cast<IndividualMessage>(elem)->get_msg_edges().second == interlocutor_.id_) { // убрать dynamic_cast, расширив базовый класс!!!! TODO!!!!
-                        phboxLayout->addStretch();
-                        phboxLayout->addWidget(new MessageCard(nullptr, AUDIO_MSG_TYPE, elem->get_msg_content()->get_raw_data()));
-                    } else {
-                        phboxLayout->addWidget(new MessageCard(nullptr, AUDIO_MSG_TYPE, elem->get_msg_content()->get_raw_data()));
-                        phboxLayout->addStretch();
-                    }
-
-                break;
-                }
+            if (std::dynamic_pointer_cast<IndividualMessage>(elem)->get_msg_edges().second == interlocutor_.id_) { // убрать dynamic_cast, расширив базовый класс!!!! TODO!!!!
+                phboxLayout->addStretch();
+                phboxLayout->addWidget(new MessageCard(nullptr, elem));
+            } else {
+                phboxLayout->addWidget(new MessageCard(nullptr, elem));
+                phboxLayout->addStretch();
             }
 
             ui->verticalLayout->addLayout(phboxLayout);

@@ -89,40 +89,7 @@ void ChannelWidget::slotSendMessage() {
 
 void ChannelWidget::slotHandleSendMessage(int result) {
     if (result == SEND_CHNNL_MSG_SUCCESS_ANSWER) {
-        switch (send_msg_type_) {
-            case TEXT_MSG_TYPE: {
-                QHBoxLayout *phboxLayout = new QHBoxLayout();
-                phboxLayout->addWidget(new MessageCard(nullptr, TEXT_MSG_TYPE, ui->messageEdit->text()));
-                phboxLayout->addStretch();
-
-                ui->verticalLayout->addLayout(phboxLayout);
-                ui->verticalLayout->addStretch();
-                ui->messageEdit->setText("");
-                break;
-            }
-            case IMAGE_MSG_TYPE: {
-                QPixmap pix;
-                pix.load(image_path_.c_str());
-                pix = pix.scaledToWidth(450);
-
-                QHBoxLayout *phboxLayout = new QHBoxLayout();
-                phboxLayout->addWidget(new MessageCard(nullptr, pix, image_path_.c_str()));
-                phboxLayout->addStretch();
-
-                ui->verticalLayout->addLayout(phboxLayout);
-                ui->verticalLayout->addStretch();
-                break;
-            }
-            case AUDIO_MSG_TYPE: {
-                QHBoxLayout *phboxLayout = new QHBoxLayout();
-                phboxLayout->addWidget(new MessageCard(nullptr, AUDIO_MSG_TYPE, audio_file_ + ".m4a"));
-                phboxLayout->addStretch();
-
-                ui->verticalLayout->addLayout(phboxLayout);
-                ui->verticalLayout->addStretch();
-                break;
-            }
-        }
+        ClientSingleton::get_client()->async_get_channel_messages(channel_info_.id_);
     } else if (result == SEND_CHNNL_MSG_FAILED_ANSWER){
         std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Ошибка отправки сообщения в канал. Попытайтесь снова. ");
         dialog_ptr->exec();
@@ -136,27 +103,9 @@ void ChannelWidget::slotHandleGetMessages(int result, std::vector<std::shared_pt
     if (result == GET_CHNNL_MSG_SUCCESS_ANSWER){
         for (auto& elem : messages) {
             QHBoxLayout *phboxLayout = new QHBoxLayout();
-            switch(elem->get_msg_content()->get_msg_content_type()) {
-                case TEXT_MSG_TYPE: {
-                    phboxLayout->addWidget(new MessageCard(nullptr, TEXT_MSG_TYPE, elem->get_msg_content()->get_raw_data()));
-                    phboxLayout->addStretch();
-                    break;
-                }
-                case IMAGE_MSG_TYPE: {
-                    QPixmap pix;
-                    pix.load(elem->get_msg_content()->get_raw_data());
-                    pix = pix.scaledToWidth(450);
 
-                    phboxLayout->addWidget(new MessageCard(nullptr, pix, elem->get_msg_content()->get_raw_data()));
-                    phboxLayout->addStretch();
-
-                    break;
-                }
-                case AUDIO_MSG_TYPE: {
-                    phboxLayout->addWidget(new MessageCard(nullptr, AUDIO_MSG_TYPE, elem->get_msg_content()->get_raw_data()));
-                    phboxLayout->addStretch();
-                }
-            }
+            phboxLayout->addWidget(new MessageCard(nullptr, elem));
+            phboxLayout->addStretch();
 
             ui->verticalLayout->addLayout(phboxLayout);
         }
