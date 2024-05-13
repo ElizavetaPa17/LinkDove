@@ -10,6 +10,8 @@
 #include "imagedisplayingdialog.h"
 #include "audiomanagersingleton.h"
 #include "groupmessage.h"
+#include "agreedialog.h"
+#include "clientsingleton.h"
 
 MessageCard::MessageCard(QWidget *parent)
     : QWidget(parent)
@@ -19,7 +21,7 @@ MessageCard::MessageCard(QWidget *parent)
     setupConnection();
 }
 
-MessageCard::MessageCard(QWidget *parent, std::shared_ptr<IMessage> msg)
+MessageCard::MessageCard(QWidget *parent, std::shared_ptr<IMessage> msg, bool can_delete)
     : MessageCard(parent)
 {
     msg_ = msg;
@@ -61,6 +63,13 @@ MessageCard::MessageCard(QWidget *parent, std::shared_ptr<IMessage> msg)
              break;
         }
     }
+
+    if (can_delete) {
+        std::cerr << can_delete;
+        ui->deleteButton->show();
+    } else {
+        ui->deleteButton->hide();
+    }
 }
 
 MessageCard::~MessageCard()
@@ -97,7 +106,15 @@ void MessageCard::slotStopAudio() {
     ui->audioButton->setIcon(QIcon(":/recources/../resources/audio_wait_icon.png"));
 }
 
+void MessageCard::slotDeleteMsg() {
+    std::unique_ptr<AgreeDialog> dialog_ptr = std::make_unique<AgreeDialog>(nullptr, "Вы точно хотите удалить сообщение?");
+    if (dialog_ptr->exec() == QDialog::Accepted) {
+        ClientSingleton::get_client()->async_delete_msg(*msg_);
+    }
+}
+
 void MessageCard::setupConnection() {
-    connect(ui->audioButton, &QPushButton::clicked, this, &MessageCard::slotPlayAudio);
+    connect(ui->audioButton,                      &QPushButton::clicked,          this, &MessageCard::slotPlayAudio);
+    connect(ui->deleteButton,                     &QPushButton::clicked,          this, &MessageCard::slotDeleteMsg);
     connect(AudioManagerSingleton::get_manager(), &AudioManager::playing_stopped, this, &MessageCard::slotStopAudio);
 }

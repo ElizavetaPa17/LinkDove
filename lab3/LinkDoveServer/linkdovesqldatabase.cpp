@@ -710,6 +710,24 @@ bool LinkDoveSQLDataBase::add_ind_message(const IMessage& msg) {
     return true;
 }
 
+bool LinkDoveSQLDataBase::delete_ind_message(const IMessage &msg) {
+    QSqlQuery query(data_base_);
+
+    query.prepare(" DELETE FROM INDIVIDUAL_MESSAGES "
+                  " WHERE ID=:id; ");
+
+    query.bindValue(":id", msg.get_id());
+    std::cerr << msg.get_id() << '\n';
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString() << '\n';
+        return false;
+    } else {
+        // если удаление было успешно, то row affected > 0, иначе row affected == 0 (false).
+        return query.numRowsAffected();
+    }
+}
+
 bool LinkDoveSQLDataBase::add_chnnl_message(const IMessage& msg) {
     QSqlQuery query(data_base_);
     unsigned long long msg_id = 0;
@@ -870,6 +888,23 @@ bool LinkDoveSQLDataBase::add_chnnl_message(const IMessage& msg) {
 
     query.exec(" COMMIT; ");
     return true;
+}
+
+bool LinkDoveSQLDataBase::delete_chnnl_message(const IMessage& msg) {
+    QSqlQuery query(data_base_);
+
+    query.prepare(" DELETE FROM CHANNEL_MESSAGES "
+                  " WHERE ID=:id; ");
+
+    query.bindValue(":id", msg.get_id());
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString() << '\n';
+        return false;
+    } else {
+        // если удаление было успешно, то row affected > 0, иначе row affected == 0 (false).
+        return query.numRowsAffected();
+    }
 }
 
 std::vector<std::shared_ptr<IMessage>> LinkDoveSQLDataBase::get_ind_messages(unsigned long long sender_id, unsigned long long receiver_id) {
@@ -1501,6 +1536,23 @@ bool LinkDoveSQLDataBase::add_chat_message(const IMessage& msg) {
 
     query.exec(" COMMIT; ");
     return true;
+}
+
+bool LinkDoveSQLDataBase::delete_chat_message(const IMessage& msg) {
+    QSqlQuery query(data_base_);
+
+    query.prepare(" DELETE FROM CHAT_MESSAGES "
+                  " WHERE ID=:id; ");
+
+    query.bindValue(":id", msg.get_id());
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString() << '\n';
+        return false;
+    } else {
+        // если удаление было успешно, то row affected > 0, иначе row affected == 0 (false).
+        return query.numRowsAffected();
+    }
 }
 
 std::vector<std::shared_ptr<IMessage>> LinkDoveSQLDataBase::get_chat_messages(unsigned long long chat_id) {

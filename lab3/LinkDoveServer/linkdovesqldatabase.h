@@ -121,7 +121,15 @@ public:
      * @param msg - Добавляемое сообщение.
      * @return - В случае успеха возвращает true, иначе - false.
      */
-    bool add_ind_message(const IMessage& msg);
+    bool add_ind_message(const IMessage &msg);
+
+    /**
+     * <p> Удаляет сообщение между двумя собеседниками. </p>
+     * @brief delete_ind_message
+     * @param msg - Удаляемое сообщение.
+     * @return - В случае успеха возвращает true, иначе - false.
+     */
+    bool delete_ind_message(const IMessage &msg);
 
     /**
      * <p> Добавляет сообщение в канал. </p>
@@ -130,6 +138,14 @@ public:
      * @return - В случае успеха возвращает true, иначе - false.
      */
     bool add_chnnl_message(const IMessage& msg);
+
+    /**
+     * <p> Удаляет сообщение из канала. </p>
+     * @brief delete_chnnl_message
+     * @param msg - Удаляемое сообщение.
+     * @return - В случае успеха возвращает true, иначе - false.
+     */
+    bool delete_chnnl_message(const IMessage& msg);
 
     /**
      * <p> Возвращает сообщения между двумя собеседниками. </p>
@@ -309,11 +325,19 @@ public:
 
     /**
      * <p> Добавляет сообщение в чат (группу). </p>
-     * @brief add_chat_mess
+     * @brief add_chat_message
      * @param msg - Добавляемое сообщение.
      * @return - В случае успеха возвращает true, иначе - false.
      */
     bool add_chat_message(const IMessage& msg);
+
+    /**
+     * <p> Удаляет сообщение из чата (группы). </p>
+     * @brief delete_chat_message
+     * @param msg - Удаляемое сообщение.
+     * @return - В случае успеха возвращает true, иначе - false.
+     */
+    bool delete_chat_message(const IMessage& msg);
 
     /**
      * <p> Извлекает сообщения чата из БД. </p>

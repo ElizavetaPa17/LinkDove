@@ -131,6 +131,15 @@ enum ResponseTypes {
 
     DEL_NOTIFICATION_SUCCESS_ANSWER,
     DEL_NOTIFICATION_FAILED_ANSWER,
+
+    DEL_IND_MSG_SUCCESS_ANSWER,
+    DEL_IND_MSG_FAILED_ANSWER,
+
+    DEL_CHANNEL_MSG_SUCCESS_ANSWER,
+    DEL_CHANNEL_MSG_FAILED_ANSWER,
+
+    DEL_CHAT_MSG_SUCCESS_ANSWER,
+    DEL_CHAT_MSG_FAILED_ANSWER,
 };
 
 enum MessageType {
@@ -455,3 +464,18 @@ extern const char *DEL_NOTIFICATION_REQUEST;
 extern const char *DEL_NOTIFICATION_SUCCESS;
 // Ответ сервера на неудачное удаление уведомления
 extern const char *DEL_NOTIFICATION_FAILED;
+
+// Запрос на удаление сообщения
+extern const char *DEL_MSG_REQUEST;
+// Ответ сервера на успешное удаление сообщения в инд. чате
+extern const char *DEL_IND_MSG_SUCCESS;
+// Ответ сервера на неудачное удаление сообщения в инд. чате
+extern const char *DEL_IND_MSG_FAILED;
+// Ответ сервера на успешное удаление сообщения в канале
+extern const char *DEL_CHANNEL_MSG_SUCCESS;
+// Ответ сервера на неудачное удаление сообщения в канале
+extern const char *DEL_CHANNEL_MSG_FAILED;
+// Ответ сервера на успешное удаление сообщения в чате (группе)
+extern const char *DEL_CHAT_MSG_SUCCESS;
+// Ответ сервера на неудачное удаление сообщения в чате (группе)
+extern const char *DEL_CHAT_MSG_FAILED;

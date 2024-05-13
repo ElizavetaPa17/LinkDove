@@ -203,6 +203,8 @@ void LinkDoveServer::handle_type_request(ConnectionIterator iterator) {
         handle_get_notifications(iterator);
     } else if (request_type == DEL_NOTIFICATION_REQUEST) {
         handle_del_notification(iterator);
+    } else if (request_type == DEL_MSG_REQUEST) {
+        handle_delete_msg(iterator);
     }
 }
 
@@ -946,6 +948,46 @@ void LinkDoveServer::handle_del_notification(ConnectionIterator iterator) {
         answer << DEL_NOTIFICATION_SUCCESS << "\n" << END_OF_REQUEST;
     } else {
         answer << DEL_NOTIFICATION_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_delete_msg(ConnectionIterator iterator) {
+    std::shared_ptr<IMessage> msg_ptr = UtilitySerializator::deserialize_msg(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    switch (msg_ptr->get_msg_type()) {
+        case INDIVIDUAL_MSG_TYPE: {
+            if (data_base_.delete_ind_message(*msg_ptr)) {
+                answer << DEL_IND_MSG_SUCCESS << "\n" << END_OF_REQUEST;
+            } else {
+                answer << DEL_IND_MSG_FAILED << "\n" << END_OF_REQUEST;
+            }
+
+            break;
+        }
+        case CHANNEL_MSG_TYPE: {
+            if (data_base_.delete_chnnl_message(*msg_ptr)) {
+                answer << DEL_CHANNEL_MSG_SUCCESS << "\n" << END_OF_REQUEST;
+            } else {
+                answer << DEL_CHANNEL_MSG_FAILED << "\n" << END_OF_REQUEST;
+            }
+
+            break;
+        }
+        case GROUP_MSG_TYPE: {
+            if (data_base_.delete_chat_message(*msg_ptr)) {
+                answer << DEL_CHANNEL_MSG_SUCCESS << "\n" << END_OF_REQUEST;
+            } else {
+                answer << DEL_CHANNEL_MSG_FAILED << "\n" << END_OF_REQUEST;
+            }
+
+            break;
+        }
     }
 
     iterator->out_stream_ << answer.str();

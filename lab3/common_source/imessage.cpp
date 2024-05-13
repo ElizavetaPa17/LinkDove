@@ -13,7 +13,7 @@ IMessage::~IMessage() {
 
 }
 
-unsigned long long IMessage::get_id() {
+unsigned long long IMessage::get_id() const {
     return id_;
 }
 

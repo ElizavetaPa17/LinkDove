@@ -283,6 +283,13 @@ public:
     void async_del_notification(unsigned long long id);
 
     /**
+     * <p> Отправляет запрос на удаление сообщения. </p>
+     * @brief async_delete_msg
+     * @param msg - Удаляемое сообщение.
+     */
+    void async_delete_msg(const IMessage &msg);
+
+    /**
      * <p> Возвращает информацию о пользователе. </p>
      * @brief get_status_info
      * @return - Структура, содержащая информацию о пользователе.
@@ -566,6 +573,13 @@ signals:
      * @param result - Параметр, содержащий результат запроса.
      */
     void del_notification_result(int result);
+
+    /**
+     * <p> Генерирует сигнал после получения результата удаления сообщения. </p>
+     * @brief delete_msg_result
+     * @param result - Параметр, содержащий результат запроса.
+     */
+    void delete_msg_result(int result);
 
 private:
     std::shared_ptr<asio::io_context> io_context_ptr_;

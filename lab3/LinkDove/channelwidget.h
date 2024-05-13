@@ -138,6 +138,13 @@ private slots:
      */
     void slotGetParticipantListResult(int result, std::vector<std::string> participants);
 
+    /**
+     * <p> Слот, который обрабатывает собатие удаление сообщения. </p>
+     * @brief slotDeleteMessageResult
+     * @param result
+     */
+    void slotDeleteMessageResult(int result);
+
 private:
     Ui::ChannelWidget *ui;
     ChannelInfo channel_info_;

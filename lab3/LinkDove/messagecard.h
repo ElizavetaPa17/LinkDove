@@ -19,7 +19,7 @@ class MessageCard : public QWidget
     Q_OBJECT
 
 public:
-    explicit MessageCard(QWidget *parent, std::shared_ptr<IMessage> msg);
+    explicit MessageCard(QWidget *parent, std::shared_ptr<IMessage> msg, bool can_delete = false);
     ~MessageCard();
 
 protected:
@@ -45,6 +45,12 @@ private slots:
      * @brief slotPlayAudio
      */
     void slotStopAudio();
+
+    /**
+     * <p> Слот, который обрабатывает событие нажатия на кнопку удаления сообщения. </p>
+     * @brief slotDeleteMsg
+     */
+    void slotDeleteMsg();
 
 private:
     Ui::MessageCard *ui;

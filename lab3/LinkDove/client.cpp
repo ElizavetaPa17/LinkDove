@@ -358,8 +358,16 @@ void Client::async_get_notifications() {
 void Client::async_del_notification(unsigned long long id) {
     connection_.out_stream_ << DEL_NOTIFICATION_REQUEST << "\n";
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, id);
-
     connection_.out_stream_ << END_OF_REQUEST;
+
+    write_to_server();
+}
+
+void Client::async_delete_msg(const IMessage &msg) {
+    connection_.out_stream_ << DEL_MSG_REQUEST << "\n";
+    UtilitySerializator::serialize(connection_.out_stream_, msg);
+    connection_.out_stream_ << END_OF_REQUEST;
+
     write_to_server();
 }
 
@@ -600,6 +608,18 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
             emit del_notification_result(DEL_NOTIFICATION_SUCCESS_ANSWER);
         } else if (answer_type == DEL_NOTIFICATION_FAILED) {
             emit del_notification_result(DEL_NOTIFICATION_FAILED_ANSWER);
+        } else if (answer_type == DEL_IND_MSG_SUCCESS) {
+            emit delete_msg_result(DEL_IND_MSG_SUCCESS_ANSWER);
+        } else if (answer_type == DEL_IND_MSG_FAILED) {
+            emit delete_msg_result(DEL_IND_MSG_FAILED_ANSWER);
+        } else if (answer_type == DEL_CHANNEL_MSG_SUCCESS) {
+            emit delete_msg_result(DEL_CHANNEL_MSG_SUCCESS_ANSWER);
+        } else if (answer_type == DEL_CHANNEL_MSG_FAILED) {
+            emit delete_msg_result(DEL_CHANNEL_MSG_FAILED_ANSWER);
+        } else if (answer_type == DEL_CHAT_MSG_SUCCESS) {
+            emit delete_msg_result(DEL_CHAT_MSG_SUCCESS_ANSWER);
+        } else if (answer_type == DEL_CHAT_MSG_FAILED) {
+            emit delete_msg_result(DEL_CHAT_MSG_FAILED_ANSWER);
         } else {
             std::cerr << "Unkown server answer: " << answer_type << '\n';
         }

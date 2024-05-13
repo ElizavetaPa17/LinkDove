@@ -95,6 +95,13 @@ private slots:
      */
     void slotHandleDeleteResult(int result);
 
+    /**
+     * <p> Слот, который обрабатывает собатие удаление сообщения. </p>
+     * @brief slotDeleteMessageResult
+     * @param result
+     */
+    void slotDeleteMessageResult(int result);
+
 private:
     Ui::ChatWidget    *ui;
     StatusInfo interlocutor_;

@@ -349,6 +349,13 @@ private:
      */
     void handle_del_notification(ConnectionIterator iterator);
 
+    /**
+     * <p> Обрабатывает запрос на удаление сообщения. </p>
+     * @brief handle_delete_msg
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_delete_msg(ConnectionIterator iterator);
+
     /** <p> Запускает в отдельном потоке контекст для обработки асинхронных функций. </p>
      * @brief run_context
      */

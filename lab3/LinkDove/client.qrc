@@ -27,5 +27,6 @@
     <file alias="record_icon.png">../resources/record_icon.png</file>
     <file alias="audio_play_icon.png">../resources/audio_play_icon.png</file>
     <file alias="audio_wait_icon.png">../resources/audio_wait_icon.png</file>
+    <file alias="white_trash_icon.png">../resources/white_trash_icon.png</file>
 </qresource>
 </RCC>

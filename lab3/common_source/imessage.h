@@ -39,7 +39,7 @@ public:
      * @brief get_id
      * @return - Идентификатор сообщения.
      */
-    unsigned long long get_id();
+    unsigned long long get_id() const;
 
     /**
      * <p> Устанавливает идентификатор сообщения. </p>

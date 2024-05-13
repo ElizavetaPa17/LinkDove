@@ -62,13 +62,15 @@ void ChatWidget::slotHandleSendMessage(int result) {
 }
 
 void ChatWidget::slotHandleGetMessages(int result, std::vector<std::shared_ptr<IMessage>> messages) {
+    slotClear();
+
     if (result == GET_IND_MSG_SUCCESS_ANSWER){
         for (auto& elem : messages) {
             QHBoxLayout *phboxLayout = new QHBoxLayout();
 
             if (std::dynamic_pointer_cast<IndividualMessage>(elem)->get_msg_edges().second == interlocutor_.id_) { // убрать dynamic_cast, расширив базовый класс!!!! TODO!!!!
                 phboxLayout->addStretch();
-                phboxLayout->addWidget(new MessageCard(nullptr, elem));
+                phboxLayout->addWidget(new MessageCard(nullptr, elem, true));
             } else {
                 phboxLayout->addWidget(new MessageCard(nullptr, elem));
                 phboxLayout->addStretch();
@@ -156,6 +158,15 @@ void ChatWidget::slotClear() {
     ui->verticalLayout->addStretch();
 }
 
+void ChatWidget::slotDeleteMessageResult(int result) {
+    if (result == DEL_IND_MSG_SUCCESS_ANSWER) {
+        ClientSingleton::get_client()->async_get_ind_messages(interlocutor_.id_);
+    } else if (result == DEL_IND_MSG_FAILED_ANSWER) {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Что-то пошло не так при попытке удалить сообщение.");
+        dialog_ptr->exec();
+    }
+}
+
 void ChatWidget::setupConnection() {
     connect(ui->messageEdit,       &QLineEdit::returnPressed, this, &ChatWidget::slotSendMessage);
     connect(ui->sendButton,        &QPushButton::clicked,     this, &ChatWidget::slotSendMessage);
@@ -166,6 +177,7 @@ void ChatWidget::setupConnection() {
     connect(ClientSingleton::get_client(), &Client::send_msg_result,        this, &ChatWidget::slotHandleSendMessage);
     connect(ClientSingleton::get_client(), &Client::get_ind_msg_result,     this, &ChatWidget::slotHandleGetMessages);
     connect(ClientSingleton::get_client(), &Client::delete_ind_chat_result, this, &ChatWidget::slotHandleDeleteResult);
+    connect(ClientSingleton::get_client(), &Client::delete_msg_result,      this, &ChatWidget::slotDeleteMessageResult);
 
     connect(ui->deleteButton, &QPushButton::clicked, this, &ChatWidget::slotDeleteChat);
 }

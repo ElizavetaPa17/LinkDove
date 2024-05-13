@@ -100,11 +100,18 @@ void ChannelWidget::slotHandleSendMessage(int result) {
 void ChannelWidget::slotHandleGetMessages(int result, std::vector<std::shared_ptr<IMessage>> messages) {
     slotClear();
 
+    unsigned long long owner_id = ClientSingleton::get_client()->get_status_info().id_;
+
     if (result == GET_CHNNL_MSG_SUCCESS_ANSWER){
         for (auto& elem : messages) {
             QHBoxLayout *phboxLayout = new QHBoxLayout();
 
-            phboxLayout->addWidget(new MessageCard(nullptr, elem));
+            if (channel_info_.owner_id_ == owner_id) {
+                phboxLayout->addWidget(new MessageCard(nullptr, elem, true));
+            } else {
+                phboxLayout->addWidget(new MessageCard(nullptr, elem));
+            }
+
             phboxLayout->addStretch();
 
             ui->verticalLayout->addLayout(phboxLayout);
@@ -232,6 +239,15 @@ void ChannelWidget::slotGetParticipantListResult(int result, std::vector<std::st
     }
 }
 
+void ChannelWidget::slotDeleteMessageResult(int result) {
+    if (result == DEL_CHANNEL_MSG_SUCCESS_ANSWER) {
+        ClientSingleton::get_client()->async_get_channel_messages(channel_info_.id_);
+    } else if (result == DEL_CHANNEL_MSG_FAILED_ANSWER) {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Что-то пошло не так при попытке удалить сообщение.");
+        dialog_ptr->exec();
+    }
+}
+
 void ChannelWidget::setupConnection() {
     connect(ui->messageEdit,       &QLineEdit::returnPressed, this, &ChannelWidget::slotSendMessage);
     connect(ui->sendButton,        &QPushButton::clicked,     this, &ChannelWidget::slotSendMessage);
@@ -246,6 +262,7 @@ void ChannelWidget::setupConnection() {
     connect(ClientSingleton::get_client(), &Client::quit_channel_result,               this, &ChannelWidget::slotQuitChannelResult);
     connect(ClientSingleton::get_client(), &Client::remove_user_from_channel_result,   this, &ChannelWidget::slotRemoveUserResult);
     connect(ClientSingleton::get_client(), &Client::get_channel_participants_result,   this, &ChannelWidget::slotGetParticipantListResult);
+    connect(ClientSingleton::get_client(), &Client::delete_msg_result,                 this, &ChannelWidget::slotDeleteMessageResult);
 
     connect(ui->joinButton, &QPushButton::clicked, ClientSingleton::get_client(), [this] () {
                                                                                     ClientSingleton::get_client()->async_add_channel_participant_request(channel_info_.id_);

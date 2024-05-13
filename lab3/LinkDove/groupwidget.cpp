@@ -108,7 +108,7 @@ void GroupWidget::slotHandleGetMessages(int result, std::vector<std::shared_ptr<
 
             if (std::dynamic_pointer_cast<GroupMessage>(elem)->get_owner_id() == user_id) {
                 phboxLayout->addStretch();
-                phboxLayout->addWidget(new MessageCard(nullptr, elem));
+                phboxLayout->addWidget(new MessageCard(nullptr, elem, true));
             } else {
                 phboxLayout->addWidget(new MessageCard(nullptr, elem));
                 phboxLayout->addStretch();
@@ -242,6 +242,15 @@ void GroupWidget::slotGetParticipantListResult(int result, std::vector<std::stri
     }
 }
 
+void GroupWidget::slotDeleteMessageResult(int result) {
+    if (result == DEL_CHAT_MSG_SUCCESS_ANSWER) {
+        ClientSingleton::get_client()->async_get_chat_messages(chat_info_.id_);
+    } else if (result == DEL_CHAT_MSG_FAILED_ANSWER) {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Что-то пошло не так при попытке удалить сообщение.");
+        dialog_ptr->exec();
+    }
+}
+
 void GroupWidget::setupConnection() {
     connect(ui->messageEdit,       &QLineEdit::returnPressed, this, &GroupWidget::slotSendMessage);
     connect(ui->sendButton,        &QPushButton::clicked,     this, &GroupWidget::slotSendMessage);
@@ -256,6 +265,7 @@ void GroupWidget::setupConnection() {
     connect(ClientSingleton::get_client(), &Client::quit_chat_result,               this, &GroupWidget::slotQuitGroupResult);
     connect(ClientSingleton::get_client(), &Client::remove_user_from_chat_result,   this, &GroupWidget::slotRemoveUserResult);
     connect(ClientSingleton::get_client(), &Client::get_chat_participants_result,   this, &GroupWidget::slotGetParticipantListResult);
+    connect(ClientSingleton::get_client(), &Client::delete_msg_result,              this, &GroupWidget::slotDeleteMessageResult);
 
     connect(ui->joinButton, &QPushButton::clicked, ClientSingleton::get_client(), [this] () {
                                                                                     ClientSingleton::get_client()->async_add_chat_participant_request(chat_info_.id_);
