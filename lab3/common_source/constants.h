@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 enum Page {
     WELCOME_PAGE,
     LOGIN_PAGE,
@@ -199,283 +201,283 @@ const int CREATED_ENTITY_ID = 0;
 
 
 // Информация о приложении LinkDove
-extern const char *APPLICATION_DESCRIPTION;
+extern const std::string APPLICATION_DESCRIPTION;
 
 // Типы сообщений
-extern const char *TEXT_MSG;
-extern const char *AUDIO_MSG;
-extern const char *IMAGE_MSG;
+extern const std::string TEXT_MSG;
+extern const std::string AUDIO_MSG;
+extern const std::string IMAGE_MSG;
 
 /*
  * Типы запросов
 */
 
 // Запрос клиента на авторизацию
-extern const char *LOGIN_REQUEST;
+extern const std::string LOGIN_REQUEST;
 // Ответ сервера в случае успешной авторизации
-extern const char *LOGIN_SUCCESS;
+extern const std::string LOGIN_SUCCESS;
 // Ответ сервера в случае провала авторизации
-extern const char *LOGIN_FAILED;
+extern const std::string LOGIN_FAILED;
 // Ответ сервера в случае, если пользователь
-extern const char *LOGIN_BANNED;
+extern const std::string LOGIN_BANNED;
 
 // Запрос клиента на регистрацию
-extern const char *REGISTER_REQUEST;
+extern const std::string REGISTER_REQUEST;
 // Ответ сервера в случае успешной регистрации
-extern const char *REGISTER_SUCCESS;
+extern const std::string REGISTER_SUCCESS;
 // Ответ сервера в случае провала регистрации
-extern const char *REGISTER_FAILED;
+extern const std::string REGISTER_FAILED;
 
 // Запрос администратору, содержащий жалобу пользователя
-extern const char *SEND_COMPLAINT_REQUEST;
+extern const std::string SEND_COMPLAINT_REQUEST;
 // Ответ сервера на успешную регистрацию жалобы
-extern const char *SEND_COMPLAINT_SUCCESS;
+extern const std::string SEND_COMPLAINT_SUCCESS;
 // Ответ сервера на неудачную регистрацию жалобы
-extern const char *SEND_COMPLAINT_FAILED;
+extern const std::string SEND_COMPLAINT_FAILED;
 
 // Запрос на удаление жалобы от администратора
-extern const char *DEL_COMPLAINT_REQUEST;
+extern const std::string DEL_COMPLAINT_REQUEST;
 // Ответ сервера на успешное удаление жалобы
-extern const char *DEL_COMPLAINT_SUCCESS;
+extern const std::string DEL_COMPLAINT_SUCCESS;
 // Ответ сервера на неудачное удаление жалобы
-extern const char *DEL_COMPLAINT_FAILED;
+extern const std::string DEL_COMPLAINT_FAILED;
 
 // Запрос на получение жалоб
-extern const char *GET_COMPLAINTS_REQUEST;
+extern const std::string GET_COMPLAINTS_REQUEST;
 // Ответ сервера на успешный запрос жалоб
-extern const char *GET_COMPLAINTS_SUCCESS;
+extern const std::string GET_COMPLAINTS_SUCCESS;
 // Ответ сервера на неудачный запрос жалоб
-extern const char *GET_COMPLAINTS_FAILED;
+extern const std::string GET_COMPLAINTS_FAILED;
 
 // Запрос клиента на обновление информации о пользователе
-extern const char *UPDATE_USER_REQUEST;
+extern const std::string UPDATE_USER_REQUEST;
 // Ответ сервера на успешное обновление информации о пользователе
-extern const char *UPDATE_USER_SUCCESS;
+extern const std::string UPDATE_USER_SUCCESS;
 // Ответ сервера на неудачное обновление информации о пользователе
-extern const char *UPDATE_USER_FAILED;
+extern const std::string UPDATE_USER_FAILED;
 
 // Запрос на поиск информации пользователя
-extern const char *FIND_USER_REQUEST;
+extern const std::string FIND_USER_REQUEST;
 // Ответ сервера на успешный поиск информации о пользователе
-extern const char *FIND_USER_SUCCESS;
+extern const std::string FIND_USER_SUCCESS;
 // Ответ сервера на неудачный поиск информации о пользователе
-extern const char *FIND_USER_FAILED;
+extern const std::string FIND_USER_FAILED;
 
 // Запрос на блокирувку/разблокировку пользователя от администратора
-extern const char *BAN_USER_REQUEST;
+extern const std::string BAN_USER_REQUEST;
 // Ответ сервера на успешную блокирувку/разблокировку пользователя
-extern const char *BAN_USER_SUCCESS;
+extern const std::string BAN_USER_SUCCESS;
 // Ответ сервера на неудачную блокирувку/разблокировку пользователя
-extern const char *BAN_USER_FAILED;
+extern const std::string BAN_USER_FAILED;
 
 // Запрос на отправку сообщения
-extern const char *SEND_MSG_REQUEST;
+extern const std::string SEND_MSG_REQUEST;
 // Ответ сервера на успешную отправку сообщения от пользователя в беседе между двумя участниками
-extern const char *SEND_IND_MSG_SUCCESS;
+extern const std::string SEND_IND_MSG_SUCCESS;
 // Ответ сервера на неудачную отправку сообщения от пользователя в беседе между двумя участниками
-extern const char *SEND_IND_MSG_FAILED;
+extern const std::string SEND_IND_MSG_FAILED;
 // Ответ сервера на успешную отправку сообщения в канал
-extern const char *SEND_CHNNL_MSG_SUCCESS;
+extern const std::string SEND_CHNNL_MSG_SUCCESS;
 // Ответ сервера на неудачную отправку сообщения в канал
-extern const char *SEND_CHNNL_MSG_FAILED;
+extern const std::string SEND_CHNNL_MSG_FAILED;
 // Ответ сервера на успешную отправку сообщения в чат (группу)
-extern const char *SEND_CHAT_MSG_SUCCESS;
+extern const std::string SEND_CHAT_MSG_SUCCESS;
 // Ответ сервера на неудачную отправку сообщения в чат (группу)
-extern const char *SEND_CHAT_MSG_FAILED;
+extern const std::string SEND_CHAT_MSG_FAILED;
 
 // Запрос на получение сообщений в чате с собеседником
-extern const char *GET_IND_MSG_REQUEST;
+extern const std::string GET_IND_MSG_REQUEST;
 // Ответ сервера на успешную отправку списка сообщений из чата с собеседником.
-extern const char *GET_IND_MSG_SUCCESS;
+extern const std::string GET_IND_MSG_SUCCESS;
 // Ответ сервера на неудачную отправку списка сообщений из чата с собеседником.
-extern const char *GET_IND_MSG_FAILED;
+extern const std::string GET_IND_MSG_FAILED;
 
 // Запрос на получение информации о собеседниках, с которыми у текущего пользователя есть активный чат
-extern const char *GET_INTERLOCUTORS_REQUEST;
+extern const std::string GET_INTERLOCUTORS_REQUEST;
 // Ответ сервера на успешную отправку информации о таких собеседниках
-extern const char *GET_INTERLOCUTORS_SUCCESS;
+extern const std::string GET_INTERLOCUTORS_SUCCESS;
 // Ответ сервера на неудачную отправку информации о таких собеседниках
-extern const char *GET_INTERLOCUTORS_FAILED;
+extern const std::string GET_INTERLOCUTORS_FAILED;
 
 // Запрос на удаление переписки между двумя собеседниками
-extern const char *DELETE_IND_CHAT_REQUEST;
+extern const std::string DELETE_IND_CHAT_REQUEST;
 // Ответ сервера на успешное удаление переписки
-extern const char *DELETE_IND_CHAT_SUCCESS;
+extern const std::string DELETE_IND_CHAT_SUCCESS;
 // Ответ сервера на неудачное удаление переписки
-extern const char *DELETE_IND_CHAT_FAILED;
+extern const std::string DELETE_IND_CHAT_FAILED;
 
 // Запрос на создание канала
-extern const char *CREATE_CHANNEL_REQUEST;
+extern const std::string CREATE_CHANNEL_REQUEST;
 // Ответ сервера на успешное создание канала
-extern const char *CREATE_CHANNEL_SUCCESS;
+extern const std::string CREATE_CHANNEL_SUCCESS;
 // Ответ сервера на неудачное создание канала
-extern const char *CREATE_CHANNEL_FAILED;
+extern const std::string CREATE_CHANNEL_FAILED;
 
 // Запрос на поиск информации о канале
-extern const char *FIND_CHANNEL_REQUEST;
+extern const std::string FIND_CHANNEL_REQUEST;
 // Ответ сервера на успешный поиск информации о канале
-extern const char *FIND_CHANNEL_SUCCESS;
+extern const std::string FIND_CHANNEL_SUCCESS;
 // Ответ сервера на неудачный поиск информации о канале
-extern const char *FIND_CHANNEL_FAILED;
+extern const std::string FIND_CHANNEL_FAILED;
 
 // Запрос на получение информации о каналах, в которых состоит текущий пользователь
-extern const char *GET_CHANNELS_REQUEST;
+extern const std::string GET_CHANNELS_REQUEST;
 // Ответ сервера на успешную отправку информации о таких каналах
-extern const char *GET_CHANNELS_SUCCESS;
+extern const std::string GET_CHANNELS_SUCCESS;
 // Ответ сервера на неудачную отправку информации о таких каналах
-extern const char *GET_CHANNELS_FAILED;
+extern const std::string GET_CHANNELS_FAILED;
 
 // Запрос на получение информации о том, является ли пользователь участником канала
-extern const char *IS_CHANNEL_PARTICIPANT_REQUEST;
+extern const std::string IS_CHANNEL_PARTICIPANT_REQUEST;
 // Ответ сервера на успешную отправку информации
-extern const char *IS_CHANNEL_PARTICIPANT_SUCCESS;
+extern const std::string IS_CHANNEL_PARTICIPANT_SUCCESS;
 // Ответ сервера на неудачную отправку информации
-extern const char *IS_CHANNEL_PARTICIPANT_FAILED;
+extern const std::string IS_CHANNEL_PARTICIPANT_FAILED;
 
 // Запрос на добавление текущего пользователя в канал
-extern const char *ADD_PARTICIPANT_TO_CHANNEL_REQUEST;
+extern const std::string ADD_PARTICIPANT_TO_CHANNEL_REQUEST;
 // Ответ сервера на успешное добавление текущего пользователя в канал
-extern const char *ADD_PARTICIPANT_TO_CHANNEL_SUCCESS;
+extern const std::string ADD_PARTICIPANT_TO_CHANNEL_SUCCESS;
 // Ответ сервера на неудачное добавление текущего пользователя в канал
-extern const char *ADD_PARTICIPANT_TO_CHANNEL_FAILED;
+extern const std::string ADD_PARTICIPANT_TO_CHANNEL_FAILED;
 
 // Запрос на получение сообщений из канала
-extern const char *GET_CHNNL_MSG_REQUEST;
+extern const std::string GET_CHNNL_MSG_REQUEST;
 // Ответ сервера на успешное получение сообщений из канала
-extern const char *GET_CHNNL_MSG_SUCCESS;
+extern const std::string GET_CHNNL_MSG_SUCCESS;
 // Ответ сервера на неудачное получение сообщений из канала
-extern const char *GET_CHNNL_MSG_FAILED;
+extern const std::string GET_CHNNL_MSG_FAILED;
 
 // Запрос на получение списка участников канала
-extern const char *GET_CHNNL_PARTICIPANTS_REQUEST;
+extern const std::string GET_CHNNL_PARTICIPANTS_REQUEST;
 // Ответ сервера на успешное получение списка участников канала
-extern const char *GET_CHNNL_PARTICIPANTS_SUCCESS;
+extern const std::string GET_CHNNL_PARTICIPANTS_SUCCESS;
 // Ответ сервера на неудачное получение списка участников канала
-extern const char *GET_CHNNL_PARTICIPANTS_FAILED;
+extern const std::string GET_CHNNL_PARTICIPANTS_FAILED;
 
 // Запрос на удаление канала
-extern const char *DELETE_CHANNEL_REQUEST;
+extern const std::string DELETE_CHANNEL_REQUEST;
 // Ответ сервера на успешное удаление канала
-extern const char *DELETE_CHANNEL_SUCCESS;
+extern const std::string DELETE_CHANNEL_SUCCESS;
 // Ответ сервера на неудачное удаление канала
-extern const char *DELETE_CHANNEL_FAILED;
+extern const std::string DELETE_CHANNEL_FAILED;
 
 // Запрос на удаление из канала пользователя
-extern const char *QUIT_CHANNEL_REQUEST;
+extern const std::string QUIT_CHANNEL_REQUEST;
 // Ответ сервера на успешное удаление пользователя из канала
-extern const char *QUIT_CHANNEL_SUCCESS;
+extern const std::string QUIT_CHANNEL_SUCCESS;
 // Ответ сервера на неудачное удаление пользователя из канала
-extern const char *QUIT_CHANNEL_FAILED;
+extern const std::string QUIT_CHANNEL_FAILED;
 
 // Запрос на удаление пользователя из канала владельцем канала
-extern const char *REMOVE_USER_FROM_CHANNEL_REQUEST;
+extern const std::string REMOVE_USER_FROM_CHANNEL_REQUEST;
 // Ответ сервера на успешное удаление пользователя из канала владельцем канала
-extern const char *REMOVE_USER_FROM_CHANNEL_SUCCESS;
+extern const std::string REMOVE_USER_FROM_CHANNEL_SUCCESS;
 // Ответ сервера на неудачное удаление пользователя из канала владельцем канала
-extern const char *REMOVE_USER_FROM_CHANNEL_FAILED;
+extern const std::string REMOVE_USER_FROM_CHANNEL_FAILED;
 
 // Запрос на создание чата
-extern const char *CREATE_CHAT_REQUEST;
+extern const std::string CREATE_CHAT_REQUEST;
 // Ответ сервера на успешное создание чата
-extern const char *CREATE_CHAT_SUCCESS;
+extern const std::string CREATE_CHAT_SUCCESS;
 // Ответ сервера на неудачное создание чата
-extern const char *CREATE_CHAT_FAILED;
+extern const std::string CREATE_CHAT_FAILED;
 
 // Запрос на получение информации о чатах, в которых состоит текущий пользователь
-extern const char *GET_CHATS_REQUEST;
+extern const std::string GET_CHATS_REQUEST;
 // Ответ сервера на успешную отправку информации о таких чатах
-extern const char *GET_CHATS_SUCCESS;
+extern const std::string GET_CHATS_SUCCESS;
 // Ответ сервера на неудачную отправку информации о таких чатах
-extern const char *GET_CHATS_FAILED;
+extern const std::string GET_CHATS_FAILED;
 
 // Запрос на поиск информации о чате
-extern const char *FIND_CHAT_REQUEST;
+extern const std::string FIND_CHAT_REQUEST;
 // Ответ сервера на успешный поиск информации о чате
-extern const char *FIND_CHAT_SUCCESS;
+extern const std::string FIND_CHAT_SUCCESS;
 // Ответ сервера на неудачный поиск информации о чате
-extern const char *FIND_CHAT_FAILED;
+extern const std::string FIND_CHAT_FAILED;
 
 // Запрос на получение информации о том, является ли пользователь участником чата
-extern const char *IS_CHAT_PARTICIPANT_REQUEST;
+extern const std::string IS_CHAT_PARTICIPANT_REQUEST;
 // Ответ сервера на успешную отправку информации
-extern const char *IS_CHAT_PARTICIPANT_SUCCESS;
+extern const std::string IS_CHAT_PARTICIPANT_SUCCESS;
 // Ответ сервера на неудачную отправку информации
-extern const char *IS_CHAT_PARTICIPANT_FAILED;
+extern const std::string IS_CHAT_PARTICIPANT_FAILED;
 
 // Запрос на добавление текущего пользователя в чат
-extern const char *ADD_PARTICIPANT_TO_CHAT_REQUEST;
+extern const std::string ADD_PARTICIPANT_TO_CHAT_REQUEST;
 // Ответ сервера на успешное добавление текущего пользователя в чат
-extern const char *ADD_PARTICIPANT_TO_CHAT_SUCCESS;
+extern const std::string ADD_PARTICIPANT_TO_CHAT_SUCCESS;
 // Ответ сервера на неудачное добавление текущего пользователя в чат
-extern const char *ADD_PARTICIPANT_TO_CHAT_FAILED;
+extern const std::string ADD_PARTICIPANT_TO_CHAT_FAILED;
 
 // Запрос на получение сообщений из чата
-extern const char *GET_CHAT_MSG_REQUEST;
+extern const std::string GET_CHAT_MSG_REQUEST;
 // Ответ сервера на успешное получение сообщений из чата
-extern const char *GET_CHAT_MSG_SUCCESS;
+extern const std::string GET_CHAT_MSG_SUCCESS;
 // Ответ сервера на неудачное получение сообщений из чата
-extern const char *GET_CHAT_MSG_FAILED;
+extern const std::string GET_CHAT_MSG_FAILED;
 
 // Запрос на получение списка участников чата (группы)
-extern const char *GET_CHAT_PARTICIPANTS_REQUEST;
+extern const std::string GET_CHAT_PARTICIPANTS_REQUEST;
 // Ответ сервера на успешное получение списка участников чата (группы)
-extern const char *GET_CHAT_PARTICIPANTS_SUCCESS;
+extern const std::string GET_CHAT_PARTICIPANTS_SUCCESS;
 // Ответ сервера на неудачное получение списка участников чата (группы)
-extern const char *GET_CHAT_PARTICIPANTS_FAILED;
+extern const std::string GET_CHAT_PARTICIPANTS_FAILED;
 
 // Запрос на удаление чата
-extern const char *DELETE_CHAT_REQUEST;
+extern const std::string DELETE_CHAT_REQUEST;
 // Ответ сервера на успешное удаление чата
-extern const char *DELETE_CHAT_SUCCESS;
+extern const std::string DELETE_CHAT_SUCCESS;
 // Ответ сервера на неудачное удаление чата
-extern const char *DELETE_CHAT_FAILED;
+extern const std::string DELETE_CHAT_FAILED;
 
 // Запрос на удаление из чата пользователя
-extern const char *QUIT_CHAT_REQUEST;
+extern const std::string QUIT_CHAT_REQUEST;
 // Ответ сервера на успешное удаление пользователя из чата
-extern const char *QUIT_CHAT_SUCCESS;
+extern const std::string QUIT_CHAT_SUCCESS;
 // Ответ сервера на неудачное удаление пользователя из чата
-extern const char *QUIT_CHAT_FAILED;
+extern const std::string QUIT_CHAT_FAILED;
 
 // Запрос на удаление пользователя из канала владельцем чата (группы)
-extern const char *REMOVE_USER_FROM_CHAT_REQUEST;
+extern const std::string REMOVE_USER_FROM_CHAT_REQUEST;
 // Ответ сервера на успешное удаление пользователя из канала владельцем чата (группы)
-extern const char *REMOVE_USER_FROM_CHAT_SUCCESS;
+extern const std::string REMOVE_USER_FROM_CHAT_SUCCESS;
 // Ответ сервера на неудачное удаление пользователя из канала владельцем чата (группы)
-extern const char *REMOVE_USER_FROM_CHAT_FAILED;
+extern const std::string REMOVE_USER_FROM_CHAT_FAILED;
 
 // Запрос на отправку ответа на жалобу пользователю
-extern const char *SEND_USER_ANSWER_REQUEST;
+extern const std::string SEND_USER_ANSWER_REQUEST;
 // Ответ сервера на успешную отправку ответа на жалобу пользователя
-extern const char *SEND_USER_ANSWER_SUCCESS;
+extern const std::string SEND_USER_ANSWER_SUCCESS;
 // Ответ сервера на неудачную отправку ответа на жалобу пользователя
-extern const char *SEND_USER_ANSWER_FAILED;
+extern const std::string SEND_USER_ANSWER_FAILED;
 
 // Запрос на получение уведомлений от администратора
-extern const char *GET_NOTIFICATIONS_REQUEST;
+extern const std::string GET_NOTIFICATIONS_REQUEST;
 // Ответ сервера на успешное получение уведомлений
-extern const char *GET_NOTIFICATIONS_SUCCESS;
+extern const std::string GET_NOTIFICATIONS_SUCCESS;
 // Ответ сервера на неудачное получение уведомлений
-extern const char *GET_NOTIFICATIONS_FAILED;
+extern const std::string GET_NOTIFICATIONS_FAILED;
 
 // Запрос на удаление уведомления
-extern const char *DEL_NOTIFICATION_REQUEST;
+extern const std::string DEL_NOTIFICATION_REQUEST;
 // Ответ сервера на успешное удаление уведомления
-extern const char *DEL_NOTIFICATION_SUCCESS;
+extern const std::string DEL_NOTIFICATION_SUCCESS;
 // Ответ сервера на неудачное удаление уведомления
-extern const char *DEL_NOTIFICATION_FAILED;
+extern const std::string DEL_NOTIFICATION_FAILED;
 
 // Запрос на удаление сообщения
-extern const char *DEL_MSG_REQUEST;
+extern const std::string DEL_MSG_REQUEST;
 // Ответ сервера на успешное удаление сообщения в инд. чате
-extern const char *DEL_IND_MSG_SUCCESS;
+extern const std::string DEL_IND_MSG_SUCCESS;
 // Ответ сервера на неудачное удаление сообщения в инд. чате
-extern const char *DEL_IND_MSG_FAILED;
+extern const std::string DEL_IND_MSG_FAILED;
 // Ответ сервера на успешное удаление сообщения в канале
-extern const char *DEL_CHANNEL_MSG_SUCCESS;
+extern const std::string DEL_CHANNEL_MSG_SUCCESS;
 // Ответ сервера на неудачное удаление сообщения в канале
-extern const char *DEL_CHANNEL_MSG_FAILED;
+extern const std::string DEL_CHANNEL_MSG_FAILED;
 // Ответ сервера на успешное удаление сообщения в чате (группе)
-extern const char *DEL_CHAT_MSG_SUCCESS;
+extern const std::string DEL_CHAT_MSG_SUCCESS;
 // Ответ сервера на неудачное удаление сообщения в чате (группе)
-extern const char *DEL_CHAT_MSG_FAILED;
+extern const std::string DEL_CHAT_MSG_FAILED;

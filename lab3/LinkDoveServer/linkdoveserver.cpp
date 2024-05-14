@@ -22,7 +22,7 @@ LinkDoveServer::LinkDoveServer()
     , acceptor_(*io_context_ptr_)
     , data_base_(DATABASE_CONNECTION_NAME)
 {
-
+    setup_connection_tree();
 }
 
 LinkDoveServer::~LinkDoveServer() {
@@ -38,6 +38,55 @@ void LinkDoveServer::listen(uint16_t port) {
     acceptor_.listen();
 
     start_async_accept();
+}
+
+void LinkDoveServer::setup_connection_tree() {
+    handle_tree_[LOGIN_REQUEST]                      = &LinkDoveServer::handle_login_request;
+    handle_tree_[REGISTER_REQUEST]                   = &LinkDoveServer::handle_register_request;
+    handle_tree_[SEND_COMPLAINT_REQUEST]             = &LinkDoveServer::handle_send_complaint_request;
+    handle_tree_[DEL_COMPLAINT_REQUEST]              = &LinkDoveServer::handle_del_complaint_request;
+    handle_tree_[GET_COMPLAINTS_REQUEST]             = &LinkDoveServer::handle_get_complaints_request;
+    handle_tree_[UPDATE_USER_REQUEST]                = &LinkDoveServer::handle_update_user_request;
+    handle_tree_[FIND_USER_REQUEST]                  = &LinkDoveServer::handle_find_user_request;
+    handle_tree_[BAN_USER_REQUEST]                   = &LinkDoveServer::handle_ban_user_request;
+    handle_tree_[SEND_MSG_REQUEST]                   = &LinkDoveServer::handle_send_msg_request;
+    handle_tree_[GET_IND_MSG_REQUEST]                = &LinkDoveServer::handle_get_msg_request;
+    handle_tree_[GET_INTERLOCUTORS_REQUEST]          = &LinkDoveServer::handle_get_interlocutors_request;
+    handle_tree_[CREATE_CHANNEL_REQUEST]             = &LinkDoveServer::handle_channel_create_request;
+    handle_tree_[FIND_CHANNEL_REQUEST]               = &LinkDoveServer::handle_find_channel_request;
+    handle_tree_[GET_CHANNELS_REQUEST]               = &LinkDoveServer::handle_get_channels_request;
+    handle_tree_[IS_CHANNEL_PARTICIPANT_REQUEST]     = &LinkDoveServer::handle_is_channel_participant_request;
+    handle_tree_[ADD_PARTICIPANT_TO_CHANNEL_REQUEST] = &LinkDoveServer::handle_add_channel_participant_request;
+    handle_tree_[GET_CHNNL_MSG_REQUEST]              = &LinkDoveServer::handle_get_channel_messages_request;
+    handle_tree_[DELETE_CHANNEL_REQUEST]             = &LinkDoveServer::handle_delete_channel;
+    handle_tree_[CREATE_CHAT_REQUEST]                = &LinkDoveServer::handle_create_chat_request;
+    handle_tree_[IS_CHAT_PARTICIPANT_REQUEST]        = &LinkDoveServer::handle_is_chat_participant_request;
+    handle_tree_[ADD_PARTICIPANT_TO_CHAT_REQUEST]    = &LinkDoveServer::handle_add_chat_participant_request;
+    handle_tree_[GET_CHATS_REQUEST]                  = &LinkDoveServer::handle_get_chats_request;
+    handle_tree_[FIND_CHAT_REQUEST]                  = &LinkDoveServer::handle_find_chat_request;
+    handle_tree_[GET_CHAT_MSG_REQUEST]               = &LinkDoveServer::handle_get_chat_messages_request;
+    handle_tree_[DELETE_CHAT_REQUEST]                = &LinkDoveServer::handle_delete_chat;
+    handle_tree_[DELETE_IND_CHAT_REQUEST]            = &LinkDoveServer::handle_delete_ind_chat;
+    handle_tree_[QUIT_CHAT_REQUEST]                  = &LinkDoveServer::handle_quit_chat;
+    handle_tree_[QUIT_CHANNEL_REQUEST]               = &LinkDoveServer::handle_quit_channel;
+    handle_tree_[REMOVE_USER_FROM_CHANNEL_REQUEST]   = &LinkDoveServer::handle_remove_user_from_channel;
+    handle_tree_[REMOVE_USER_FROM_CHAT_REQUEST]      = &LinkDoveServer::handle_remove_user_from_chat;
+    handle_tree_[GET_CHNNL_PARTICIPANTS_REQUEST]     = &LinkDoveServer::handle_get_channel_participants_request;
+    handle_tree_[GET_CHAT_PARTICIPANTS_REQUEST]      = &LinkDoveServer::handle_get_chat_participants_request;
+    handle_tree_[SEND_USER_ANSWER_REQUEST]           = &LinkDoveServer::handle_answer_user;
+    handle_tree_[GET_NOTIFICATIONS_REQUEST]          = &LinkDoveServer::handle_get_notifications;
+    handle_tree_[DEL_NOTIFICATION_REQUEST]           = &LinkDoveServer::handle_del_notification;
+    handle_tree_[DEL_MSG_REQUEST]                    = &LinkDoveServer::handle_delete_msg;
+
+    for (auto iter = handle_tree_.begin(); iter != handle_tree_.end(); ++iter) {
+        std::cerr << iter->first << '\n';
+    }
+
+    try {
+        handle_tree_.at(LOGIN_REQUEST);
+    } catch (...) {
+        std::cerr << "NO METHOD\n";
+    }
 }
 
 void LinkDoveServer::start_async_accept() {
@@ -133,79 +182,7 @@ void LinkDoveServer::handle_type_request(ConnectionIterator iterator) {
     std::string request_type;
     std::getline(iterator->in_stream_, request_type);
 
-    if (request_type == LOGIN_REQUEST) {
-        handle_login_request(iterator);
-    } else if (request_type == REGISTER_REQUEST) {
-        handle_register_request(iterator);
-    } else if (request_type == SEND_COMPLAINT_REQUEST) {
-        handle_send_complaint_request(iterator);
-    } else if (request_type == DEL_COMPLAINT_REQUEST) {
-        handle_del_complaint_request(iterator);
-    } else if (request_type == GET_COMPLAINTS_REQUEST) {
-        handle_get_complaints_request(iterator);
-    } else if (request_type == UPDATE_USER_REQUEST) {
-        handle_update_user_request(iterator);
-    } else if (request_type == FIND_USER_REQUEST) {
-        handle_find_user_request(iterator);
-    } else if (request_type == BAN_USER_REQUEST) {
-        handle_ban_user_request(iterator);
-    } else if (request_type == SEND_MSG_REQUEST) {
-        handle_send_msg_request(iterator);
-    } else if (request_type == GET_IND_MSG_REQUEST) {
-        handle_get_msg_request(iterator);
-    } else if (request_type == GET_INTERLOCUTORS_REQUEST) {
-        handle_get_interlocutors_request(iterator);
-    } else if (request_type == CREATE_CHANNEL_REQUEST) {
-        handle_channel_create_request(iterator);
-    } else if (request_type == FIND_CHANNEL_REQUEST) {
-        handle_find_channel_request(iterator);
-    } else if (request_type == GET_CHANNELS_REQUEST) {
-        handle_get_channels_request(iterator);
-    } else if (request_type == IS_CHANNEL_PARTICIPANT_REQUEST) {
-        handle_is_channel_participant_request(iterator);
-    } else if (request_type == ADD_PARTICIPANT_TO_CHANNEL_REQUEST) {
-        handle_add_channel_participant_request(iterator);
-    } else if (request_type == GET_CHNNL_MSG_REQUEST) {
-        handle_get_channel_messages_request(iterator);
-    } else if (request_type == DELETE_CHANNEL_REQUEST) {
-        handle_delete_channel(iterator);
-    } else if (request_type == CREATE_CHAT_REQUEST) {
-        handle_create_chat_request(iterator);
-    } else if (request_type == IS_CHAT_PARTICIPANT_REQUEST) {
-        handle_is_chat_participant_request(iterator);
-    } else if (request_type == ADD_PARTICIPANT_TO_CHAT_REQUEST) {
-        handle_add_chat_participant_request(iterator);
-    } else if (request_type == GET_CHATS_REQUEST) {
-        handle_get_chats_request(iterator);
-    } else if (request_type == FIND_CHAT_REQUEST) {
-        handle_find_chat_request(iterator);
-    } else if (request_type == GET_CHAT_MSG_REQUEST) {
-        handle_get_chat_messages_request(iterator);
-    } else if (request_type == DELETE_CHAT_REQUEST) {
-        handle_delete_chat(iterator);
-    } else if (request_type == DELETE_IND_CHAT_REQUEST) {
-        handle_delete_ind_chat(iterator);
-    } else if (request_type == QUIT_CHAT_REQUEST) {
-        handle_quit_chat(iterator);
-    } else if (request_type == QUIT_CHANNEL_REQUEST) {
-        handle_quit_channel(iterator);
-    } else if (request_type == REMOVE_USER_FROM_CHANNEL_REQUEST) {
-        handle_remove_user_from_channel(iterator);
-    } else if (request_type == REMOVE_USER_FROM_CHAT_REQUEST) {
-        handle_remove_user_from_chat(iterator);
-    } else if (request_type == GET_CHNNL_PARTICIPANTS_REQUEST) {
-        handle_get_channel_participants_request(iterator);
-    } else if (request_type == GET_CHAT_PARTICIPANTS_REQUEST) {
-        handle_get_chat_participants_request(iterator);
-    } else if (request_type == SEND_USER_ANSWER_REQUEST) {
-        handle_answer_user(iterator);
-    } else if (request_type == GET_NOTIFICATIONS_REQUEST) {
-        handle_get_notifications(iterator);
-    } else if (request_type == DEL_NOTIFICATION_REQUEST) {
-        handle_del_notification(iterator);
-    } else if (request_type == DEL_MSG_REQUEST) {
-        handle_delete_msg(iterator);
-    }
+    (this->*handle_tree_[request_type.c_str()])(iterator);
 }
 
 void LinkDoveServer::handle_login_request(ConnectionIterator iterator) {

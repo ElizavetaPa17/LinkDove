@@ -6,6 +6,9 @@
 #include <boost/asio.hpp>
 #include <boost/bind/bind.hpp>
 
+#include <unordered_map>
+#include <functional>
+
 #include "tcpconnection.h"
 #include "linkdovesqldatabase.h"
 #include "constants.h"
@@ -29,11 +32,20 @@ public:
 
 private:
     using ConnectionIterator = std::list<TCPConnection>::iterator;
+    typedef void (LinkDoveServer::*HandleFunction_t)(ConnectionIterator);
 
     std::shared_ptr<asio::io_context> io_context_ptr_;
     tcp::acceptor acceptor_;
     std::list<TCPConnection> connections_;
     LinkDoveSQLDataBase data_base_;
+
+    std::unordered_map<std::string, HandleFunction_t> handle_tree_;
+
+    /**
+     * <p> Настраивает функции обработки запросов в сервере. </p>
+     * @brief setup_connection_tree
+     */
+    void setup_connection_tree();
 
     /**
      * <p> Начинает принимать соединения к порту, указанному при вызове функции listen. </p>
