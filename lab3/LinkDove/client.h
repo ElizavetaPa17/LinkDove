@@ -7,6 +7,8 @@
 #include <boost/asio.hpp>
 #include <boost/bind/bind.hpp>
 
+#include <functional>
+
 #include "IStreamConnection.h"
 #include "logininfo.h"
 #include "UserInfo.h"
@@ -586,6 +588,7 @@ private:
     IStreamConnection<tcp> connection_;
     tcp::endpoint endpoint_;
     bool is_connected_;
+    std::unordered_map<std::string, std::function<void()>> response_tree_;
 
     StatusInfo status_info_;
     StatusInfo updated_status_info_;
@@ -593,7 +596,11 @@ private:
     ChannelInfo found_channel_info_;
     ChatInfo found_chat_info_;
 
-    void create_account() {}
+    /**
+     * <p> Настраивает дерево обработки ответов от сервера. </p>
+     * @brief setup_response_tree
+     */
+    void setup_response_tree();
 
     /**
      * <p> Асинхронно читает ответ от сервера. </p>

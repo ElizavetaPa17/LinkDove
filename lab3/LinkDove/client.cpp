@@ -12,10 +12,9 @@ Client::Client(std::shared_ptr<asio::io_context> io_context_ptr, boost::asio::ip
       endpoint_(address, port),
       is_connected_(false)
 {
-
+    setup_response_tree();
 }
 
-// лучше io_context в отдельный класс вынести и там запустить его работу в отдельном потоке
 void Client::async_connect() {
     connection_.socket_.async_connect(endpoint_,
                                       boost::bind(&Client::handle_async_connect,
@@ -391,6 +390,148 @@ bool Client::is_connected() noexcept {
     return is_connected_;
 }
 
+
+void Client::setup_response_tree() {
+    response_tree_[LOGIN_SUCCESS] = [this]() { status_info_.deserialize(connection_.in_stream_);
+                                               emit authorization_result(LOGIN_SUCCESS_ANSWER); };
+    response_tree_[LOGIN_BANNED] = [this] () { emit authorization_result(LOGIN_BANNED_ANSWER); };
+    response_tree_[LOGIN_FAILED] = [this] () { emit authorization_result(LOGIN_FAILED_ANSWER); };
+
+    response_tree_[REGISTER_SUCCESS] = [this] () { status_info_.deserialize(connection_.in_stream_);
+                                                   emit authorization_result(REGISTRATION_SUCCESS_ANSWER); };
+    response_tree_[REGISTER_FAILED]  = [this] () { emit authorization_result(REGISTRATION_FAILED_ANSWER); };
+
+    response_tree_[SEND_COMPLAINT_SUCCESS] = [this] () { emit send_complaint_result(SEND_COMPLAINT_SUCCESS_ANSWER); };
+    response_tree_[SEND_COMPLAINT_FAILED]  = [this] () { emit send_complaint_result(SEND_COMPLAINT_FAILED_ANSWER); };
+
+    response_tree_[DEL_COMPLAINT_SUCCESS] = [this] () { emit del_complaint_result(DEL_COMPLAINT_SUCCESS_ANSWER); };
+    response_tree_[DEL_COMPLAINT_FAILED]  = [this] () { emit del_complaint_result(DEL_COMPLAINT_FAILED_ANSWER); };
+
+    response_tree_[GET_COMPLAINTS_SUCCESS] = [this] () { std::vector<Complaint> complaints = UtilitySerializator::deserialize_compl_vec(connection_.in_stream_).second;
+                                                         emit get_complaints_result(GET_COMPLAINTS_SUCCESS_ANSWER, complaints); };
+    response_tree_[GET_COMPLAINTS_FAILED]  = [this] () { emit get_complaints_result(GET_COMPLAINTS_FAILED_ANSWER, std::vector<Complaint>()); };
+
+    response_tree_[UPDATE_USER_SUCCESS] = [this] () { status_info_ = updated_status_info_;
+                                                      emit update_user_result(UPDATE_USER_SUCCESS_ANSWER); };
+    response_tree_[UPDATE_USER_FAILED]  = [this] () { emit update_user_result(UPDATE_USER_FAILED_ANSWER); };
+
+    response_tree_[FIND_USER_SUCCESS] = [this] () { found_status_info_.deserialize(connection_.in_stream_);
+                                                    emit find_user_result(FIND_USER_SUCCESS_ANSWER); };
+    response_tree_[FIND_USER_FAILED]  = [this] () { emit find_user_result(FIND_USER_FAILED_ANWSER); };
+
+    response_tree_[BAN_USER_SUCCESS] = [this] () { emit ban_user_result(BAN_USER_SUCCESS_ANSWER); };
+    response_tree_[BAN_USER_FAILED]  = [this] () { emit ban_user_result(BAN_USER_FAILED_ANSWER); };
+
+    response_tree_[SEND_IND_MSG_SUCCESS] = [this] () { emit send_msg_result(SEND_IND_MSG_SUCCESS_ANSWER); };
+    response_tree_[SEND_IND_MSG_FAILED]  = [this] () { emit send_msg_result(SEND_IND_MSG_FAILED_ANSWER); };
+
+    response_tree_[GET_IND_MSG_SUCCESS] = [this] () { std::vector<std::shared_ptr<IMessage>> messages = UtilitySerializator::deserialize_msg_vec(connection_.in_stream_).second;
+                                                      emit get_ind_msg_result(GET_IND_MSG_SUCCESS_ANSWER, messages); };
+    response_tree_[GET_IND_MSG_FAILED]  = [this] () { emit get_ind_msg_result(GET_IND_MSG_FAILED_ANSWER, std::vector<std::shared_ptr<IMessage>>()); };
+
+    response_tree_[GET_INTERLOCUTORS_SUCCESS] = [this] () { std::vector<StatusInfo> status_info_vec = UtilitySerializator::deserialize_st_info_vec(connection_.in_stream_).second;
+                                                            emit get_interlocutors_result(GET_INTERLOCUTORS_SUCCESS_ANSWER, status_info_vec); };
+    response_tree_[GET_INTERLOCUTORS_FAILED]  = [this] () { emit get_interlocutors_result(GET_INTERLOCUTORS_FAILED_ANSWER, std::vector<StatusInfo>());};
+
+    response_tree_[CREATE_CHANNEL_SUCCESS] = [this] () { emit create_channel_result(CREATE_CHANNEL_SUCCESS_ANSWER); };
+    response_tree_[CREATE_CHANNEL_FAILED]  = [this] () { emit create_channel_result(CREATE_CHANNEL_FAILED_ANSWER);};
+
+    response_tree_[FIND_CHANNEL_SUCCESS] = [this] () { found_channel_info_.deserialize(connection_.in_stream_);
+                                                       emit find_channel_result(FIND_CHANNEL_SUCCESS_ANSWER); };
+    response_tree_[FIND_CHANNEL_FAILED]  = [this] () { emit find_channel_result(FIND_CHANNEL_FAILED_ANSWER); };
+
+    response_tree_[GET_CHANNELS_SUCCESS] = [this] () { std::vector<ChannelInfo> channels = UtilitySerializator::deserialize_ch_info_vec(connection_.in_stream_).second;
+                                                       emit get_channels_result(GET_CHANNELS_SUCCESS_ANSWER, channels); };
+    response_tree_[GET_CHANNELS_FAILED]  = [this] () { emit get_channels_result(GET_CHANNELS_FAILED_ANSWER, std::vector<ChannelInfo>()); };
+
+    response_tree_[IS_CHANNEL_PARTICIPANT_SUCCESS] = [this] () { bool is_participant = UtilitySerializator::deserialize_fundamental<bool>(connection_.in_stream_).second;
+                                                                 emit is_channel_participant_result(IS_CHANNEL_PARTICIPANT_SUCCESS_ANSWER, is_participant); };
+    response_tree_[IS_CHANNEL_PARTICIPANT_FAILED]  = [this] () { emit is_channel_participant_result(IS_CHANNEL_PARTICIPANT_FAILED_ANSWER, false); };
+
+    response_tree_[ADD_PARTICIPANT_TO_CHANNEL_SUCCESS] = [this] () { emit add_participant_to_channel_result(ADD_PARTICIPANT_TO_CHANNEL_SUCCESS_ANSWER); };
+    response_tree_[ADD_PARTICIPANT_TO_CHANNEL_FAILED]  = [this] () { emit add_participant_to_channel_result(ADD_PARTICIPANT_TO_CHANNEL_FAILED_ANSWER); };
+
+    response_tree_[SEND_CHNNL_MSG_SUCCESS] = [this] () { emit send_msg_result(SEND_CHNNL_MSG_SUCCESS_ANSWER); };
+    response_tree_[SEND_CHNNL_MSG_FAILED]  = [this] () { emit send_msg_result(SEND_CHNNL_MSG_FAILED_ANSWER); };
+
+    response_tree_[GET_CHNNL_MSG_SUCCESS] = [this] () { std::vector<std::shared_ptr<IMessage>> messages = UtilitySerializator::deserialize_msg_vec(connection_.in_stream_).second;
+                                                        emit get_channel_msg_result(GET_CHNNL_MSG_SUCCESS_ANSWER, messages); };
+    response_tree_[GET_CHNNL_MSG_FAILED]  = [this] () { emit get_channel_msg_result(GET_CHNNL_MSG_FAILED_ANSWER, std::vector<std::shared_ptr<IMessage>>()); };
+
+    response_tree_[CREATE_CHAT_SUCCESS] = [this] () { emit create_chat_result(CREATE_CHAT_SUCCESS_ANSWER); };
+    response_tree_[CREATE_CHAT_FAILED]  = [this] () { emit create_chat_result(CREATE_CHAT_FAILED_ANSWER); };
+
+    response_tree_[GET_CHATS_SUCCESS] = [this] () { std::vector<ChatInfo> chats = UtilitySerializator::deserialize_chat_info_vec(connection_.in_stream_).second;
+                                                    emit get_chats_result(GET_CHATS_SUCCESS_ANSWER, chats); };
+    response_tree_[GET_CHATS_FAILED]  = [this] () { emit get_chats_result(GET_CHATS_FAILED_ANSWER, std::vector<ChatInfo>()); };
+
+    response_tree_[FIND_CHAT_SUCCESS] = [this] () { found_chat_info_.deserialize(connection_.in_stream_);
+                                                    emit find_chat_result(FIND_CHAT_SUCCESS_ANSWER);};
+    response_tree_[FIND_CHAT_FAILED]  = [this] () { emit find_chat_result(FIND_CHAT_FAILED_ANSWER); };
+
+    response_tree_[IS_CHAT_PARTICIPANT_SUCCESS] = [this] () { bool is_participant = UtilitySerializator::deserialize_fundamental<bool>(connection_.in_stream_).second;
+                                                              emit is_chat_participant_result(IS_CHAT_PARTICIPANT_SUCCESS_ANSWER, is_participant); };
+    response_tree_[IS_CHAT_PARTICIPANT_FAILED]  = [this] () { emit is_chat_participant_result(IS_CHAT_PARTICIPANT_FAILED_ANSWER, false); };
+
+    response_tree_[ADD_PARTICIPANT_TO_CHAT_SUCCESS] = [this] () { emit add_participant_to_chat_result(ADD_PARTICIPANT_TO_CHAT_SUCCESS_ANSWER); };
+    response_tree_[ADD_PARTICIPANT_TO_CHAT_FAILED]  = [this] () { emit add_participant_to_chat_result(ADD_PARTICIPANT_TO_CHAT_FAILED_ANSWER); };
+
+    response_tree_[SEND_CHAT_MSG_SUCCESS] = [this] () { emit send_msg_result(SEND_CHAT_MSG_SUCCESS_ANSWER); };
+    response_tree_[SEND_CHAT_MSG_FAILED]  = [this] () { emit send_msg_result(SEND_CHAT_MSG_FAILED_ANSWER); };
+
+    response_tree_[GET_CHAT_MSG_SUCCESS] = [this] () { std::vector<std::shared_ptr<IMessage>> messages = UtilitySerializator::deserialize_msg_vec(connection_.in_stream_).second;
+                                                       emit get_chat_msg_result(GET_CHAT_MSG_SUCCESS_ANSWER, messages); };
+    response_tree_[GET_CHAT_MSG_FAILED]  = [this] () { emit get_chat_msg_result(GET_CHAT_MSG_FAILED_ANSWER, std::vector<std::shared_ptr<IMessage>>()); };
+
+    response_tree_[DELETE_CHANNEL_SUCCESS] = [this] () { emit delete_channel_result(DELETE_CHANNEL_SUCCESS_ANSWER); };
+    response_tree_[DELETE_CHANNEL_FAILED]  = [this] () { emit delete_channel_result(DELETE_CHANNEL_FAILED_ANSWER); };
+
+    response_tree_[DELETE_CHAT_SUCCESS] = [this] () { emit delete_chat_result(DELETE_CHAT_SUCCESS_ANSWER); };
+    response_tree_[DELETE_CHAT_FAILED]  = [this] () { emit delete_chat_result(DELETE_CHAT_FAILED_ANSWER); };
+
+    response_tree_[DELETE_IND_CHAT_SUCCESS] = [this] () { emit delete_ind_chat_result(DELETE_IND_CHAT_SUCCESS_ANSWER); };
+    response_tree_[DELETE_IND_CHAT_FAILED]  = [this] () { emit delete_ind_chat_result(DELETE_IND_CHAT_FAILED_ANSWER); };
+
+    response_tree_[QUIT_CHAT_SUCCESS] = [this] () { emit quit_chat_result(QUIT_CHAT_SUCCESS_ANSWER); };
+    response_tree_[QUIT_CHAT_FAILED]  = [this] () { emit quit_chat_result(QUIT_CHAT_FAILED_ANSWER); };
+
+    response_tree_[QUIT_CHANNEL_SUCCESS] = [this] () { emit quit_channel_result(QUIT_CHANNEL_SUCCESS_ANSWER); };
+    response_tree_[QUIT_CHANNEL_FAILED]  = [this] () { emit quit_channel_result(QUIT_CHANNEL_FAILED_ANSWER); };
+
+    response_tree_[REMOVE_USER_FROM_CHANNEL_SUCCESS] = [this] () { emit remove_user_from_channel_result(REMOVE_USER_FROM_CHANNEL_SUCCESS_ANSWER); };
+    response_tree_[REMOVE_USER_FROM_CHANNEL_FAILED]  = [this] () { emit remove_user_from_channel_result(REMOVE_USER_FROM_CHANNEL_FAILED_ANSWER); };
+
+    response_tree_[REMOVE_USER_FROM_CHAT_SUCCESS] = [this] () { emit remove_user_from_chat_result(REMOVE_USER_FROM_CHAT_SUCCESS_ANSWER); };
+    response_tree_[REMOVE_USER_FROM_CHAT_FAILED]  = [this] () { emit remove_user_from_chat_result(REMOVE_USER_FROM_CHAT_FAILED_ANSWER); };
+
+    response_tree_[GET_CHNNL_PARTICIPANTS_SUCCESS] = [this] () { std::vector<std::string> participants = UtilitySerializator::deserialize_vec_string(connection_.in_stream_).second;
+                                                                 emit get_channel_participants_result(GET_CHNNL_PARTICIPANTS_SUCCESS_ANSWER, participants); };
+    response_tree_[GET_CHNNL_PARTICIPANTS_FAILED]  = [this] () { emit get_channel_participants_result(GET_CHNNL_PARTICIPANTS_FAILED_ANSWER, std::vector<std::string>()); };
+
+    response_tree_[GET_CHAT_PARTICIPANTS_SUCCESS] = [this] () { std::vector<std::string> participants = UtilitySerializator::deserialize_vec_string(connection_.in_stream_).second;
+                                                                emit get_chat_participants_result(GET_CHAT_PARTICIPANTS_SUCCESS_ANSWER, participants); };
+    response_tree_[GET_CHAT_PARTICIPANTS_FAILED]  = [this] () { emit get_chat_participants_result(GET_CHAT_PARTICIPANTS_FAILED_ANSWER, std::vector<std::string>()); };
+
+    response_tree_[SEND_USER_ANSWER_SUCCESS] = [this] () { emit answer_user_result(SEND_USER_ANSWER_SUCCESS_ANSWER); };
+    response_tree_[SEND_USER_ANSWER_FAILED]  = [this] () { emit answer_user_result(SEND_USER_ANSWER_FAILED_ANSWER); };
+
+    response_tree_[GET_NOTIFICATIONS_SUCCESS] = [this] () { std::vector<Notification> notifications = UtilitySerializator::deserialize_not_vec(connection_.in_stream_).second;
+                                                            emit get_notifications_result(GET_NOTIFICATIONS_SUCCESS_ANSWER, notifications); };
+    response_tree_[GET_NOTIFICATIONS_FAILED]  = [this] () { emit get_notifications_result(GET_NOTIFICATIONS_FAILED_ANSWER, std::vector<Notification>()); };
+
+    response_tree_[DEL_NOTIFICATION_SUCCESS] = [this] () { emit del_notification_result(DEL_NOTIFICATION_SUCCESS_ANSWER); };
+    response_tree_[DEL_NOTIFICATION_FAILED]  = [this] () { emit del_notification_result(DEL_NOTIFICATION_FAILED_ANSWER); };
+
+    response_tree_[DEL_IND_MSG_SUCCESS] = [this] () { emit delete_msg_result(DEL_IND_MSG_SUCCESS_ANSWER); };
+    response_tree_[DEL_IND_MSG_FAILED]  = [this] () { emit delete_msg_result(DEL_IND_MSG_FAILED_ANSWER); };
+
+    response_tree_[DEL_CHANNEL_MSG_SUCCESS] = [this] () { emit delete_msg_result(DEL_CHANNEL_MSG_SUCCESS_ANSWER); };
+    response_tree_[DEL_CHANNEL_MSG_FAILED]  = [this] () { emit delete_msg_result(DEL_CHANNEL_MSG_FAILED_ANSWER); };
+
+    response_tree_[DEL_CHAT_MSG_SUCCESS] = [this] () { emit delete_msg_result(DEL_CHAT_MSG_SUCCESS_ANSWER); };
+    response_tree_[DEL_CHAT_MSG_FAILED]  = [this] () { emit delete_msg_result(DEL_CHAT_MSG_FAILED_ANSWER); };
+}
+
 void Client::async_read() {
     asio::async_read_until(connection_.socket_,
                            connection_.buffer_,
@@ -438,191 +579,8 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
     if (bytes_transferred > 0) {
         std::string answer_type;
         std::getline(connection_.in_stream_, answer_type);
-        // вместо гигантского else if прикрути MAP!!!1!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        if (answer_type == LOGIN_SUCCESS) {
-            status_info_.deserialize(connection_.in_stream_);
-            emit authorization_result(LOGIN_SUCCESS_ANSWER);
-        } else if (answer_type == LOGIN_BANNED) {
-            emit authorization_result(LOGIN_BANNED_ANSWER);
-        } else if (answer_type == LOGIN_FAILED) {
-            emit authorization_result(LOGIN_FAILED_ANSWER);
-        } else if (answer_type == REGISTER_SUCCESS) {
-            status_info_.deserialize(connection_.in_stream_);
-            emit authorization_result(REGISTRATION_SUCCESS_ANSWER);
-        } else if (answer_type == REGISTER_FAILED) {
-            emit authorization_result(REGISTRATION_FAILED_ANSWER);
-        } else if (answer_type == SEND_COMPLAINT_SUCCESS) {
-            emit send_complaint_result(SEND_COMPLAINT_SUCCESS_ANSWER);
-        } else if (answer_type == SEND_COMPLAINT_FAILED){
-            emit send_complaint_result(SEND_COMPLAINT_FAILED_ANSWER);
-        } else if (answer_type == DEL_COMPLAINT_SUCCESS) {
-            emit del_complaint_result(DEL_COMPLAINT_SUCCESS_ANSWER);
-        } else if (answer_type == DEL_COMPLAINT_FAILED) {
-            emit del_complaint_result(DEL_COMPLAINT_FAILED_ANSWER);
-        } else if (answer_type == GET_COMPLAINTS_SUCCESS) {
-            std::vector<Complaint> complaints = UtilitySerializator::deserialize_compl_vec(connection_.in_stream_).second;
-            emit get_complaints_result(GET_COMPLAINTS_SUCCESS_ANSWER, complaints);
-        } else if (answer_type == GET_COMPLAINTS_FAILED) {
-            emit get_complaints_result(GET_COMPLAINTS_FAILED_ANSWER, std::vector<Complaint>());
-        } else if (answer_type == UPDATE_USER_SUCCESS) {
-            status_info_ = updated_status_info_;
-            emit update_user_result(UPDATE_USER_SUCCESS_ANSWER);
-        } else if (answer_type == UPDATE_USER_FAILED){
-            emit update_user_result(UPDATE_USER_FAILED_ANSWER);
-        } else if (answer_type == FIND_USER_SUCCESS) {
-            found_status_info_.deserialize(connection_.in_stream_);
-            emit find_user_result(FIND_USER_SUCCESS_ANSWER);
-        } else if (answer_type == FIND_USER_FAILED) {
-            emit find_user_result(FIND_USER_FAILED_ANWSER);
-        } else if (answer_type == BAN_USER_SUCCESS) {
-            emit ban_user_result(BAN_USER_SUCCESS_ANSWER);
-        } else if (answer_type == BAN_USER_FAILED){
-            emit ban_user_result(BAN_USER_FAILED_ANSWER);
-        } else if (answer_type == SEND_IND_MSG_SUCCESS) {
-            emit send_msg_result(SEND_IND_MSG_SUCCESS_ANSWER);
-        } else if (answer_type == SEND_IND_MSG_FAILED) {
-            emit send_msg_result(SEND_IND_MSG_FAILED_ANSWER);
-        } else if (answer_type ==  GET_IND_MSG_SUCCESS) {
-            std::vector<std::shared_ptr<IMessage>> messages = UtilitySerializator::deserialize_msg_vec(connection_.in_stream_).second;
-            emit get_ind_msg_result(GET_IND_MSG_SUCCESS_ANSWER, messages);
-        } else if (answer_type == GET_IND_MSG_FAILED) {
-            emit get_ind_msg_result(GET_IND_MSG_FAILED_ANSWER, std::vector<std::shared_ptr<IMessage>>());
-        } else if (answer_type == GET_INTERLOCUTORS_SUCCESS) {
-            std::vector<StatusInfo> status_info_vec = UtilitySerializator::deserialize_st_info_vec(connection_.in_stream_).second;
-            emit get_interlocutors_result(GET_INTERLOCUTORS_SUCCESS_ANSWER, status_info_vec);
-        } else if (answer_type == GET_INTERLOCUTORS_FAILED) {
-            emit get_interlocutors_result(GET_INTERLOCUTORS_FAILED_ANSWER, std::vector<StatusInfo>());
-        } else if (answer_type == CREATE_CHANNEL_SUCCESS) {
-            emit create_channel_result(CREATE_CHANNEL_SUCCESS_ANSWER);
-        } else if (answer_type == CREATE_CHANNEL_FAILED) {
-            emit create_channel_result(CREATE_CHANNEL_FAILED_ANSWER);
-        } else if (answer_type == FIND_CHANNEL_SUCCESS) {
-            emit find_channel_result(FIND_CHANNEL_SUCCESS_ANSWER);
-            found_channel_info_.deserialize(connection_.in_stream_);
-        } else if (answer_type == FIND_CHANNEL_FAILED){
-            emit find_channel_result(FIND_CHANNEL_FAILED_ANSWER);
-        } else if (answer_type == GET_CHANNELS_SUCCESS) {
-            std::vector<ChannelInfo> channels = UtilitySerializator::deserialize_ch_info_vec(connection_.in_stream_).second;
-            emit get_channels_result(GET_CHANNELS_SUCCESS_ANSWER, channels);
-        } else if (answer_type == GET_CHANNELS_FAILED) {
-            emit get_channels_result(GET_CHANNELS_FAILED_ANSWER, std::vector<ChannelInfo>());
-        } else if (answer_type == IS_CHANNEL_PARTICIPANT_SUCCESS) {
-            bool is_participant = UtilitySerializator::deserialize_fundamental<bool>(connection_.in_stream_).second;
-            emit is_channel_participant_result(IS_CHANNEL_PARTICIPANT_SUCCESS_ANSWER, is_participant);
-        } else if (answer_type == IS_CHANNEL_PARTICIPANT_FAILED) {
-            emit is_channel_participant_result(IS_CHANNEL_PARTICIPANT_FAILED_ANSWER, false);
-        } else if (answer_type == ADD_PARTICIPANT_TO_CHANNEL_SUCCESS) {
-            emit add_participant_to_channel_result(ADD_PARTICIPANT_TO_CHANNEL_SUCCESS_ANSWER);
-        } else if (answer_type == ADD_PARTICIPANT_TO_CHANNEL_FAILED) {
-            emit add_participant_to_channel_result(ADD_PARTICIPANT_TO_CHANNEL_FAILED_ANSWER);
-        } else if (answer_type == SEND_CHNNL_MSG_SUCCESS) {
-            emit send_msg_result(SEND_CHNNL_MSG_SUCCESS_ANSWER);
-        } else if (answer_type == SEND_CHNNL_MSG_FAILED) {
-            emit send_msg_result(SEND_CHNNL_MSG_FAILED_ANSWER);
-        } else if (answer_type == GET_CHNNL_MSG_SUCCESS) {
-            std::vector<std::shared_ptr<IMessage>> messages = UtilitySerializator::deserialize_msg_vec(connection_.in_stream_).second;
-            emit get_channel_msg_result(GET_CHNNL_MSG_SUCCESS_ANSWER, messages);
-        } else if (answer_type == GET_CHNNL_MSG_FAILED){
-            emit get_channel_msg_result(GET_CHNNL_MSG_FAILED_ANSWER, std::vector<std::shared_ptr<IMessage>>());
-        } else if (answer_type == CREATE_CHAT_SUCCESS) {
-            emit create_chat_result(CREATE_CHAT_SUCCESS_ANSWER);
-        } else if (answer_type == CREATE_CHAT_FAILED) {
-            emit create_chat_result(CREATE_CHAT_FAILED_ANSWER);
-        } else if (answer_type == GET_CHATS_SUCCESS) {
-            std::vector<ChatInfo> chats = UtilitySerializator::deserialize_chat_info_vec(connection_.in_stream_).second;
-            emit get_chats_result(GET_CHATS_SUCCESS_ANSWER, chats);
-        } else if (answer_type == GET_CHATS_FAILED) {
-            emit get_chats_result(GET_CHATS_FAILED_ANSWER, std::vector<ChatInfo>());
-        } else if (answer_type == FIND_CHAT_SUCCESS) {
-            found_chat_info_.deserialize(connection_.in_stream_);
-            emit find_chat_result(FIND_CHAT_SUCCESS_ANSWER);
-        } else if (answer_type == FIND_CHAT_FAILED) {
-            emit find_chat_result(FIND_CHAT_FAILED_ANSWER);
-        } else if (answer_type == IS_CHAT_PARTICIPANT_SUCCESS) {
-            bool is_participant = UtilitySerializator::deserialize_fundamental<bool>(connection_.in_stream_).second;
-            emit is_chat_participant_result(IS_CHAT_PARTICIPANT_SUCCESS_ANSWER, is_participant);
-        } else if (answer_type == IS_CHAT_PARTICIPANT_FAILED) {
-            emit is_chat_participant_result(IS_CHAT_PARTICIPANT_FAILED_ANSWER, false);
-        } else if (answer_type == ADD_PARTICIPANT_TO_CHAT_SUCCESS) {
-            emit add_participant_to_chat_result(ADD_PARTICIPANT_TO_CHAT_SUCCESS_ANSWER);
-        } else if (answer_type == ADD_PARTICIPANT_TO_CHAT_FAILED){
-            emit add_participant_to_chat_result(ADD_PARTICIPANT_TO_CHAT_FAILED_ANSWER);
-        } else if (answer_type == SEND_CHAT_MSG_SUCCESS) {
-            emit send_msg_result(SEND_CHAT_MSG_SUCCESS_ANSWER);
-        } else if (answer_type == SEND_CHAT_MSG_FAILED) {
-            emit send_msg_result(SEND_CHAT_MSG_FAILED_ANSWER);
-        } else if (answer_type == GET_CHAT_MSG_SUCCESS) {
-            std::vector<std::shared_ptr<IMessage>> messages = UtilitySerializator::deserialize_msg_vec(connection_.in_stream_).second;
-            emit get_chat_msg_result(GET_CHAT_MSG_SUCCESS_ANSWER, messages);
-        } else if (answer_type == GET_CHAT_MSG_FAILED) {
-            emit get_chat_msg_result(GET_CHAT_MSG_FAILED_ANSWER, std::vector<std::shared_ptr<IMessage>>());
-        } else if (answer_type == DELETE_CHANNEL_SUCCESS) {
-            emit delete_channel_result(DELETE_CHANNEL_SUCCESS_ANSWER);
-        } else if (answer_type == DELETE_CHANNEL_FAILED) {
-            emit delete_channel_result(DELETE_CHANNEL_FAILED_ANSWER);
-        } else if (answer_type == DELETE_CHAT_SUCCESS) {
-            emit delete_chat_result(DELETE_CHAT_SUCCESS_ANSWER);
-        } else if (answer_type == DELETE_CHAT_FAILED) {
-            emit delete_chat_result(DELETE_CHAT_FAILED_ANSWER);
-        } else if (answer_type == DELETE_IND_CHAT_SUCCESS) {
-            emit delete_ind_chat_result(DELETE_IND_CHAT_SUCCESS_ANSWER);
-        } else if (answer_type == DELETE_IND_CHAT_FAILED) {
-            emit delete_ind_chat_result(DELETE_IND_CHAT_FAILED_ANSWER);
-        } else if (answer_type == QUIT_CHAT_SUCCESS) {
-            emit quit_chat_result(QUIT_CHAT_SUCCESS_ANSWER);
-        } else if (answer_type == QUIT_CHAT_FAILED) {
-            emit quit_chat_result(QUIT_CHAT_FAILED_ANSWER);
-        } else if (answer_type == QUIT_CHANNEL_SUCCESS) {
-            emit quit_channel_result(QUIT_CHANNEL_SUCCESS_ANSWER);
-        } else if (answer_type == QUIT_CHANNEL_FAILED) {
-            emit quit_channel_result(QUIT_CHANNEL_FAILED_ANSWER);
-        } else if (answer_type == REMOVE_USER_FROM_CHANNEL_SUCCESS) {
-            emit remove_user_from_channel_result(REMOVE_USER_FROM_CHANNEL_SUCCESS_ANSWER);
-        } else if (answer_type == REMOVE_USER_FROM_CHANNEL_FAILED) {
-            emit remove_user_from_channel_result(REMOVE_USER_FROM_CHANNEL_FAILED_ANSWER);
-        } else if (answer_type == REMOVE_USER_FROM_CHAT_SUCCESS) {
-            emit remove_user_from_chat_result(REMOVE_USER_FROM_CHAT_SUCCESS_ANSWER);
-        } else if (answer_type == REMOVE_USER_FROM_CHAT_FAILED) {
-            emit remove_user_from_chat_result(REMOVE_USER_FROM_CHAT_FAILED_ANSWER);
-        } else if (answer_type == GET_CHNNL_PARTICIPANTS_SUCCESS) {
-            std::vector<std::string> participants = UtilitySerializator::deserialize_vec_string(connection_.in_stream_).second;
-            emit get_channel_participants_result(GET_CHNNL_PARTICIPANTS_SUCCESS_ANSWER, participants);
-        } else if (answer_type == GET_CHNNL_PARTICIPANTS_FAILED) {
-            emit get_channel_participants_result(GET_CHNNL_PARTICIPANTS_FAILED_ANSWER, std::vector<std::string>());
-        } else if (answer_type == GET_CHAT_PARTICIPANTS_SUCCESS) {
-            std::vector<std::string> participants = UtilitySerializator::deserialize_vec_string(connection_.in_stream_).second;
-            emit get_chat_participants_result(GET_CHAT_PARTICIPANTS_SUCCESS_ANSWER, participants);
-        } else if (answer_type == GET_CHAT_PARTICIPANTS_FAILED) {
-            emit get_chat_participants_result(GET_CHAT_PARTICIPANTS_FAILED_ANSWER, std::vector<std::string>());
-        } else if (answer_type == SEND_USER_ANSWER_SUCCESS) {
-            emit answer_user_result(SEND_USER_ANSWER_SUCCESS_ANSWER);
-        } else if (answer_type == SEND_USER_ANSWER_FAILED) {
-            emit answer_user_result(SEND_USER_ANSWER_FAILED_ANSWER);
-        } else if (answer_type == GET_NOTIFICATIONS_SUCCESS) {
-            std::vector<Notification> notifications = UtilitySerializator::deserialize_not_vec(connection_.in_stream_).second;
-            emit get_notifications_result(GET_NOTIFICATIONS_SUCCESS_ANSWER, notifications);
-        } else if (answer_type == GET_NOTIFICATIONS_FAILED) {
-            emit get_notifications_result(GET_NOTIFICATIONS_FAILED_ANSWER, std::vector<Notification>());
-        } else if (answer_type == DEL_NOTIFICATION_SUCCESS) {
-            emit del_notification_result(DEL_NOTIFICATION_SUCCESS_ANSWER);
-        } else if (answer_type == DEL_NOTIFICATION_FAILED) {
-            emit del_notification_result(DEL_NOTIFICATION_FAILED_ANSWER);
-        } else if (answer_type == DEL_IND_MSG_SUCCESS) {
-            emit delete_msg_result(DEL_IND_MSG_SUCCESS_ANSWER);
-        } else if (answer_type == DEL_IND_MSG_FAILED) {
-            emit delete_msg_result(DEL_IND_MSG_FAILED_ANSWER);
-        } else if (answer_type == DEL_CHANNEL_MSG_SUCCESS) {
-            emit delete_msg_result(DEL_CHANNEL_MSG_SUCCESS_ANSWER);
-        } else if (answer_type == DEL_CHANNEL_MSG_FAILED) {
-            emit delete_msg_result(DEL_CHANNEL_MSG_FAILED_ANSWER);
-        } else if (answer_type == DEL_CHAT_MSG_SUCCESS) {
-            emit delete_msg_result(DEL_CHAT_MSG_SUCCESS_ANSWER);
-        } else if (answer_type == DEL_CHAT_MSG_FAILED) {
-            emit delete_msg_result(DEL_CHAT_MSG_FAILED_ANSWER);
-        } else {
-            std::cerr << "Unkown server answer: " << answer_type << '\n';
-        }
+
+        response_tree_[answer_type]();
 
         remove_delimeter();
     }

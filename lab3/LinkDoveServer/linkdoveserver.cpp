@@ -77,16 +77,6 @@ void LinkDoveServer::setup_connection_tree() {
     handle_tree_[GET_NOTIFICATIONS_REQUEST]          = &LinkDoveServer::handle_get_notifications;
     handle_tree_[DEL_NOTIFICATION_REQUEST]           = &LinkDoveServer::handle_del_notification;
     handle_tree_[DEL_MSG_REQUEST]                    = &LinkDoveServer::handle_delete_msg;
-
-    for (auto iter = handle_tree_.begin(); iter != handle_tree_.end(); ++iter) {
-        std::cerr << iter->first << '\n';
-    }
-
-    try {
-        handle_tree_.at(LOGIN_REQUEST);
-    } catch (...) {
-        std::cerr << "NO METHOD\n";
-    }
 }
 
 void LinkDoveServer::start_async_accept() {
@@ -182,7 +172,7 @@ void LinkDoveServer::handle_type_request(ConnectionIterator iterator) {
     std::string request_type;
     std::getline(iterator->in_stream_, request_type);
 
-    (this->*handle_tree_[request_type.c_str()])(iterator);
+    (this->*handle_tree_[request_type])(iterator);
 }
 
 void LinkDoveServer::handle_login_request(ConnectionIterator iterator) {
