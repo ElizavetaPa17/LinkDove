@@ -11,6 +11,7 @@
 #include "listlabeldialog.h"
 #include "messagecard.h"
 #include "utility.h"
+#include "audiomanagersingleton.h"
 
 GroupWidget::GroupWidget(QWidget *parent)
     : QWidget(parent)
@@ -28,6 +29,8 @@ GroupWidget::~GroupWidget()
 }
 
 void GroupWidget::slotOpenGroup(const ChatInfo &group_info) {
+    AudioManagerSingleton::get_manager()->stop();
+
     chat_info_ = group_info;
     ui->infoLabel->setText(group_info.name_.c_str());
 
@@ -166,7 +169,7 @@ void GroupWidget::slotRecordAudio() {
         ui->microphoneButton->setIcon(QIcon(":/recources/../resources/microphone_icon.png"));
         is_recording_ = false;
 
-        audio_manager_.stop_recording();
+        AudioManagerSingleton::get_manager()->stop_recording();
 
         std::shared_ptr<GroupMessage> ind_message = MessageUtility::create_group_audio_message(chat_info_.id_,
                                                                                                  ClientSingleton::get_client()->get_status_info().id_,
@@ -179,7 +182,7 @@ void GroupWidget::slotRecordAudio() {
         is_recording_ = true;
 
         audio_file_ = audio_dir_ + QtUtility::get_random_string(20);
-        audio_manager_.start_recording(audio_file_);
+        AudioManagerSingleton::get_manager()->start_recording(audio_file_);
     }
 }
 

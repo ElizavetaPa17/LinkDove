@@ -17,6 +17,7 @@
 #include "imagemessagecontent.h"
 #include "clientsingleton.h"
 #include "utility.h"
+#include "audiomanagersingleton.h"
 
 ChatWidget::ChatWidget(QWidget *parent)
     : QWidget(parent)
@@ -33,6 +34,8 @@ ChatWidget::~ChatWidget() {
 }
 
 void ChatWidget::slotOpenChatWith(const StatusInfo &status_info) {
+    AudioManagerSingleton::get_manager()->stop();
+
     interlocutor_ = status_info;
     ui->infoLabel->setText(status_info.username_.c_str());
 
@@ -112,7 +115,7 @@ void ChatWidget::slotRecordAudio() {
         ui->microphoneButton->setIcon(QIcon(":/recources/../resources/microphone_icon.png"));
         is_recording_ = false;
 
-        audio_manager_.stop_recording();
+        AudioManagerSingleton::get_manager()->stop_recording();
 
         std::shared_ptr<IndividualMessage> ind_message = MessageUtility::create_individual_audio_message(ClientSingleton::get_client()->get_status_info().id_,
                                                                                                          interlocutor_.id_,
@@ -125,7 +128,7 @@ void ChatWidget::slotRecordAudio() {
         is_recording_ = true;
 
         audio_file_ = audio_dir_ + QtUtility::get_random_string(20);
-        audio_manager_.start_recording(audio_file_);
+        AudioManagerSingleton::get_manager()->start_recording(audio_file_);
     }
 }
 

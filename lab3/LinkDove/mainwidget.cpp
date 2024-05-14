@@ -6,6 +6,7 @@
 
 #include "clientsingleton.h"
 #include "infodialog.h"
+#include "audiomanagersingleton.h"
 
 MainWidget::MainWidget(QWidget *parent) :
     QWidget(parent),
@@ -35,6 +36,8 @@ void MainWidget::setStatusInfo(const StatusInfo& status_info) {
 }
 
 void MainWidget::slotRedirectClick(QWidget *sender) {
+    AudioManagerSingleton::get_manager()->stop();
+
     if (sender == ui->profileLabel) {
         ui->stackedWidget->setCurrentIndex(PROFILE_PAGE);
     } else if (sender == ui->chatLabel) {
@@ -61,20 +64,16 @@ void MainWidget::slotRedirectClick(QWidget *sender) {
 }
 
 void MainWidget::slotTabRedirectClick(int index) {
-    if (index == 0) { // FIX MAGIC INT
+    if (index == 0 /*INDIVIDUA _MESSAGES PAGE*/) {
         ClientSingleton::get_client()->async_get_interlocutors();
-    } else if (index == 2) { // FIX MAGIN INT
-        ClientSingleton::get_client()->async_get_channels();
-    } else {
+    } else if (index == 1 /*CHATS (GROUPS) PAGE*/) {
         ClientSingleton::get_client()->async_get_chats();
+    } else /* CHANNELS PAGE */{
+        ClientSingleton::get_client()->async_get_channels();
     }
 }
 
 void MainWidget::slotQuit() {
-    // clear status info value
-    //memset(&status_info_, 0, sizeof(status_info_));
-
-    // Устанавливаем страницу, которая предлагает выбрать собеседника/группу/чат.
     ui->chatStackedWidget->setCurrentIndex(1);
     ui->groupStackedWidget->setCurrentIndex(1);
     ui->channelStackedWidget->setCurrentIndex(1);

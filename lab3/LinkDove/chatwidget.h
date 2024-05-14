@@ -5,7 +5,6 @@
 
 #include "StatusInfo.h"
 #include "imessage.h"
-#include "audiomanager.h"
 
 namespace Ui {
 class ChatWidget;
@@ -105,7 +104,6 @@ private slots:
 private:
     Ui::ChatWidget    *ui;
     StatusInfo interlocutor_;
-    AudioManager audio_manager_;
 
     int                send_msg_type_;  // Тип крайнего отправленного сообщения
     std::string        image_path_;

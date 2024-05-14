@@ -11,7 +11,7 @@
 #include "messagecard.h"
 #include "agreedialog.h"
 #include "typestringdialog.h"
-#include <ctime>
+#include "audiomanagersingleton.h"
 
 ChannelWidget::ChannelWidget(QWidget *parent)
     : QWidget(parent)
@@ -29,6 +29,8 @@ ChannelWidget::~ChannelWidget()
 }
 
 void ChannelWidget::slotOpenChannel(const ChannelInfo &channel_info) {
+    AudioManagerSingleton::get_manager()->stop();
+
     channel_info_ = channel_info;
     ui->infoLabel->setText(channel_info_.name_.c_str());
 
@@ -158,7 +160,7 @@ void ChannelWidget::slotRecordAudio() {
         ui->microphoneButton->setIcon(QIcon(":/recources/../resources/microphone_icon.png"));
         is_recording_ = false;
 
-        audio_manager_.stop_recording();
+        AudioManagerSingleton::get_manager()->stop_recording();
 
         std::shared_ptr<ChannelMessage> ind_message = MessageUtility::create_channel_audio_message(channel_info_.id_,
                                                                                                       audio_file_.toStdString() + ".m4a");
@@ -170,7 +172,7 @@ void ChannelWidget::slotRecordAudio() {
         is_recording_ = true;
 
         audio_file_ = audio_dir_ + QtUtility::get_random_string(20);
-        audio_manager_.start_recording(audio_file_);
+        AudioManagerSingleton::get_manager()->start_recording(audio_file_);
     }
 }
 
