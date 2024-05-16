@@ -49,6 +49,8 @@ void LinkDoveServer::setup_connection_tree() {
     handle_tree_[UPDATE_USER_REQUEST]                = &LinkDoveServer::handle_update_user_request;
     handle_tree_[FIND_USER_REQUEST]                  = &LinkDoveServer::handle_find_user_request;
     handle_tree_[BAN_USER_REQUEST]                   = &LinkDoveServer::handle_ban_user_request;
+    handle_tree_[BAN_IND_USER_REQUEST]               = &LinkDoveServer::handle_ban_ind_user_request;
+    handle_tree_[IS_BANNED_IND_USER_REQUEST]         = &LinkDoveServer::handle_is_banned_ind_user_request;
     handle_tree_[SEND_MSG_REQUEST]                   = &LinkDoveServer::handle_send_msg_request;
     handle_tree_[GET_IND_MSG_REQUEST]                = &LinkDoveServer::handle_get_msg_request;
     handle_tree_[GET_INTERLOCUTORS_REQUEST]          = &LinkDoveServer::handle_get_interlocutors_request;
@@ -171,6 +173,8 @@ void LinkDoveServer::handle_async_close_write(ConnectionIterator iterator, boost
 void LinkDoveServer::handle_type_request(ConnectionIterator iterator) {
     std::string request_type;
     std::getline(iterator->in_stream_, request_type);
+
+    std::cerr << request_type << '\n';
 
     (this->*handle_tree_[request_type])(iterator);
 }
@@ -332,6 +336,52 @@ void LinkDoveServer::handle_ban_user_request(ConnectionIterator iterator) {
         answer << BAN_USER_SUCCESS << "\n" << END_OF_REQUEST;
     } else {
         answer << BAN_USER_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_ban_ind_user_request(ConnectionIterator iterator) {
+    std::string username = UtilitySerializator::deserialize_string(iterator->in_stream_).second;
+    unsigned long long from_id =  UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+    uint8_t is_ban = UtilitySerializator::deserialize_fundamental<uint8_t>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    try {
+        StatusInfo banned_user = data_base_.get_status_info(username);
+
+        // НЕЛЬЗЯ ЗАБЛОКИРОВАТЬ АДМИНА!
+        if (banned_user.id_ != ADMIN_ID && data_base_.ban_ind_user(from_id, banned_user.id_, is_ban)) {
+            answer << BAN_IND_USER_SUCCESS << "\n" << END_OF_REQUEST;
+        } else {
+            answer << BAN_IND_USER_FAILED << "\n" << END_OF_REQUEST;
+        }
+    } catch (std::runtime_error &ex) {
+        answer << BAN_IND_USER_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_is_banned_ind_user_request(ConnectionIterator iterator) {
+    std::string username = UtilitySerializator::deserialize_string(iterator->in_stream_).second;
+    unsigned long long to_id =  UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    try {
+        StatusInfo banned_user = data_base_.get_status_info(username);
+
+        answer << IS_BANNED_IND_USER_SUCCESS << "\n";
+        UtilitySerializator::serialize_fundamental<bool>(answer, data_base_.is_banned_ind_user(banned_user.id_, to_id));
+        answer << END_OF_REQUEST;
+    } catch (std::runtime_error &ex) {
+        answer << IS_BANNED_IND_USER_FAILED << "\n" << END_OF_REQUEST;
     }
 
     iterator->out_stream_ << answer.str();

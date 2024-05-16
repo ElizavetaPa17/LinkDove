@@ -93,6 +93,13 @@ private slots:
      */
     void slotGetNotificationsResult(int result, std::vector<Notification> notifications);
 
+    /**
+     * <p> Слот, обрабатывающий результат блокировки/разблокировки пользователя. </p>
+     * @brief slotHandleBanResult
+     * @param result
+     */
+    void slotHandleBanResult(int result);
+
 private:
     Ui::SettingWidget *ui;
     ComplaintsListDialog complaint_dialog_;

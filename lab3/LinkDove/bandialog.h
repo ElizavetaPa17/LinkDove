@@ -2,6 +2,7 @@
 #define BANDIALOG_H
 
 #include <QDialog>
+#include <utility>
 
 namespace Ui {
 class BanDialog;
@@ -19,13 +20,12 @@ public:
     explicit BanDialog(QWidget *parent = nullptr);
     ~BanDialog();
 
-public slots:
     /**
-     * <p> Слот, обрабатывающий результат блокировки/разблокировки пользователя. </p>
-     * @brief slotHandleBanResult
-     * @param result
+     * <p> Возвращает никнейм пользователя для его блокировки/разблокировки. </p>
+     * @brief get_info
+     * @return - Пара <никнейм пользователя, флаг блокировки>
      */
-    void slotHandleBanResult(int result);
+    std::pair<QString, bool> get_info();
 
 private slots:
     /**
@@ -34,21 +34,9 @@ private slots:
      */
     void slotEnableButtons();
 
-    /**
-     * <p> Слот, обрабатывающий нажатие кнопки блокировки. </p>
-     * @brief slotHandleBanButton
-     */
-    void slotHandleBanButton();
-
-    /**
-     * <p> Слот, обрабатывающий нажатие кнопки разблокировки. </p>
-     * @brief slotHandleUnbanButton
-     */
-    void slotHandleUnbanButton();
-
 private:
     Ui::BanDialog *ui;
-    bool is_ban = false;
+    bool is_ban_ = false;
 
     /**
      * <p> Делает кнопки разблокировки доступными/недоступными и меняет их внешний вид. </p>

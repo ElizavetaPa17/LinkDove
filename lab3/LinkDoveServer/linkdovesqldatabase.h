@@ -42,13 +42,32 @@ public:
     bool update_user(const StatusInfo& status_info);
 
     /**
-     * <p> Блокирует или разблокировывает пользователя с никнеймом username в зависимости от флага is_ban. </p>
+     * <p> Блокирует или разблокировывает пользователя для авторизации. </p>
      * @brief ban_user
-     * @param username - Идентификатор пользователя.
+     * @param username - Никнейм пользователя, который блокируется/разблокируется.
      * @param is_ban - Если is_ban равно true, то пользователь блокируется, иначе - разблокировывается.
-     * @return
+     * @return - В случае успешного обновления статуса блокировки true, иначе - false.
      */
     bool ban_user(const std::string &username, bool is_ban);
+
+    /**
+     * <p> Блокирует или разблокировывает пользователя в переписке. </p>
+     * @brief ban_ind_user
+     * @param from_id - Идентификатор пользователя, который осуществляет блокировку.
+     * @param to_id - Идентификатор пользователя, который блокируется/разблокируется.
+     * @param is_ban - Если is_ban равно true, то пользователь блокируется, иначе - разблокировывается.
+     * @return - В случае успешного обновления статуса блокировки true, иначе - false.
+     */
+    bool ban_ind_user(unsigned long long from_id, unsigned long long to_id, bool is_ban);
+
+    /**
+     * <p> Возвращает статус блокировки пользователя в переписке. </p>
+     * @brief is_banned_ind_user
+     * @param from_id - Идентификатор пользователя, который заблокировал.
+     * @param to_id - Идентификатор пользователя, который был заблокирован.
+     * @return - В случае блокировки возвращает true, иначе - false.
+     */
+    bool is_banned_ind_user(unsigned long long from_id, unsigned long long to_id);
 
     /**
      * <p> Проверяет, блокирован ли пользователь. </p>

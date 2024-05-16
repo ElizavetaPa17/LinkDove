@@ -78,6 +78,14 @@ private slots:
      */
     void slotHandleUserCardClicked(const StatusInfo &status_info);
 
+    /**
+     * <p> Слот, принимающий от клиента результат получения статуса блокировки пользователя. </p>
+     * @brief slotHandleIsBannedUser
+     * @param result - Результат получения статуса блокировки.
+     * @param is_banned - Флаг статуса блокировки.
+     */
+    void slotHandleIsBannedUser(int result, bool is_banned);
+
 protected:
     // Переопределяем метод отрисовки, т.к. иначе с виджетом
     // не работают css-таблицы (проблема самого  Qt)
@@ -85,6 +93,7 @@ protected:
 
 private:
     Ui::UsersList *ui;
+    StatusInfo status_info_;
 
     /**
      * <p> Настраивает соединения с классом. </p>

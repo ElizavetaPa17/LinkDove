@@ -41,14 +41,14 @@ void MainWidget::slotRedirectClick(QWidget *sender) {
     if (sender == ui->profileLabel) {
         ui->stackedWidget->setCurrentIndex(PROFILE_PAGE);
     } else if (sender == ui->chatLabel) {
-        ui->stackedWidget->setCurrentIndex(CHAT_PAGE);
-
         if (ClientSingleton::get_client()->get_status_info().is_banned_) {
             std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Ваш аккаунт был заблокирован. Для выяснения причины свяжитесь с администратором. ");
             dialog_ptr->exec();
 
             return;
         }
+
+        ui->stackedWidget->setCurrentIndex(CHAT_PAGE);
 
         if (ui->tabWidget->currentIndex() == 0) { // FIX MAGIC INT
             ClientSingleton::get_client()->async_get_interlocutors();
@@ -92,6 +92,41 @@ void MainWidget::slotRedirectTabWidget(int result) {
     } else if (result == DELETE_IND_CHAT_SUCCESS_ANSWER) {
         ui->chatStackedWidget->setCurrentIndex(1);
         ClientSingleton::get_client()->async_get_interlocutors();
+    }
+}
+
+void MainWidget::slotHandleBannedStatus(int result, bool is_banned) {
+    switch (result) {
+        case IS_IND_BANNED_USER_FAILED_ANSWER: {
+            ui->chatStackedWidget->setCurrentIndex(1);
+            break;
+        }
+        case IS_CHNNL_BANNED_USER_FAILED_ANSWER: {
+            ui->channelStackedWidget->setCurrentIndex(1);
+            break;
+        }
+        case IS_CHAT_BANNED_USER_FAILED_ANSWER: {
+            ui->groupStackedWidget->setCurrentIndex(1);
+            break;
+        }
+        case IS_IND_BANNED_USER_SUCCESS_ANSWER: {
+            if (is_banned) {
+                ui->chatStackedWidget->setCurrentIndex(1);
+            }
+            break;
+        }
+        case IS_CHNNL_BANNED_USER_SUCCESS_ANSWER: {
+            if (is_banned) {
+                ui->channelStackedWidget->setCurrentIndex(1);
+            }
+            break;
+        }
+        case IS_CHAT_BANNED_USER_SUCCESS_ANSWER: {
+            if (is_banned) {
+                ui->groupStackedWidget->setCurrentIndex(1);
+            }
+            break;
+        }
     }
 }
 
@@ -162,6 +197,7 @@ void MainWidget::setupConnection() {
     connect(ClientSingleton::get_client(), &Client::delete_ind_chat_result, this, &MainWidget::slotRedirectTabWidget);
     connect(ClientSingleton::get_client(), &Client::quit_chat_result,       this, &MainWidget::slotRedirectTabWidget);
     connect(ClientSingleton::get_client(), &Client::quit_channel_result,    this, &MainWidget::slotRedirectTabWidget);
+    connect(ClientSingleton::get_client(), &Client::is_banned_user_result,  this, &MainWidget::slotHandleBannedStatus);
 
 
     connect(ui->usersList,   &UsersList::userCardClicked,      ui->chatWidget,    &ChatWidget::slotOpenChatWith);

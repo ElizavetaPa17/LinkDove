@@ -95,11 +95,24 @@ private slots:
     void slotHandleDeleteResult(int result);
 
     /**
-     * <p> Слот, который обрабатывает собатие удаление сообщения. </p>
+     * <p> Слот, который обрабатывает событие удаление сообщения. </p>
      * @brief slotDeleteMessageResult
-     * @param result
+     * @param result - Результат удаления сообщения.
      */
     void slotDeleteMessageResult(int result);
+
+    /**
+     * <p> Слот, который обрабатывает событие нажатия на кнопку блокировки/разблокировки пользователя. </p>
+     * @brief slotBanUser
+     */
+    void slotBanUser();
+
+    /**
+     * <p> Слот, который обрабатывает событие блокировки/разблокировки пользователя текущим пользователем. </p>
+     * @brief slotBanUserResult
+     * @param result - Результат блокироваки/разблокировки пользователя.
+     */
+    void slotBanUserResult(int result);
 
 private:
     Ui::ChatWidget    *ui;

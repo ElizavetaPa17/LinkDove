@@ -47,6 +47,24 @@ enum ResponseTypes {
     BAN_USER_SUCCESS_ANSWER,
     BAN_USER_FAILED_ANSWER,
 
+    BAN_IND_USER_SUCCESS_ANSWER,
+    BAN_IND_USER_FAILED_ANSWER,
+
+    BAN_CHNNL_USER_SUCCESS_ANSWER,
+    BAN_CHNNL_USER_FAILED_ANSWER,
+
+    BAN_CHAT_USER_SUCCESS_ANSWER,
+    BAN_CHAT_USER_FAILED_ANSWER,
+
+    IS_IND_BANNED_USER_SUCCESS_ANSWER,
+    IS_IND_BANNED_USER_FAILED_ANSWER,
+
+    IS_CHNNL_BANNED_USER_SUCCESS_ANSWER,
+    IS_CHNNL_BANNED_USER_FAILED_ANSWER,
+
+    IS_CHAT_BANNED_USER_SUCCESS_ANSWER,
+    IS_CHAT_BANNED_USER_FAILED_ANSWER,
+
     SEND_IND_MSG_SUCCESS_ANSWER,
     SEND_IND_MSG_FAILED_ANSWER,
 
@@ -269,6 +287,48 @@ extern const std::string BAN_USER_REQUEST;
 extern const std::string BAN_USER_SUCCESS;
 // Ответ сервера на неудачную блокирувку/разблокировку пользователя
 extern const std::string BAN_USER_FAILED;
+
+// Запрос на блокирувку/разблокировку пользователя от текущего пользователя (переписки)
+extern const std::string BAN_IND_USER_REQUEST;
+// Ответ сервера на успешную блокирувку/разблокировку пользователя в переписках
+extern const std::string BAN_IND_USER_SUCCESS;
+// Ответ сервера на неудачную блокирувку/разблокировку пользователя в переписках
+extern const std::string BAN_IND_USER_FAILED;
+
+// Запрос на блокирувку/разблокировку пользователя от владельца канала
+extern const std::string BAN_CHNNL_USER_REQUEST;
+// Ответ сервера на успешную блокирувку/разблокировку пользователя в канале
+extern const std::string BAN_CHNNL_USER_SUCCESS;
+// Ответ сервера на неудачную блокирувку/разблокировку пользователя в канале
+extern const std::string BAN_CHNNL_USER_FAILED;
+
+// Запрос на блокирувку/разблокировку пользователя от владельца чата (группы)
+extern const std::string BAN_CHAT_USER_REQUEST;
+// Ответ сервера на успешную блокирувку/разблокировку пользователя в чате (группе)
+extern const std::string BAN_CHAT_USER_SUCCESS;
+// Ответ сервера на неудачную блокирувку/разблокировку пользователя в чате (группе)
+extern const std::string BAN_CHAT_USER_FAILED;
+
+// Запрос серверу на текущий статус блокировки пользователя в переписке
+extern const std::string IS_BANNED_IND_USER_REQUEST;
+// Ответ сервера на успешное получение статуса блокировки
+extern const std::string IS_BANNED_IND_USER_SUCCESS;
+// Ответ сервера на неудачное получение статуса блокировки
+extern const std::string IS_BANNED_IND_USER_FAILED;
+
+// Запрос серверу на текущий статус блокировки пользователя в канале
+extern const std::string IS_BANNED_CHNNL_USER_REQUEST;
+// Ответ сервера на успешное получение статуса блокировки
+extern const std::string IS_BANNED_CHNNL_USER_SUCCESS;
+// Ответ сервера на неудачное получение статуса блокировки
+extern const std::string IS_BANNED_CHNNL_USER_FAILED;
+
+// Запрос серверу на текущий статус блокировки пользователя в чате (группе)
+extern const std::string IS_BANNED_CHAT_USER_REQUEST;
+// Ответ сервера на успешное получение статуса блокировки
+extern const std::string IS_BANNED_CHAT_USER_SUCCESS;
+// Ответ сервера на неудачное получение статуса блокировки
+extern const std::string IS_BANNED_CHAT_USER_FAILED;
 
 // Запрос на отправку сообщения
 extern const std::string SEND_MSG_REQUEST;

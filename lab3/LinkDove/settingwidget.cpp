@@ -95,8 +95,15 @@ void SettingWidget::slotDisplayAboutDialog() {
 
 void SettingWidget::slotDisplayBanDialog() {
     std::unique_ptr<BanDialog> dialog_ptr = std::make_unique<BanDialog>();
-    connect(ClientSingleton::get_client(), &Client::ban_user_result, dialog_ptr.get(), &BanDialog::slotHandleBanResult);
-    dialog_ptr->exec();
+    if (dialog_ptr->exec() == QDialog::Accepted) {
+        std::pair<QString, bool> dialog_pair = dialog_ptr->get_info();
+
+        if (dialog_pair.second) {
+            ClientSingleton::get_client()->async_ban_user(dialog_pair.first.toStdString(), true);
+        } else {
+            ClientSingleton::get_client()->async_ban_user(dialog_pair.first.toStdString(), false);
+        }
+    }
 }
 
 void SettingWidget::slotGetNotificationsResult(int result, std::vector<Notification> notifications) {
@@ -120,13 +127,28 @@ void SettingWidget::slotGetNotificationsResult(int result, std::vector<Notificat
     }
 }
 
+void SettingWidget::slotHandleBanResult(int result) {
+    std::string text;
+    if (result == BAN_USER_SUCCESS_ANSWER) {
+        text = "Статус блокировки пользователя успешно изменен.";
+    } else if (result == BAN_USER_FAILED_ANSWER) {
+        text = "Что-то пошло не так при попытке изменить статус блокировки пользователя. ";
+    } else {
+        return;
+    }
+
+    std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, text);
+    dialog_ptr->exec();
+}
+
 void SettingWidget::setupConnections() {
     connect(ui->quitButton,   &QPushButton::clicked, this, &SettingWidget::slotQuitAccount);
     connect(ui->aboutButton,  &QPushButton::clicked, this, &SettingWidget::slotDisplayAboutDialog);
     connect(ui->banButton,    &QPushButton::clicked, this, &SettingWidget::slotDisplayBanDialog);
     connect(ui->notifyButton, &QPushButton::clicked, this, [this]() { ClientSingleton::get_client()->async_get_notifications(); });
 
-    connect(ClientSingleton::get_client(), &Client::get_complaints_result, this, &SettingWidget::slotDisplayComplaintList);
-    connect(ClientSingleton::get_client(), &Client::send_complaint_result, this, &SettingWidget::slotComplaintResult);
+    connect(ClientSingleton::get_client(), &Client::get_complaints_result,    this, &SettingWidget::slotDisplayComplaintList);
+    connect(ClientSingleton::get_client(), &Client::send_complaint_result,    this, &SettingWidget::slotComplaintResult);
     connect(ClientSingleton::get_client(), &Client::get_notifications_result, this, &SettingWidget::slotGetNotificationsResult);
+    connect(ClientSingleton::get_client(), &Client::ban_user_result,          this, &SettingWidget::slotHandleBanResult);
 }

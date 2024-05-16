@@ -68,6 +68,14 @@ private slots:
      */
     void slotRedirectTabWidget(int result);
 
+    /**
+     * <p> Слот, который обрабатывает результат получения статуса блокировки пользователя и ограничивает доступ к переписке.</p>
+     * @brief slotHandleBannedStatus
+     * @param result - Параметр, содержащий результат получения статуса.
+     * @param is_banned - Флаг блокировки
+     */
+    void slotHandleBannedStatus(int result, bool is_banned);
+
 private:
     Ui::MainWidget *ui;
     StatusInfo status_info_;

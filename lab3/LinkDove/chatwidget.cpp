@@ -10,6 +10,7 @@
 
 #include "infodialog.h"
 #include "agreedialog.h"
+#include "baninterlocutordialog.h"
 #include "interlocutorprofiledialog.h"
 #include "messagecard.h"
 #include "individualmessage.h"
@@ -170,17 +171,41 @@ void ChatWidget::slotDeleteMessageResult(int result) {
     }
 }
 
+void ChatWidget::slotBanUser() {
+    std::unique_ptr<BanInterlocutorDialog> dialog_ptr = std::make_unique<BanInterlocutorDialog>();
+    if (dialog_ptr->exec() == QDialog::Accepted) {
+        bool is_ban = dialog_ptr->get_info();
+        ClientSingleton::get_client()->async_ban_ind_user(interlocutor_.username_, is_ban);
+    }
+}
+
+void ChatWidget::slotBanUserResult(int result) {
+    std::string text;
+    if (result == BAN_IND_USER_SUCCESS_ANSWER) {
+        text = "Статус блокировки пользователя был изменен.  ";
+    } else if (result == BAN_IND_USER_FAILED_ANSWER) {
+        text = "Что-то пошло не так при попытке заблокировать пользователя.";
+    } else {
+        return;
+    }
+
+    std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, text);
+    dialog_ptr->exec();
+}
+
 void ChatWidget::setupConnection() {
     connect(ui->messageEdit,       &QLineEdit::returnPressed, this, &ChatWidget::slotSendMessage);
     connect(ui->sendButton,        &QPushButton::clicked,     this, &ChatWidget::slotSendMessage);
     connect(ui->cameraButton,      &QPushButton::clicked,     this, &ChatWidget::slotChooseImage);
     connect(ui->microphoneButton,  &QPushButton::clicked,     this, &ChatWidget::slotRecordAudio);
+    connect(ui->banButton,         &QPushButton::clicked,     this, &ChatWidget::slotBanUser);
     connect(ui->infoLabel,         &ClickableLabel::clicked,  this, &ChatWidget::slotDisplayInterlocutorProfile);
 
     connect(ClientSingleton::get_client(), &Client::send_msg_result,        this, &ChatWidget::slotHandleSendMessage);
     connect(ClientSingleton::get_client(), &Client::get_ind_msg_result,     this, &ChatWidget::slotHandleGetMessages);
     connect(ClientSingleton::get_client(), &Client::delete_ind_chat_result, this, &ChatWidget::slotHandleDeleteResult);
     connect(ClientSingleton::get_client(), &Client::delete_msg_result,      this, &ChatWidget::slotDeleteMessageResult);
+    connect(ClientSingleton::get_client(), &Client::ban_user_result,        this, &ChatWidget::slotBanUserResult);
 
     connect(ui->deleteButton, &QPushButton::clicked, this, &ChatWidget::slotDeleteChat);
 }

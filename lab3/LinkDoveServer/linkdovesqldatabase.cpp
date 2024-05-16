@@ -133,6 +133,18 @@ bool LinkDoveSQLDataBase::setup_tables() {
         std::cerr << "Failed to setup IND_AUDIO_MESSAGE_CONTENTS table: " << query.lastError().text().toStdString() << '\n';
     }
 
+    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS INTERLOCUTOR_BANNED_USERS "
+                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
+                       " from_id MEDIUMINT NOT NULL, "
+                       " to_id MEDIUMINT NOT NULL, "
+                       " FOREIGN KEY (from_id) REFERENCES USERS (ID) ON DELETE CASCADE, "
+                       " FOREIGN KEY (to_id) REFERENCES USERS (ID) ON DELETE CASCADE); ");
+
+    if (!is_ok) {
+        std::cerr << "Failed to setup INTERLOCUTOR_BANNED_USERS: " << query.lastError().text().toStdString() << '\n';
+        return false;
+    }
+
     is_ok = query.exec("CREATE TABLE IF NOT EXISTS CHANNELS "
                        "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
                        " owner_id MEDIUMINT NOT NULL, "
@@ -200,6 +212,18 @@ bool LinkDoveSQLDataBase::setup_tables() {
 
     if (!is_ok) {
         std::cerr << "Failed to setup CHANNEL_AUDIO_MESSAGE_CONTENTS table: " << query.lastError().text().toStdString() << '\n';
+        return false;
+    }
+
+    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS CHANNEL_BANNED_USERS "
+                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
+                       " user_id MEDIUMINT NOT NULL, "
+                       " channel_id BIGINT NOT NULL, "
+                       " FOREIGN KEY (user_id) REFERENCES USERS (ID) ON DELETE CASCADE, "
+                       " FOREIGN KEY (channel_id) REFERENCES CHANNELS (ID) ON DELETE CASCADE); ");
+
+    if (!is_ok) {
+        std::cerr << "Failed to setup CHANNEL_BANNED_USERS: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
@@ -272,6 +296,18 @@ bool LinkDoveSQLDataBase::setup_tables() {
 
     if (!is_ok) {
         std::cerr << "Failed to setup CHAT_AUDIO_MESSAGE_CONTENTS table: " << query.lastError().text().toStdString() << '\n';
+        return false;
+    }
+
+    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS CHAT_BANNED_USERS "
+                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
+                       " user_id MEDIUMINT NOT NULL, "
+                       " chat_id BIGINT NOT NULL, "
+                       " FOREIGN KEY (user_id) REFERENCES USERS (ID) ON DELETE CASCADE, "
+                       " FOREIGN KEY (chat_id) REFERENCES CHATS (ID) ON DELETE CASCADE); ");
+
+    if (!is_ok) {
+        std::cerr << "Failed to setup CHAT_BANNED_USERS: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
@@ -406,8 +442,53 @@ bool LinkDoveSQLDataBase::ban_user(const std::string &username, bool is_ban) {
         std::cerr << query.lastError().text().toStdString() << '\n';
         return false;
     } else {
-        // если изменение было успешно, то row affected > 0, иначе row affected == 0 (false).
+        // если блокировка была успешна, то row affected > 0, иначе row affected == 0 (false).
         return query.numRowsAffected();
+    }
+}
+
+bool LinkDoveSQLDataBase::ban_ind_user(unsigned long long from_id, unsigned long long to_id, bool is_ban) {
+    QSqlQuery query(data_base_);
+
+    if (is_ban) {
+        query.prepare(" INSERT INTO INTERLOCUTOR_BANNED_USERS "
+                      " (from_id, to_id) "
+                      " VALUES (:from_id, :to_id); ");
+    } else {
+        query.prepare(" DELETE FROM INTERLOCUTOR_BANNED_USERS "
+                      " WHERE from_id=:from_id AND to_id=:to_id; ");
+    }
+
+    query.bindValue(":from_id", from_id);
+    query.bindValue(":to_id", to_id);
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString() << '\n';
+        return false;
+    } else {
+        // если блокировка была успешна, то row affected > 0, иначе row affected == 0 (false).
+        return query.numRowsAffected();
+    }
+}
+
+bool LinkDoveSQLDataBase::is_banned_ind_user(unsigned long long from_id, unsigned long long to_id) {
+    QSqlQuery query(data_base_);
+
+    query.prepare(" SELECT * FROM INTERLOCUTOR_BANNED_USERS "
+                  " WHERE from_id=:from_id AND to_id=:to_id; ");
+
+    query.bindValue(":from_id", from_id);
+    query.bindValue(":to_id", to_id);
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString() << '\n';
+        throw std::runtime_error("is_banned_ind_user failed due to exec.");
+    } else {
+        if (query.next()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
 
@@ -1118,7 +1199,7 @@ bool LinkDoveSQLDataBase::is_channel_participant(unsigned long long participant_
 
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString();
-        throw std::runtime_error("is_channel_participant failed due to query.exec");
+        throw std::runtime_error("is_channel_participant failed due to exec.");
     } else {
         if (query.next()) {
             return true;
@@ -1726,7 +1807,8 @@ namespace link_dove_database_details__ {
         status_info.email_       = query.value("email").toString().toStdString();
         status_info.birthday_    = QDate::fromString(query.value("birthday").toString(), QString(BIRTHAY_FORMAT));
         status_info.text_status_ = query.value("text_status").toString().toStdString();
-        status_info.image_path_ = query.value("image").toString().toStdString();
+        status_info.image_path_  = query.value("image").toString().toStdString();
+        status_info.is_banned_   = query.value("is_banned").toBool();
 
         return status_info;
     }

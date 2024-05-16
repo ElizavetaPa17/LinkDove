@@ -95,6 +95,25 @@ public:
     void async_ban_user(const std::string &username, bool is_ban);
 
     /**
+     * <p> Отправляет запрос на блокировку/разблокировку пользователя в переписке. </p>
+     * @brief async_ban_ind_user
+     * @param username - Никнейм пользователя, которого мы блокируем/разблокируем.
+     * @param is_ban - Флаг блокировки/разблокировки.
+     */
+    void async_ban_ind_user(const std::string &username, bool is_ban);
+
+    //void async_ban_chnnl_user(const std::string &username, bool is_ban);
+
+    //void async_ban_chat_user(const std::string &username, bool is_ban);
+
+    /**
+     * <p> Проверяет, не заблокирован ли текущий пользователь собеседником в переписке. </p>
+     * @brief async_is_banned_ind_user
+     * @param username - Никнейм пользователя, статус блокировки по отношению к которому опрашивается.
+     */
+    void async_is_banned_ind_user(const std::string &username);
+
+    /**
      * <p> Отправляет сообщение. </p>
      * @brief async_send_message
      * @param message - Отправляемое сообщение.
@@ -375,6 +394,14 @@ signals:
      * @param result - Параметр, содержащий результат блокировки/разблокировки пользователя.
      */
     void ban_user_result(int result);
+
+    /**
+     * <p> Генерирует сигнал после получения статуса блокировки пользователя. </p>
+     * @brief is_banned_user_result
+     * @param result - Параметр, содержащий результат получения статуса блокировки пользователя.
+     * @param is_banned - Флаг статуса блокировки.
+     */
+    void is_banned_user_result(int result, bool is_banned);
 
     /**
      * <p> Генерирует сигнал после получения результата отправки сообщения. </p>

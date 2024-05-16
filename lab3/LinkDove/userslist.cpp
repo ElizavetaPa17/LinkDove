@@ -70,6 +70,8 @@ void UsersList::slotFindUserResult(int result) {
         std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Пользователь не найден.");
         dialog_ptr->exec();
     } else {
+        ClientSingleton::get_client()->async_find_user(ui->searchEdit->text().toStdString());
+
         StatusInfo status_info = ClientSingleton::get_client()->get_found_user();
         removeUsers();
         addUser(status_info);
@@ -90,11 +92,29 @@ void UsersList::slotGetInterlocutorsResult(int result, std::vector<StatusInfo> i
 }
 
 void UsersList::slotHandleUserCardClicked(const StatusInfo &status_info) {
-    emit userCardClicked(status_info);
+    status_info_ = status_info;
+
+    ClientSingleton::get_client()->async_is_banned_ind_user(status_info.username_);
+}
+
+void UsersList::slotHandleIsBannedUser(int result, bool is_banned) {
+    if (result == IS_IND_BANNED_USER_SUCCESS_ANSWER) {
+        if (!is_banned) {
+            emit userCardClicked(status_info_);
+        } else {
+            std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Вы были заблокированы пользователем. ");
+            dialog_ptr->exec();
+        }
+    } else if (IS_IND_BANNED_USER_FAILED_ANSWER) {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Что-то пошло не так при попытке получить статус блокировки. ");
+        dialog_ptr->exec();
+    }
 }
 
 void UsersList::setupConnection() {
     connect(ClientSingleton::get_client(), &Client::find_user_result,         this, &UsersList::slotFindUserResult);
     connect(ClientSingleton::get_client(), &Client::get_interlocutors_result, this, &UsersList::slotGetInterlocutorsResult);
+    connect(ClientSingleton::get_client(), &Client::is_banned_user_result,    this, &UsersList::slotHandleIsBannedUser);
+
     connect(ui->searchEdit,                &QLineEdit::returnPressed,         this, &UsersList::slotsHandleReturnPress);
 }

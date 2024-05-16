@@ -25,25 +25,18 @@ void Client::async_connect() {
 }
 
 void Client::async_login(const LoginInfo& login_info) {
-    std::stringstream str_stream;
-    str_stream << LOGIN_REQUEST << "\n";
-
-    login_info.serialize(str_stream) << '\n';
-    str_stream << END_OF_REQUEST;
-
-    connection_.out_stream_ << str_stream.str();
+    connection_.out_stream_ << LOGIN_REQUEST << "\n";
+    login_info.serialize(connection_.out_stream_) << '\n';
+    connection_.out_stream_ << END_OF_REQUEST;
 
     write_to_server();
 }
 
 void Client::async_register(const UserInfo& user_info) {
-    std::stringstream str_stream;
-    str_stream << REGISTER_REQUEST << '\n';
+    connection_.out_stream_ << REGISTER_REQUEST << '\n';
+    user_info.serialize(connection_.out_stream_);
+    connection_.out_stream_ << END_OF_REQUEST;
 
-    user_info.serialize(str_stream);
-    str_stream << END_OF_REQUEST;
-
-    connection_.out_stream_ << str_stream.str();
     status_info_ = user_info.status_info_;
 
     write_to_server();
@@ -54,13 +47,9 @@ void Client::async_send_complaint(const std::string& text) {
     complaint.sender_id_ = status_info_.id_;
     complaint.text_ = text;
 
-    std::stringstream str_stream;
-    str_stream << SEND_COMPLAINT_REQUEST << '\n';
-
-    complaint.serialize(str_stream);
-    str_stream << END_OF_REQUEST;
-
-    connection_.out_stream_ << str_stream.str();
+    connection_.out_stream_ << SEND_COMPLAINT_REQUEST << '\n';
+    complaint.serialize(connection_.out_stream_);
+    connection_.out_stream_ << END_OF_REQUEST;
 
     write_to_server();
 }
@@ -86,12 +75,9 @@ void Client::async_update_user(StatusInfo& status_info) {
     updated_status_info_ = status_info;
     updated_status_info_.id_ = status_info_.id_;
 
-    std::stringstream str_stream;
-    str_stream << UPDATE_USER_REQUEST << '\n';
-
-    status_info.serialize(str_stream);
-    str_stream << END_OF_REQUEST;
-    connection_.out_stream_ << str_stream.str();
+    connection_.out_stream_ << UPDATE_USER_REQUEST << '\n';
+    status_info.serialize(connection_.out_stream_);
+    connection_.out_stream_ << END_OF_REQUEST;
 
     write_to_server();
 }
@@ -105,14 +91,29 @@ void Client::async_find_user(const std::string &username) {
 }
 
 void Client::async_ban_user(const std::string &username, bool is_ban) {
-    std::stringstream str_stream;
-    str_stream << BAN_USER_REQUEST << '\n';
+    connection_.out_stream_ << BAN_USER_REQUEST << '\n';
+    UtilitySerializator::serialize(connection_.out_stream_, username);
+    UtilitySerializator::serialize_fundamental<uint8_t>(connection_.out_stream_, is_ban);
+    connection_.out_stream_ << END_OF_REQUEST;
 
-    UtilitySerializator::serialize(str_stream, username);
-    UtilitySerializator::serialize_fundamental<uint8_t>(str_stream, is_ban);
-    str_stream << END_OF_REQUEST;
+    write_to_server();
+}
 
-    connection_.out_stream_ << str_stream.str();
+void Client::async_ban_ind_user(const std::string &username, bool is_ban) {
+    connection_.out_stream_ << BAN_IND_USER_REQUEST << '\n';
+    UtilitySerializator::serialize(connection_.out_stream_, username);
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, status_info_.id_);
+    UtilitySerializator::serialize_fundamental<uint8_t>(connection_.out_stream_, is_ban);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    write_to_server();
+}
+
+void Client::async_is_banned_ind_user(const std::string &username) {
+    connection_.out_stream_ << IS_BANNED_IND_USER_REQUEST << '\n';
+    UtilitySerializator::serialize(connection_.out_stream_, username);
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, status_info_.id_);
+    connection_.out_stream_ << END_OF_REQUEST;
 
     write_to_server();
 }
@@ -126,15 +127,10 @@ void Client::async_send_message(const IMessage& message) {
 }
 
 void Client::async_get_ind_messages(unsigned long long other_id) {
-    std::stringstream str_stream;
-    str_stream << GET_IND_MSG_REQUEST << '\n';
-
-    UtilitySerializator::serialize_fundamental<unsigned long long>(str_stream, status_info_.id_);
-    UtilitySerializator::serialize_fundamental<unsigned long long>(str_stream, other_id);
-
-    str_stream << END_OF_REQUEST;
-
-    connection_.out_stream_ << str_stream.str();
+    connection_.out_stream_ << GET_IND_MSG_REQUEST << '\n';
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, status_info_.id_);
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, other_id);
+    connection_.out_stream_ << END_OF_REQUEST;
 
     write_to_server();
 }
@@ -163,7 +159,6 @@ void Client::async_create_channel(const std::string &channel_name) {
     channel_info.name_ = channel_name;
     channel_info.owner_id_ = status_info_.id_;
     channel_info.serialize(connection_.out_stream_);
-
     connection_.out_stream_ << END_OF_REQUEST;
 
     write_to_server();
@@ -241,7 +236,6 @@ void Client::async_quit_channel(unsigned long long user_id, unsigned long long c
     connection_.out_stream_ << QUIT_CHANNEL_REQUEST << "\n";
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, user_id);
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, channel_id);
-
     connection_.out_stream_ << END_OF_REQUEST;
 
     write_to_server();
@@ -254,7 +248,6 @@ void Client::async_create_chat(const std::string &chat_name) {
     chat_info.name_ = chat_name;
     chat_info.owner_id_ = status_info_.id_;
     chat_info.serialize(connection_.out_stream_);
-
     connection_.out_stream_ << END_OF_REQUEST;
 
     write_to_server();
@@ -422,6 +415,13 @@ void Client::setup_response_tree() {
     response_tree_[BAN_USER_SUCCESS] = [this] () { emit ban_user_result(BAN_USER_SUCCESS_ANSWER); };
     response_tree_[BAN_USER_FAILED]  = [this] () { emit ban_user_result(BAN_USER_FAILED_ANSWER); };
 
+    response_tree_[BAN_IND_USER_SUCCESS] = [this] () { emit ban_user_result(BAN_IND_USER_SUCCESS_ANSWER); };
+    response_tree_[BAN_IND_USER_FAILED]  = [this] () { emit ban_user_result(BAN_IND_USER_FAILED_ANSWER); };
+
+    response_tree_[IS_BANNED_IND_USER_SUCCESS] = [this] () { bool is_banned = UtilitySerializator::deserialize_fundamental<bool>(connection_.in_stream_).second;
+                                                             emit is_banned_user_result(IS_IND_BANNED_USER_SUCCESS_ANSWER, is_banned); };
+    response_tree_[IS_BANNED_IND_USER_FAILED]  = [this] () { emit is_banned_user_result(IS_IND_BANNED_USER_FAILED_ANSWER, true); };
+
     response_tree_[SEND_IND_MSG_SUCCESS] = [this] () { emit send_msg_result(SEND_IND_MSG_SUCCESS_ANSWER); };
     response_tree_[SEND_IND_MSG_FAILED]  = [this] () { emit send_msg_result(SEND_IND_MSG_FAILED_ANSWER); };
 
@@ -579,6 +579,7 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
     if (bytes_transferred > 0) {
         std::string answer_type;
         std::getline(connection_.in_stream_, answer_type);
+        std::cerr << answer_type << '\n';
 
         response_tree_[answer_type]();
 
