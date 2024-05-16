@@ -507,6 +507,26 @@ bool LinkDoveSQLDataBase::get_user_banned_status(const std::string &username) {
     }
 }
 
+std::vector<std::string> LinkDoveSQLDataBase::get_banned_interlocutors(unsigned long long id) {
+    QSqlQuery query(data_base_);
+    query.prepare(" SELECT * FROM INTERLOCUTOR_BANNED_USERS "
+                  " WHERE from_id=:id; ");
+
+    query.bindValue(":id", id);
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString() << '\n';
+        throw std::runtime_error("get_banned_interlocutors failed due to query.exec");
+    }
+
+    std::vector<std::string> interlocutors;
+    while (query.next()) {
+        interlocutors.push_back(get_status_info(query.value("to_id").toULongLong()).username_);
+    }
+
+    return interlocutors;
+}
+
 bool LinkDoveSQLDataBase::add_complaint(const Complaint& complaint) {
     QSqlQuery query(data_base_);
     query.prepare("INSERT INTO COMPLAINTS (sender_id, text) "

@@ -100,6 +100,14 @@ private slots:
      */
     void slotHandleBanResult(int result);
 
+    /**
+     * <p> Слот, обрабатывающий результат получения списка никнеймов заблокированных пользователей. </p>
+     * @brief slotGetBannedInterlocutorsResult
+     * @param result - Парметр, содержащий результат запроса.
+     * @param interlocutors - Список никнеймов заблокированных пользователей.
+     */
+    void slotGetBannedInterlocutorsResult(int result, std::vector<std::string> interlocutors);
+
 private:
     Ui::SettingWidget *ui;
     ComplaintsListDialog complaint_dialog_;

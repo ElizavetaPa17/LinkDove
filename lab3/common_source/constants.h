@@ -65,6 +65,9 @@ enum ResponseTypes {
     IS_CHAT_BANNED_USER_SUCCESS_ANSWER,
     IS_CHAT_BANNED_USER_FAILED_ANSWER,
 
+    GET_BANNED_INTERLOCUTORS_SUCCESS_ANSWER,
+    GET_BANNED_INTERLOCUTORS_FAILED_ANSWER,
+
     SEND_IND_MSG_SUCCESS_ANSWER,
     SEND_IND_MSG_FAILED_ANSWER,
 
@@ -329,6 +332,13 @@ extern const std::string IS_BANNED_CHAT_USER_REQUEST;
 extern const std::string IS_BANNED_CHAT_USER_SUCCESS;
 // Ответ сервера на неудачное получение статуса блокировки
 extern const std::string IS_BANNED_CHAT_USER_FAILED;
+
+// Запрос на получение списка заблокированных в переписках пользователей
+extern const std::string GET_BANNED_INTERLOCUTORS_REQUEST;
+// Ответ сервера на успешное получение списка
+extern const std::string GET_BANNED_INTERLOCUTORS_SUCCESS;
+// Ответ сервера на неудачное получение списка
+extern const std::string GET_BANNED_INTERLOCUTORS_FAILED;
 
 // Запрос на отправку сообщения
 extern const std::string SEND_MSG_REQUEST;

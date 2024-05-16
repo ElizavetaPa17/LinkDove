@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
-    <height>452</height>
+    <width>596</width>
+    <height>529</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -159,6 +159,41 @@ QPushButton:hover {
         </property>
         <property name="text">
          <string>Жалоба</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="confidenceButton">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>70</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>17</pointsize>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton {
+	background-color: rgb(245, 245, 245);
+	color: rgb(60, 45, 50);
+	border: 5px solid rgb(60, 45, 50);
+	border-radius: 20;
+}
+
+QPushButton:hover {
+	background-color: rgb(60, 45, 50);
+	color: rgb(245, 245, 245);
+}</string>
+        </property>
+        <property name="text">
+         <string>Приватность</string>
         </property>
        </widget>
       </item>

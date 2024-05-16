@@ -51,6 +51,7 @@ void LinkDoveServer::setup_connection_tree() {
     handle_tree_[BAN_USER_REQUEST]                   = &LinkDoveServer::handle_ban_user_request;
     handle_tree_[BAN_IND_USER_REQUEST]               = &LinkDoveServer::handle_ban_ind_user_request;
     handle_tree_[IS_BANNED_IND_USER_REQUEST]         = &LinkDoveServer::handle_is_banned_ind_user_request;
+    handle_tree_[GET_BANNED_INTERLOCUTORS_REQUEST]   = &LinkDoveServer::handle_get_banned_interlocutors;
     handle_tree_[SEND_MSG_REQUEST]                   = &LinkDoveServer::handle_send_msg_request;
     handle_tree_[GET_IND_MSG_REQUEST]                = &LinkDoveServer::handle_get_msg_request;
     handle_tree_[GET_INTERLOCUTORS_REQUEST]          = &LinkDoveServer::handle_get_interlocutors_request;
@@ -305,6 +306,7 @@ void LinkDoveServer::handle_update_user_request(ConnectionIterator iterator) {
 
 void LinkDoveServer::handle_find_user_request(ConnectionIterator iterator) {
     std::string username = UtilitySerializator::deserialize_string(iterator->in_stream_).second;
+    std::cerr << username << '\n';
 
     remove_delimeter(iterator);
 
@@ -382,6 +384,26 @@ void LinkDoveServer::handle_is_banned_ind_user_request(ConnectionIterator iterat
         answer << END_OF_REQUEST;
     } catch (std::runtime_error &ex) {
         answer << IS_BANNED_IND_USER_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_get_banned_interlocutors(ConnectionIterator iterator) {
+    unsigned long long from_id =  UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+    std::cerr << from_id << '\n';
+
+    remove_delimeter(iterator);
+    std::stringstream answer;
+    try {
+        std::vector<std::string> interlocutors = data_base_.get_banned_interlocutors(from_id);
+
+        answer << GET_BANNED_INTERLOCUTORS_SUCCESS << "\n";
+        UtilitySerializator::serialize(answer, interlocutors);
+        answer << END_OF_REQUEST;
+    } catch (std::runtime_error &ex) {
+        answer << GET_BANNED_INTERLOCUTORS_FAILED << "\n" << END_OF_REQUEST;
     }
 
     iterator->out_stream_ << answer.str();

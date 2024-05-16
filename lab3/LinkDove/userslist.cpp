@@ -70,7 +70,7 @@ void UsersList::slotFindUserResult(int result) {
         std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Пользователь не найден.");
         dialog_ptr->exec();
     } else {
-        ClientSingleton::get_client()->async_find_user(ui->searchEdit->text().toStdString());
+        std::cerr << "FOUND\n";
 
         StatusInfo status_info = ClientSingleton::get_client()->get_found_user();
         removeUsers();
@@ -100,6 +100,7 @@ void UsersList::slotHandleUserCardClicked(const StatusInfo &status_info) {
 void UsersList::slotHandleIsBannedUser(int result, bool is_banned) {
     if (result == IS_IND_BANNED_USER_SUCCESS_ANSWER) {
         if (!is_banned) {
+            std::cerr << "NOTBANNED!!!\n";
             emit userCardClicked(status_info_);
         } else {
             std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Вы были заблокированы пользователем. ");

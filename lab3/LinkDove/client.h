@@ -114,6 +114,12 @@ public:
     void async_is_banned_ind_user(const std::string &username);
 
     /**
+     * </p> Отправляет запрос на получение списка заблокированных собеседников в переписках. </p>
+     * @brief async_get_banned_interlocutors
+     */
+    void async_get_banned_interlocutors();
+
+    /**
      * <p> Отправляет сообщение. </p>
      * @brief async_send_message
      * @param message - Отправляемое сообщение.
@@ -402,6 +408,14 @@ signals:
      * @param is_banned - Флаг статуса блокировки.
      */
     void is_banned_user_result(int result, bool is_banned);
+
+    /**
+     * <p> Генерирует сигнал после получения списка заблокированных пользователей. </p>
+     * @brief get_banned_users
+     * @param result - Параметр, содержащий результат получения списка.
+     * @param usernames - Список никнеймов заблокированных пользователей.
+     */
+    void get_banned_users(int result, std::vector<std::string> usernames);
 
     /**
      * <p> Генерирует сигнал после получения результата отправки сообщения. </p>

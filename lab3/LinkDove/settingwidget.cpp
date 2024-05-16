@@ -6,6 +6,7 @@
 #include "constants.h"
 #include "clientsingleton.h"
 #include "bandialog.h"
+#include "listlabeldialog.h"
 
 SettingWidget::SettingWidget(QWidget *parent) :
     QWidget(parent),
@@ -141,14 +142,26 @@ void SettingWidget::slotHandleBanResult(int result) {
     dialog_ptr->exec();
 }
 
+void SettingWidget::slotGetBannedInterlocutorsResult(int result, std::vector<std::string> interlocutors) {
+    if (result == GET_BANNED_INTERLOCUTORS_SUCCESS_ANSWER) {
+        std::unique_ptr<ListLabelDialog> dialog_ptr = std::make_unique<ListLabelDialog>(nullptr, interlocutors);
+        dialog_ptr->exec();
+    } else if (result == GET_BANNED_INTERLOCUTORS_FAILED_ANSWER) {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Что-то пошло не так при попытке получить список заблокированнх пользователей.");
+        dialog_ptr->exec();
+    }
+}
+
 void SettingWidget::setupConnections() {
-    connect(ui->quitButton,   &QPushButton::clicked, this, &SettingWidget::slotQuitAccount);
-    connect(ui->aboutButton,  &QPushButton::clicked, this, &SettingWidget::slotDisplayAboutDialog);
-    connect(ui->banButton,    &QPushButton::clicked, this, &SettingWidget::slotDisplayBanDialog);
-    connect(ui->notifyButton, &QPushButton::clicked, this, [this]() { ClientSingleton::get_client()->async_get_notifications(); });
+    connect(ui->quitButton,       &QPushButton::clicked, this, &SettingWidget::slotQuitAccount);
+    connect(ui->aboutButton,      &QPushButton::clicked, this, &SettingWidget::slotDisplayAboutDialog);
+    connect(ui->banButton,        &QPushButton::clicked, this, &SettingWidget::slotDisplayBanDialog);
+    connect(ui->notifyButton,     &QPushButton::clicked, this, [this] () { ClientSingleton::get_client()->async_get_notifications(); });
+    connect(ui->confidenceButton, &QPushButton::clicked, this, [this] () { ClientSingleton::get_client()->async_get_banned_interlocutors(); });
 
     connect(ClientSingleton::get_client(), &Client::get_complaints_result,    this, &SettingWidget::slotDisplayComplaintList);
     connect(ClientSingleton::get_client(), &Client::send_complaint_result,    this, &SettingWidget::slotComplaintResult);
     connect(ClientSingleton::get_client(), &Client::get_notifications_result, this, &SettingWidget::slotGetNotificationsResult);
     connect(ClientSingleton::get_client(), &Client::ban_user_result,          this, &SettingWidget::slotHandleBanResult);
+    connect(ClientSingleton::get_client(), &Client::get_banned_users,         this, &SettingWidget::slotGetBannedInterlocutorsResult);
 }

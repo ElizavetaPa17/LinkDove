@@ -187,6 +187,13 @@ private:
     void handle_is_banned_ind_user_request(ConnectionIterator iterator);
 
     /**
+     * <p> Обрабатывает запрос на получение списка заблокированных в переписке пользователей. </p>
+     * @brief handle_get_banned_interlocutors
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_get_banned_interlocutors(ConnectionIterator iterator);
+
+    /**
      * <p> Обрабатывает запрос на отправку сообщения. </p>
      * @brief handle_send_msg_request
      * @param iterator - Итератор на сокет, запрос которого обрабатывается.

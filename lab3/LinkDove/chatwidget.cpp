@@ -36,6 +36,7 @@ ChatWidget::~ChatWidget() {
 
 void ChatWidget::slotOpenChatWith(const StatusInfo &status_info) {
     AudioManagerSingleton::get_manager()->stop();
+    std::cerr << "OPENCHAT!!!\n";
 
     interlocutor_ = status_info;
     ui->infoLabel->setText(status_info.username_.c_str());

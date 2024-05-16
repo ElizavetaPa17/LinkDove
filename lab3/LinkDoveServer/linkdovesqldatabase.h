@@ -78,6 +78,14 @@ public:
     bool get_user_banned_status(const std::string &username);
 
     /**
+     * <p> Извлекает список никнеймов заблокированных в переписках пользователей. </p>
+     * @brief get_banned_interlocutors
+     * @param id - Идентификатор пользователя, который извлекает список.
+     * @return - Список никнеймов.
+     */
+    std::vector<std::string> get_banned_interlocutors(unsigned long long id);
+
+    /**
      * <p> Добавляет жалобу в БД. </p>
      * @brief add_complaint
      * @param complaint - Информация о жалобе, которая добавляется в БД.
