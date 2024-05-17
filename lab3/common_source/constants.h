@@ -216,6 +216,7 @@ const int GET_NOTIFICATIONS_LIMIT = 100;
 #define MEDIA_CHAT_IMAGE_PATH "media/chat_images/"
 #define MEDIA_CHAT_AUDIO_PATH "media/chat_audio/"
 #define MEDIA_AVATARS_IMAGE_PATH "media/avatars/"
+#define DEFAULT_AVATAR_PATH "media/avatars/default_avatar.png"
 
 // Идентификатор для идентификатора сущности, которая создана, но еще не инициализирована или не сохранена в БД.
 const int CREATED_ENTITY_ID = 0;

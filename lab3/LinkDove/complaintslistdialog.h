@@ -45,6 +45,13 @@ public slots:
      */
     void slotRemoveComplaint(unsigned long long id);
 
+    /**
+     * <p> Слот, обрабатывающий результат отправления ответа на жалобу пользователю. </p>
+     * @brief slotAnswerUserResult
+     * @param result - Параметр, содержащий результат запроса.
+     */
+    void slotAnswerUserResult(int result);
+
 private:
     QScrollArea *scroll_area_;
     unsigned long long removed_complaint_id_;
@@ -55,6 +62,12 @@ private:
      * @param complaint_id - Идентификатор удаляемой жалобы.
      */
     void removeComplaint(unsigned long long complaint_id);
+
+    /**
+     * <p> Настраивает соединения внутри виджета. </P>
+     * @brief setupConnection
+     */
+    void setupConnections();
 };
 
 #endif // COMPLAINTSLISTDIALOG_H

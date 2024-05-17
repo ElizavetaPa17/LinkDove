@@ -33,7 +33,7 @@ ComplaintsListDialog::ComplaintsListDialog(QWidget *parent)
     setStyleSheet("background-color: rgb(245, 245, 245); \
                    border-radius: 51;");
 
-    connect(ClientSingleton::get_client(), &Client::del_complaint_result, this, &ComplaintsListDialog::slotDeleteComplaintResult);
+    setupConnections();
 }
 
 ComplaintsListDialog::~ComplaintsListDialog() {
@@ -64,6 +64,16 @@ void ComplaintsListDialog::slotDeleteComplaintResult(int result) {
     dialog_ptr->exec();
 }
 
+void ComplaintsListDialog::slotAnswerUserResult(int result) {
+    if (result == SEND_USER_ANSWER_SUCCESS_ANSWER) {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Ответ был успешно отправлен пользователю. ");
+        dialog_ptr->exec();
+    } else {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Что-то пошло не так при отправлении ответа пользователю. ");
+        dialog_ptr->exec();
+    }
+}
+
 void ComplaintsListDialog::slotRemoveComplaint(unsigned long long id) {
     removed_complaint_id_ = id;
 }
@@ -82,4 +92,9 @@ void ComplaintsListDialog::removeComplaint(unsigned long long complaint_id) {
             }
         }
     }
+}
+
+void ComplaintsListDialog::setupConnections() {
+    connect(ClientSingleton::get_client(), &Client::del_complaint_result, this, &ComplaintsListDialog::slotDeleteComplaintResult);
+    connect(ClientSingleton::get_client(), &Client::answer_user_result,   this, &ComplaintsListDialog::slotAnswerUserResult);
 }

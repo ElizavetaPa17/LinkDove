@@ -218,6 +218,7 @@ void LinkDoveServer::handle_register_request(ConnectionIterator iterator) {
         // В случае удачной регистрации отправляем клиенту структуру StatusInfo (в ней содержится ID)
         user_info.status_info_ = data_base_.get_status_info(user_info.status_info_.username_);
 
+
         answer << REGISTER_SUCCESS << "\n";
         user_info.status_info_.serialize(answer);
         answer << END_OF_REQUEST;
@@ -884,7 +885,6 @@ void LinkDoveServer::handle_get_chat_messages_request(ConnectionIterator iterato
     unsigned long long chat_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
 
     remove_delimeter(iterator);
-    std::cerr << "here\n";
 
     std::stringstream answer;
     try {

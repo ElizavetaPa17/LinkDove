@@ -29,8 +29,6 @@ ChannelWidget::~ChannelWidget()
 }
 
 void ChannelWidget::slotOpenChannel(const ChannelInfo &channel_info) {
-    AudioManagerSingleton::get_manager()->stop();
-
     channel_info_ = channel_info;
     ui->infoLabel->setText(channel_info_.name_.c_str());
 

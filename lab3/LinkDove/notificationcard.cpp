@@ -26,7 +26,6 @@ unsigned long long NotificationCard::getNotificationId() {
 
 void NotificationCard::setupConnections() {
     connect(ui->delButton, &QPushButton::clicked, this, [this]() { ClientSingleton::get_client()->async_del_notification(notification_id_);
-                                                                    std::cerr << notification_id_ << '\n';
                                                                    emit removed(notification_id_);
                                                                   });
 }

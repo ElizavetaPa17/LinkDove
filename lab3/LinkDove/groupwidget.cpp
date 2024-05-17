@@ -30,8 +30,6 @@ GroupWidget::~GroupWidget()
 }
 
 void GroupWidget::slotOpenGroup(const ChatInfo &group_info) {
-    AudioManagerSingleton::get_manager()->stop();
-
     chat_info_ = group_info;
     ui->infoLabel->setText(group_info.name_.c_str());
 
@@ -112,7 +110,7 @@ void GroupWidget::slotHandleGetMessages(int result, std::vector<std::shared_ptr<
         unsigned long long user_id = ClientSingleton::get_client()->get_status_info().id_;
         std::string user_name;
 
-        bool delete_flag = ((user_id == ADMIN_ID) || (user_id == chat_info_.id_)) ? true : false; // Владелец или админ могут удалять любые сообщения
+        bool delete_flag = ((user_id == ADMIN_ID) || (user_id == chat_info_.owner_id_)) ? true : false; // Владелец или админ могут удалять любые сообщения
 
         for (auto& elem : messages) {
             QHBoxLayout *phboxLayout = new QHBoxLayout();

@@ -325,6 +325,7 @@ bool LinkDoveSQLDataBase::register_user(const UserInfo& info) {
     query.bindValue(":birthday",    info.status_info_.birthday_.toString("yyyy-MM-dd"));
     query.bindValue(":text_status", info.status_info_.text_status_.c_str());
     query.bindValue(":is_banned",   0); // при создании пользователя его аккаунт не блокируется
+    query.bindValue(":image",       DEFAULT_AVATAR_PATH);
 
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString();
