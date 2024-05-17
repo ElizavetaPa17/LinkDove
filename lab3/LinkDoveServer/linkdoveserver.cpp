@@ -50,7 +50,9 @@ void LinkDoveServer::setup_connection_tree() {
     handle_tree_[FIND_USER_REQUEST]                  = &LinkDoveServer::handle_find_user_request;
     handle_tree_[BAN_USER_REQUEST]                   = &LinkDoveServer::handle_ban_user_request;
     handle_tree_[BAN_IND_USER_REQUEST]               = &LinkDoveServer::handle_ban_ind_user_request;
+    handle_tree_[BAN_CHAT_USER_REQUEST]              = &LinkDoveServer::handle_ban_chat_user_request;
     handle_tree_[IS_BANNED_IND_USER_REQUEST]         = &LinkDoveServer::handle_is_banned_ind_user_request;
+    handle_tree_[IS_BANNED_CHAT_USER_REQUEST]        = &LinkDoveServer::handle_is_banned_chat_user_request;
     handle_tree_[GET_BANNED_INTERLOCUTORS_REQUEST]   = &LinkDoveServer::handle_get_banned_interlocutors;
     handle_tree_[SEND_MSG_REQUEST]                   = &LinkDoveServer::handle_send_msg_request;
     handle_tree_[GET_IND_MSG_REQUEST]                = &LinkDoveServer::handle_get_msg_request;
@@ -369,6 +371,31 @@ void LinkDoveServer::handle_ban_ind_user_request(ConnectionIterator iterator) {
     async_write(iterator);
 }
 
+void LinkDoveServer::handle_ban_chat_user_request(ConnectionIterator iterator) {
+    std::string username = UtilitySerializator::deserialize_string(iterator->in_stream_).second;
+    unsigned long long chat_id =  UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+    uint8_t is_ban = UtilitySerializator::deserialize_fundamental<uint8_t>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    try {
+        StatusInfo banned_user = data_base_.get_status_info(username);
+
+        // НЕЛЬЗЯ ЗАБЛОКИРОВАТЬ АДМИНА!
+        if (banned_user.id_ != ADMIN_ID && data_base_.ban_chat_user(chat_id, banned_user.id_, is_ban)) {
+            answer << BAN_CHAT_USER_SUCCESS << "\n" << END_OF_REQUEST;
+        } else {
+            answer << BAN_CHAT_USER_FAILED << "\n" << END_OF_REQUEST;
+        }
+    } catch (std::runtime_error &ex) {
+        answer << BAN_CHAT_USER_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
 void LinkDoveServer::handle_is_banned_ind_user_request(ConnectionIterator iterator) {
     std::string username = UtilitySerializator::deserialize_string(iterator->in_stream_).second;
     unsigned long long to_id =  UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
@@ -378,9 +405,10 @@ void LinkDoveServer::handle_is_banned_ind_user_request(ConnectionIterator iterat
     std::stringstream answer;
     try {
         StatusInfo banned_user = data_base_.get_status_info(username);
+        bool is_banned = data_base_.is_banned_ind_user(banned_user.id_, to_id);
 
         answer << IS_BANNED_IND_USER_SUCCESS << "\n";
-        UtilitySerializator::serialize_fundamental<bool>(answer, data_base_.is_banned_ind_user(banned_user.id_, to_id));
+        UtilitySerializator::serialize_fundamental<bool>(answer, is_banned);
         answer << END_OF_REQUEST;
     } catch (std::runtime_error &ex) {
         answer << IS_BANNED_IND_USER_FAILED << "\n" << END_OF_REQUEST;
@@ -390,9 +418,29 @@ void LinkDoveServer::handle_is_banned_ind_user_request(ConnectionIterator iterat
     async_write(iterator);
 }
 
+void LinkDoveServer::handle_is_banned_chat_user_request(ConnectionIterator iterator) {
+    unsigned long long user_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+    unsigned long long chat_id =  UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    try {
+        bool is_banned = data_base_.is_banned_chat_user(chat_id, user_id);
+
+        answer << IS_BANNED_CHAT_USER_SUCCESS << "\n";
+        UtilitySerializator::serialize_fundamental<bool>(answer, is_banned);
+        answer << END_OF_REQUEST;
+    } catch (std::runtime_error &ex) {
+        answer << IS_BANNED_CHAT_USER_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
 void LinkDoveServer::handle_get_banned_interlocutors(ConnectionIterator iterator) {
     unsigned long long from_id =  UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
-    std::cerr << from_id << '\n';
 
     remove_delimeter(iterator);
     std::stringstream answer;
@@ -1020,9 +1068,9 @@ void LinkDoveServer::handle_delete_msg(ConnectionIterator iterator) {
         }
         case GROUP_MSG_TYPE: {
             if (data_base_.delete_chat_message(*msg_ptr)) {
-                answer << DEL_CHANNEL_MSG_SUCCESS << "\n" << END_OF_REQUEST;
+                answer << DEL_CHAT_MSG_SUCCESS << "\n" << END_OF_REQUEST;
             } else {
-                answer << DEL_CHANNEL_MSG_FAILED << "\n" << END_OF_REQUEST;
+                answer << DEL_CHAT_MSG_FAILED << "\n" << END_OF_REQUEST;
             }
 
             break;

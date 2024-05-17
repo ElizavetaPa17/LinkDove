@@ -144,8 +144,13 @@ void SettingWidget::slotHandleBanResult(int result) {
 
 void SettingWidget::slotGetBannedInterlocutorsResult(int result, std::vector<std::string> interlocutors) {
     if (result == GET_BANNED_INTERLOCUTORS_SUCCESS_ANSWER) {
-        std::unique_ptr<ListLabelDialog> dialog_ptr = std::make_unique<ListLabelDialog>(nullptr, interlocutors);
-        dialog_ptr->exec();
+        if (interlocutors.size() == 0) {
+            std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Список заблокированных собеседников пуст.");
+            dialog_ptr->exec();
+        } else {
+            std::unique_ptr<ListLabelDialog> dialog_ptr = std::make_unique<ListLabelDialog>(nullptr, interlocutors);
+            dialog_ptr->exec();
+        }
     } else if (result == GET_BANNED_INTERLOCUTORS_FAILED_ANSWER) {
         std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Что-то пошло не так при попытке получить список заблокированнх пользователей.");
         dialog_ptr->exec();

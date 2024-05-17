@@ -77,7 +77,9 @@ void ChatWidget::slotHandleGetMessages(int result, std::vector<std::shared_ptr<I
                 phboxLayout->addStretch();
                 phboxLayout->addWidget(new MessageCard(nullptr, elem, true));
             } else {
-                phboxLayout->addWidget(new MessageCard(nullptr, elem));
+                bool delete_flag = ClientSingleton::get_client()->get_status_info().id_ == ADMIN_ID ? true : false; // Админ может удалять сообщения собеседника
+
+                phboxLayout->addWidget(new MessageCard(nullptr, elem, delete_flag));
                 phboxLayout->addStretch();
             }
 

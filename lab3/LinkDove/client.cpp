@@ -109,10 +109,29 @@ void Client::async_ban_ind_user(const std::string &username, bool is_ban) {
     write_to_server();
 }
 
+void Client::async_ban_chat_user(const std::string &username, unsigned long long chat_id, bool is_ban) {
+    connection_.out_stream_ << BAN_CHAT_USER_REQUEST << '\n';
+    UtilitySerializator::serialize(connection_.out_stream_, username);
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, chat_id);
+    UtilitySerializator::serialize_fundamental<uint8_t>(connection_.out_stream_, is_ban);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    write_to_server();
+}
+
 void Client::async_is_banned_ind_user(const std::string &username) {
     connection_.out_stream_ << IS_BANNED_IND_USER_REQUEST << '\n';
     UtilitySerializator::serialize(connection_.out_stream_, username);
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, status_info_.id_);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    write_to_server();
+}
+
+void Client::async_is_banned_chat_user(unsigned long long chat_id) {
+    connection_.out_stream_ << IS_BANNED_CHAT_USER_REQUEST << '\n';
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, status_info_.id_);
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, chat_id);
     connection_.out_stream_ << END_OF_REQUEST;
 
     write_to_server();
@@ -426,9 +445,18 @@ void Client::setup_response_tree() {
     response_tree_[BAN_IND_USER_SUCCESS] = [this] () { emit ban_user_result(BAN_IND_USER_SUCCESS_ANSWER); };
     response_tree_[BAN_IND_USER_FAILED]  = [this] () { emit ban_user_result(BAN_IND_USER_FAILED_ANSWER); };
 
+    response_tree_[BAN_CHAT_USER_SUCCESS] = [this] () { emit ban_user_result(BAN_CHAT_USER_SUCCESS_ANSWER); };
+    response_tree_[BAN_CHAT_USER_FAILED]  = [this] () { emit ban_user_result(BAN_CHAT_USER_FAILED_ANSWER); };
+
     response_tree_[IS_BANNED_IND_USER_SUCCESS] = [this] () { bool is_banned = UtilitySerializator::deserialize_fundamental<bool>(connection_.in_stream_).second;
                                                              emit is_banned_user_result(IS_IND_BANNED_USER_SUCCESS_ANSWER, is_banned); };
     response_tree_[IS_BANNED_IND_USER_FAILED]  = [this] () { emit is_banned_user_result(IS_IND_BANNED_USER_FAILED_ANSWER, true); };
+
+    response_tree_[IS_BANNED_CHAT_USER_SUCCESS] = [this] () { bool is_banned = UtilitySerializator::deserialize_fundamental<bool>(connection_.in_stream_).second;
+                                                              emit is_banned_user_result(IS_CHAT_BANNED_USER_SUCCESS_ANSWER, is_banned);
+                                                              std::cerr << "wow\n";
+                                                            };
+    response_tree_[IS_BANNED_CHAT_USER_FAILED]  = [this] () { emit is_banned_user_result(IS_CHAT_BANNED_USER_FAILED_ANSWER, true); };
 
     response_tree_[GET_BANNED_INTERLOCUTORS_SUCCESS] = [this] () { std::vector<std::string> interlocutors = UtilitySerializator::deserialize_vec_string(connection_.in_stream_).second;
                                                                    emit get_banned_users(GET_BANNED_INTERLOCUTORS_SUCCESS_ANSWER, interlocutors); };

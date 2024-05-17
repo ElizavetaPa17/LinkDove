@@ -123,6 +123,12 @@ private slots:
     void slotRemoveUser();
 
     /**
+     * <p> Слот, который обрабатывает событие нажатия на кнопку блокировки/разблокировки пользователя. </p>
+     * @brief slotBanUser
+     */
+    void slotBanUser();
+
+    /**
      * <p> Слот, который обрабатывает результат удаление из канала пользователя владельцем канала. </p>
      * @brief slotRemoveUserResult
      * @param result - Результат удаления.
@@ -143,6 +149,13 @@ private slots:
      * @param result
      */
     void slotDeleteMessageResult(int result);
+
+    /**
+     * <p> Слот, который обрабатывает событие блокировки/разблокировки пользователя владельцем группы. </p>
+     * @brief slotBanUserResult
+     * @param result - Результат блокироваки/разблокировки пользователя.
+     */
+    void slotBanUserResult(int result);
 
 private:
     Ui::GroupWidget *ui;

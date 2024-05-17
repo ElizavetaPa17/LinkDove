@@ -471,6 +471,35 @@ bool LinkDoveSQLDataBase::ban_ind_user(unsigned long long from_id, unsigned long
     }
 }
 
+bool LinkDoveSQLDataBase::ban_chat_user(unsigned long long chat_id, unsigned long long user_id, bool is_ban) {
+    QSqlQuery query(data_base_);
+
+    if (is_ban) {
+        query.prepare(" INSERT INTO CHAT_BANNED_USERS "
+                      " (chat_id, user_id) "
+                      " VALUES (:chat_id, :user_id); ");
+    } else {
+        query.prepare(" DELETE FROM CHAT_BANNED_USERS "
+                      " WHERE chat_id=:chat_id AND user_id=:user_id; ");
+    }
+
+    query.bindValue(":chat_id", chat_id);
+    query.bindValue(":user_id", user_id);
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString() << '\n';
+        return false;
+    } else {
+        // если блокировка была успешна, то row affected > 0, иначе row affected == 0 (false).
+        bool is_quit = true;
+        if (is_ban) {
+            is_quit = quit_chat(user_id, chat_id);
+        }
+
+        return query.numRowsAffected() && is_quit; // блокировка и удаление пользователя из чата
+    }
+}
+
 bool LinkDoveSQLDataBase::is_banned_ind_user(unsigned long long from_id, unsigned long long to_id) {
     QSqlQuery query(data_base_);
 
@@ -483,6 +512,27 @@ bool LinkDoveSQLDataBase::is_banned_ind_user(unsigned long long from_id, unsigne
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString() << '\n';
         throw std::runtime_error("is_banned_ind_user failed due to exec.");
+    } else {
+        if (query.next()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
+
+bool LinkDoveSQLDataBase::is_banned_chat_user(unsigned long long chat_id, unsigned long long user_id) {
+    QSqlQuery query(data_base_);
+
+    query.prepare(" SELECT * FROM CHAT_BANNED_USERS "
+                  " WHERE chat_id=:chat_id AND user_id=:user_id; ");
+
+    query.bindValue(":chat_id", chat_id);
+    query.bindValue(":user_id", user_id);
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString() << '\n';
+        throw std::runtime_error("is_banned_chat_user failed due to exec.");
     } else {
         if (query.next()) {
             return true;

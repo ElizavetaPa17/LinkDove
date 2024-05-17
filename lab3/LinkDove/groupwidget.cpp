@@ -5,6 +5,7 @@
 
 #include "groupmessage.h"
 #include "clientsingleton.h"
+#include "bandialog.h"
 #include "infodialog.h"
 #include "agreedialog.h"
 #include "typestringdialog.h"
@@ -46,12 +47,15 @@ void GroupWidget::slotHandleIsGroupParticipantResult(int result, bool is_partici
             ui->stackedWidget->setCurrentIndex(0); // PARTICIPANT_PAGE
             ui->quitButton->show();
 
-            if (chat_info_.owner_id_ == ClientSingleton::get_client()->get_status_info().id_) {
+            if (chat_info_.owner_id_ == ClientSingleton::get_client()->get_status_info().id_
+                || ADMIN_ID == ClientSingleton::get_client()->get_status_info().id_) {
                 ui->deleteButton->show();
                 ui->removeUserButton->show();
+                ui->banButton->show();
             } else {
                 ui->removeUserButton->hide();
                 ui->deleteButton->hide();
+                ui->banButton->hide();
             }
 
         } else {
@@ -59,6 +63,8 @@ void GroupWidget::slotHandleIsGroupParticipantResult(int result, bool is_partici
             ui->deleteButton->hide();
             ui->quitButton->hide();
             ui->removeUserButton->hide();
+            ui->banButton->hide();
+
         }
     } else {
         std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Ошибка получения информации об участниках группы. Попытайтесь позже. ");
@@ -68,6 +74,7 @@ void GroupWidget::slotHandleIsGroupParticipantResult(int result, bool is_partici
         ui->deleteButton->hide();
         ui->quitButton->hide();
         ui->removeUserButton->hide();
+        ui->banButton->hide();
     }
 
     ClientSingleton::get_client()->async_get_chat_messages(chat_info_.id_);
@@ -81,7 +88,6 @@ void GroupWidget::slotClear() {
 
 void GroupWidget::slotSendMessage() {
     if (!ui->messageEdit->text().isEmpty()) {
-        std::cerr << chat_info_.id_ << '\n';
         std::shared_ptr<GroupMessage> message = MessageUtility::create_group_text_message(chat_info_.id_,
                                                                                           ClientSingleton::get_client()->get_status_info().id_,
                                                                                           ui->messageEdit->text().toStdString());
@@ -106,6 +112,8 @@ void GroupWidget::slotHandleGetMessages(int result, std::vector<std::shared_ptr<
         unsigned long long user_id = ClientSingleton::get_client()->get_status_info().id_;
         std::string user_name;
 
+        bool delete_flag = ((user_id == ADMIN_ID) || (user_id == chat_info_.id_)) ? true : false; // Владелец или админ могут удалять любые сообщения
+
         for (auto& elem : messages) {
             QHBoxLayout *phboxLayout = new QHBoxLayout();
 
@@ -113,7 +121,7 @@ void GroupWidget::slotHandleGetMessages(int result, std::vector<std::shared_ptr<
                 phboxLayout->addStretch();
                 phboxLayout->addWidget(new MessageCard(nullptr, elem, true));
             } else {
-                phboxLayout->addWidget(new MessageCard(nullptr, elem));
+                phboxLayout->addWidget(new MessageCard(nullptr, elem, delete_flag));
                 phboxLayout->addStretch();
             }
 
@@ -225,6 +233,34 @@ void GroupWidget::slotRemoveUser() {
     }
 }
 
+void GroupWidget::slotBanUser() {
+    std::unique_ptr<BanDialog> dialog_ptr = std::make_unique<BanDialog>();
+    if (dialog_ptr->exec() == QDialog::Accepted) {
+        std::pair<QString, bool> pair = dialog_ptr->get_info();
+        if (pair.first.toStdString() == ClientSingleton::get_client()->get_status_info().username_) {
+            std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Вы не можете поменять свой статус блокировки. ");
+            dialog_ptr->exec();
+            return;
+        }
+
+        ClientSingleton::get_client()->async_ban_chat_user(pair.first.toStdString(), chat_info_.id_, pair.second);
+    }
+}
+
+void GroupWidget::slotBanUserResult(int result) {
+    std::string text;
+    if (result == BAN_CHAT_USER_SUCCESS_ANSWER) {
+        text = "Статус блокировки пользователя был изменен.  ";
+    } else if (result == BAN_CHAT_USER_FAILED_ANSWER) {
+        text = "Что-то пошло не так при попытке изменить статус блокировки пользователя.";
+    } else {
+        return;
+    }
+
+    std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, text);
+    dialog_ptr->exec();
+}
+
 void GroupWidget::slotRemoveUserResult(int result) {
     if (result == REMOVE_USER_FROM_CHAT_SUCCESS_ANSWER) {
         std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Пользователь удален из группы. ");
@@ -237,8 +273,13 @@ void GroupWidget::slotRemoveUserResult(int result) {
 
 void GroupWidget::slotGetParticipantListResult(int result, std::vector<std::string> participants) {
     if (result == GET_CHAT_PARTICIPANTS_SUCCESS_ANSWER) {
-        std::unique_ptr<ListLabelDialog> dialog_ptr = std::make_unique<ListLabelDialog>(nullptr, participants);
-        dialog_ptr->exec();
+        if (participants.size() == 0) {
+            std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Список участников пуст.");
+            dialog_ptr->exec();
+        } else {
+            std::unique_ptr<ListLabelDialog> dialog_ptr = std::make_unique<ListLabelDialog>(nullptr, participants);
+            dialog_ptr->exec();
+        }
     } else {
         std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Что-то пошло не так при попытке получить список участников канала.");
         dialog_ptr->exec();
@@ -269,6 +310,7 @@ void GroupWidget::setupConnection() {
     connect(ClientSingleton::get_client(), &Client::remove_user_from_chat_result,   this, &GroupWidget::slotRemoveUserResult);
     connect(ClientSingleton::get_client(), &Client::get_chat_participants_result,   this, &GroupWidget::slotGetParticipantListResult);
     connect(ClientSingleton::get_client(), &Client::delete_msg_result,              this, &GroupWidget::slotDeleteMessageResult);
+    connect(ClientSingleton::get_client(), &Client::ban_user_result,                this, &GroupWidget::slotBanUserResult);
 
     connect(ui->joinButton, &QPushButton::clicked, ClientSingleton::get_client(), [this] () {
                                                                                     ClientSingleton::get_client()->async_add_chat_participant_request(chat_info_.id_);
@@ -277,6 +319,7 @@ void GroupWidget::setupConnection() {
     connect(ui->deleteButton,       &QPushButton::clicked, this, &GroupWidget::slotDeleteGroup);
     connect(ui->quitButton,         &QPushButton::clicked, this, &GroupWidget::slotQuitGroup);
     connect(ui->removeUserButton,   &QPushButton::clicked, this, &GroupWidget::slotRemoveUser);
+    connect(ui->banButton,          &QPushButton::clicked, this, &GroupWidget::slotBanUser);
     connect(ui->participantsButton, &QPushButton::clicked, this, [this]() {
                                                                             ClientSingleton::get_client()->async_get_chat_participants(chat_info_.id_);
                                                                           });

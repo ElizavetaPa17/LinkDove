@@ -102,9 +102,14 @@ public:
      */
     void async_ban_ind_user(const std::string &username, bool is_ban);
 
-    //void async_ban_chnnl_user(const std::string &username, bool is_ban);
-
-    //void async_ban_chat_user(const std::string &username, bool is_ban);
+    /**
+     * <p> Отправляет запрос на блокировку/разблокировку пользователя в чате (группе). </p>
+     * @brief async_ban_chat_user
+     * @param username - - Никнейм пользователя, которого мы блокируем/разблокируем.
+     * @param chat_id - Идентификатор чата (группы), в котором блокируется/разблокируется пользователь.
+     * @param is_ban - Флаг блокировки/разблокировки.
+     */
+    void async_ban_chat_user(const std::string &username, unsigned long long chat_id, bool is_ban);
 
     /**
      * <p> Проверяет, не заблокирован ли текущий пользователь собеседником в переписке. </p>
@@ -112,6 +117,13 @@ public:
      * @param username - Никнейм пользователя, статус блокировки по отношению к которому опрашивается.
      */
     void async_is_banned_ind_user(const std::string &username);
+
+    /**
+     * <p> Проверяет, не заблокирован ли текущий пользователь в чате (группе). </p>
+     * @brief async_is_banned_chat_user
+     * @param - Идентификатор чата (группы), статус блокировки в котором опрашивается.
+     */
+    void async_is_banned_chat_user(unsigned long long chat_id);
 
     /**
      * </p> Отправляет запрос на получение списка заблокированных собеседников в переписках. </p>

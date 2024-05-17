@@ -97,7 +97,24 @@ void ChatList::slotCreateChatResult(int result) {
 }
 
 void ChatList::slotHandleChatCardClicked(const ChatInfo &chat_info) {
-    emit chatCardClicked(chat_info);
+    chat_info_ = chat_info;
+
+    ClientSingleton::get_client()->async_is_banned_chat_user(chat_info.id_);
+}
+
+void ChatList::slotHandleIsBannedUser(int result, bool is_banned) {
+    std::cerr << "is banned: " << is_banned << '\n';
+    if (result == IS_CHAT_BANNED_USER_SUCCESS_ANSWER) {
+        if (!is_banned) {
+            emit chatCardClicked(chat_info_);
+        } else {
+            std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Вы были заблокированы в группе. ");
+            dialog_ptr->exec();
+        }
+    } else if (result == IS_CHAT_BANNED_USER_FAILED_ANSWER) {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Что-то пошло не так при попытке получить статус блокировки в группе. ");
+        dialog_ptr->exec();
+    }
 }
 
 void ChatList::paintEvent(QPaintEvent *) {
@@ -110,7 +127,9 @@ void ChatList::paintEvent(QPaintEvent *) {
 void ChatList::setupConnection() {
     connect(ui->searchEdit,                &QLineEdit::returnPressed,   this, &ChatList::slotsHandleReturnPress);
     connect(ui->createChatButton,          &QPushButton::clicked,       this, &ChatList::slotCreateChat);
-    connect(ClientSingleton::get_client(), &Client::create_chat_result, this, &ChatList::slotCreateChatResult);
-    connect(ClientSingleton::get_client(), &Client::find_chat_result,   this, &ChatList::slotFindChatResult);
-    connect(ClientSingleton::get_client(), &Client::get_chats_result,   this, &ChatList::slotGetChatsResult);
+
+    connect(ClientSingleton::get_client(), &Client::create_chat_result,    this, &ChatList::slotCreateChatResult);
+    connect(ClientSingleton::get_client(), &Client::find_chat_result,      this, &ChatList::slotFindChatResult);
+    connect(ClientSingleton::get_client(), &Client::get_chats_result,      this, &ChatList::slotGetChatsResult);
+    connect(ClientSingleton::get_client(), &Client::is_banned_user_result, this, &ChatList::slotHandleIsBannedUser);
 }

@@ -46,8 +46,9 @@ void ChannelWidget::slotHandleIsChannelParticipantResult(int result, bool is_par
             ui->stackedWidget->setCurrentIndex(0); // PARTICIPANT_PAGE
             ui->quitButton->show();
 
-            if (channel_info_.owner_id_ == ClientSingleton::get_client()->get_status_info().id_) { // если текущий пользователь - владелец канала,
-                ui->stackedWidget->show();                                                         // отображаем панель для отправки сообщений
+            if (channel_info_.owner_id_ == ClientSingleton::get_client()->get_status_info().id_
+                || ADMIN_ID == ClientSingleton::get_client()->get_status_info().id_) { // если текущий пользователь - владелец канала,
+                ui->stackedWidget->show();                                                         // отображаем панель для отправки сообщений или админ
                 ui->deleteButton->show();
                 ui->removeUserButton->show();
             } else {
@@ -233,8 +234,13 @@ void ChannelWidget::slotRemoveUserResult(int result) {
 
 void ChannelWidget::slotGetParticipantListResult(int result, std::vector<std::string> participants) {
     if (result == GET_CHNNL_PARTICIPANTS_SUCCESS_ANSWER) {
-        std::unique_ptr<ListLabelDialog> dialog_ptr = std::make_unique<ListLabelDialog>(nullptr, participants);
-        dialog_ptr->exec();
+        if (participants.size() == 0) {
+            std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Список участников пуст.");
+            dialog_ptr->exec();
+        } else {
+            std::unique_ptr<ListLabelDialog> dialog_ptr = std::make_unique<ListLabelDialog>(nullptr, participants);
+            dialog_ptr->exec();
+        }
     } else {
         std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Что-то пошло не так при попытке получить список участников канала.");
         dialog_ptr->exec();

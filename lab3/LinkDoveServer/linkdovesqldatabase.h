@@ -51,14 +51,24 @@ public:
     bool ban_user(const std::string &username, bool is_ban);
 
     /**
-     * <p> Блокирует или разблокировывает пользователя в переписке. </p>
+     * <p> Блокирует или разблокирует пользователя в переписке. </p>
      * @brief ban_ind_user
      * @param from_id - Идентификатор пользователя, который осуществляет блокировку.
      * @param to_id - Идентификатор пользователя, который блокируется/разблокируется.
-     * @param is_ban - Если is_ban равно true, то пользователь блокируется, иначе - разблокировывается.
+     * @param is_ban - Если is_ban равно true, то пользователь блокируется, иначе - разблокируется.
      * @return - В случае успешного обновления статуса блокировки true, иначе - false.
      */
     bool ban_ind_user(unsigned long long from_id, unsigned long long to_id, bool is_ban);
+
+    /**
+     * <p> Блокирует или разблокирует пользователя в чате (группе). </p>
+     * @brief ban_chat_user
+     * @param chat_id - Идентификатор чата (группы), в котором блокируется/разблокируется пользователь.
+     * @param user_id - Идентификатор пользователя, статус блокировки которого меняется.
+     * @param is_ban - Если is_ban равно true, то пользователь блокируется, иначе - разблокируется.
+     * @return - В случае успешного обновления статуса блокировки true, иначе - false.
+     */
+    bool ban_chat_user(unsigned long long chat_id, unsigned long long user_id, bool is_ban);
 
     /**
      * <p> Возвращает статус блокировки пользователя в переписке. </p>
@@ -68,6 +78,15 @@ public:
      * @return - В случае блокировки возвращает true, иначе - false.
      */
     bool is_banned_ind_user(unsigned long long from_id, unsigned long long to_id);
+
+    /**
+     * <p> Возвращает статус блокировки пользователя в чате (группе) </p>
+     * @brief is_banned_chat_user
+     * @param chat_id - Идентификатор чата (группы), из которого статус блокировки пользователя извлекается.
+     * @param user_id - Идентификатор пользователя, статус блокировки которого извлекается.
+     * @return - В случае блокировки возвращает true, иначе - false.
+     */
+    bool is_banned_chat_user(unsigned long long chat_id, unsigned long long user_id);
 
     /**
      * <p> Проверяет, блокирован ли пользователь. </p>

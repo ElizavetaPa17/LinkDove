@@ -144,6 +144,9 @@ QPushButton:hover {
         <property name="cursor">
          <cursorShape>PointingHandCursor</cursorShape>
         </property>
+        <property name="whatsThis">
+         <string/>
+        </property>
         <property name="styleSheet">
          <string notr="true">QPushButton {
 	background-color: rgb(245, 245, 245);
@@ -178,6 +181,9 @@ QPushButton:hover {
         </property>
         <property name="cursor">
          <cursorShape>PointingHandCursor</cursorShape>
+        </property>
+        <property name="whatsThis">
+         <string>Список заблокированных пользователей.</string>
         </property>
         <property name="styleSheet">
          <string notr="true">QPushButton {

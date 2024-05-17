@@ -166,7 +166,7 @@ private:
     void handle_find_user_request(ConnectionIterator iterator);
 
     /**
-     * <p> Обрабатывает запрос на блокировку пользователя. </p>
+     * <p> Обрабатывает запрос на блокировку пользователя админом (ограничение на отправку сообщений). </p>
      * @brief handle_ban_user_request
      * @param iterator - Итератор на сокет, запрос которого обрабатывается.
      */
@@ -180,11 +180,25 @@ private:
     void handle_ban_ind_user_request(ConnectionIterator iterator);
 
     /**
+     * <p> Обрабатывает запрос на блокировку пользователя в чате (группе). </p>
+     * @brief handle_ban_chat_user_request
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_ban_chat_user_request(ConnectionIterator iterator);
+
+    /**
      * <p> Обрабатывает запрос на получение статуса блокировки пользователя в переписке. </p>
      * @brief handle_is_banned_ind_user_request
      * @param iterator - Итератор на сокет, запрос которого обрабатывается.
      */
     void handle_is_banned_ind_user_request(ConnectionIterator iterator);
+
+    /**
+     * <p> Обрабатывает запрос на получение статуса блокировки пользователя в чате (группе). </p>
+     * @brief handle_is_banned_chat_user_request
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_is_banned_chat_user_request(ConnectionIterator iterator);
 
     /**
      * <p> Обрабатывает запрос на получение списка заблокированных в переписке пользователей. </p>

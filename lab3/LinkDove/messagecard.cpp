@@ -65,7 +65,6 @@ MessageCard::MessageCard(QWidget *parent, std::shared_ptr<IMessage> msg, bool ca
     }
 
     if (can_delete) {
-        std::cerr << can_delete;
         ui->deleteButton->show();
     } else {
         ui->deleteButton->hide();
