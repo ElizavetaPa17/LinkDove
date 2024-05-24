@@ -271,6 +271,27 @@ private:
     void handle_add_channel_participant_request(ConnectionIterator iterator);
 
     /**
+     * <p> Обрабатывает запрос на добавление пользователя в приватный канал. </p>
+     * @brief handle_request_channel_participant
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_request_channel_participant_request(ConnectionIterator iterator);
+
+    /**
+     * <p> Обрабатывает запрос на добавление пользователя в приватный канал владельцем канала. </p>
+     * @brief handle_add_private_channel_participant_request
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_add_private_channel_participant_request(ConnectionIterator iterator);
+
+    /**
+     * <p> Обрабатывает запрос на удаление запроса вступления в приватный канал. </p>
+     * @brief handle_remove_request_channel_request
+     * @param iterator
+     */
+    void handle_remove_request_channel_request(ConnectionIterator iterator);
+
+    /**
      * <p> Обрабатывает запрос на получение сообщений из канала. </p>
      * @brief handle_get_channel_messages
      * @param iterator - Итератор на сокет, запрос которого обрабатывается.
@@ -283,6 +304,13 @@ private:
      * @param iterator - Итератор на сокет, запрос которого обрабатывается.
      */
     void handle_get_channel_participants_request(ConnectionIterator iterator);
+
+    /**
+     * <p> Обрабатывает запрос на получение списка запросов вступления в приватный канал. </p>
+     * @brief handle_get_channel_requests_request
+     * @param iterator
+     */
+    void handle_get_channel_requests_request(ConnectionIterator iterator);
 
     /**
      * <p> Обрабатывает запрос на удаление канала. </p>
@@ -415,5 +443,9 @@ private:
      */
     void remove_delimeter(ConnectionIterator iterator);
 };
+
+namespace ServerUtility {
+    bool check_password(std::string &password);
+}
 
 #endif // LINKDOVESERVER_H

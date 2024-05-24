@@ -149,7 +149,7 @@ bool LinkDoveSQLDataBase::setup_tables() {
                        "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
                        " owner_id MEDIUMINT NOT NULL, "
                        " name VARCHAR(64) UNIQUE NOT NULL, "
-                       " is_banned TINYINT DEFAULT 0, "
+                       " is_private TINYINT DEFAULT 0, "
                        " FOREIGN KEY (owner_id) REFERENCES USERS(ID) ON DELETE CASCADE); ");
 
     if (!is_ok) {
@@ -166,6 +166,18 @@ bool LinkDoveSQLDataBase::setup_tables() {
 
     if (!is_ok) {
         std::cerr << "Failed to setup CHANNEL_PARTICIPANTS table: " << query.lastError().text().toStdString() << '\n';
+        return false;
+    }
+
+    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS CHANNEL_REQUESTS "
+                       " (ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
+                       " channel_id BIGINT NOT NULL, "
+                       " user_id MEDIUMINT NOT NULL, "
+                       " FOREIGN KEY (channel_id) REFERENCES CHANNELS(ID) ON DELETE CASCADE, "
+                       " FOREIGN KEY (user_id) REFERENCES USERS(ID) ON DELETE CASCADE); ");
+
+    if (!is_ok) {
+        std::cerr << "Failed to setup CHANNEL_REQUESTS table: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
@@ -231,7 +243,7 @@ bool LinkDoveSQLDataBase::setup_tables() {
                        "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
                        " owner_id MEDIUMINT NOT NULL, "
                        " name VARCHAR(64) UNIQUE NOT NULL, "
-                       " is_banned TINYINT DEFAULT 0, "
+                       " is_private TINYINT DEFAULT 0, "
                        " FOREIGN KEY (owner_id) REFERENCES USERS(ID) ON DELETE CASCADE); ");
 
     if (!is_ok) {
@@ -1149,11 +1161,13 @@ bool LinkDoveSQLDataBase::delete_ind_chat(unsigned long long first_id, unsigned 
 bool LinkDoveSQLDataBase::add_channel(const ChannelInfo &channel_info) {
     QSqlQuery query(data_base_);
     query.prepare(" INSERT INTO CHANNELS "
-                  " (owner_id, name, is_banned) "
-                  " VALUES (:owner_id, :name, 0); ");
+                  " (owner_id, name, is_private) "
+                  " VALUES (:owner_id, :name, :is_private); ");
 
     query.bindValue(":owner_id", channel_info.owner_id_);
     query.bindValue(":name", channel_info.name_.c_str());
+    query.bindValue(":is_private", channel_info.is_private_);
+
     if (data_base_.transaction()) {
         if (!query.exec()) {
             std::cerr << query.lastError().text().toStdString();
@@ -1259,6 +1273,42 @@ bool LinkDoveSQLDataBase::add_participant_to_channel(unsigned long long particip
     }
 }
 
+bool LinkDoveSQLDataBase::request_participant_to_channel(unsigned long long user_id, unsigned long long channel_id) {
+    QSqlQuery query(data_base_);
+    query.prepare(" INSERT INTO CHANNEL_REQUESTS "
+                  " (channel_id, user_id) "
+                  " VALUES (:channel_id, :user_id); ");
+
+    query.bindValue(":channel_id", channel_id);
+    query.bindValue(":user_id", user_id);
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString();
+        return false;
+    } else {
+        // если вставка была успешна, то row affected > 0, иначе row affected == 0 (false).
+        return query.numRowsAffected();
+    }
+}
+
+bool LinkDoveSQLDataBase::remove_request_channel(unsigned long long user_id, unsigned long long channel_id) {
+    QSqlQuery query(data_base_);
+
+    query.prepare(" DELETE FROM CHANNEL_REQUESTS "
+                  " WHERE user_id=:user_id AND channel_id=:channel_id;");
+
+    query.bindValue(":channel_id", channel_id);
+    query.bindValue(":user_id", user_id);
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString();
+        return false;
+    } else {
+        // если удаление было успешно, то row affected > 0, иначе row affected == 0 (false).
+        return query.numRowsAffected();
+    }
+}
+
 bool LinkDoveSQLDataBase::is_channel_participant(unsigned long long participant_id, unsigned long long channel_id) {
     QSqlQuery query(data_base_);
     query.prepare(" SELECT * FROM CHANNEL_PARTICIPANTS "
@@ -1311,12 +1361,33 @@ std::vector<std::string> LinkDoveSQLDataBase::get_channel_participants(unsigned 
 
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString() << '\n';
-        throw std::runtime_error("get_channel_participants failed due to query.exec");
+        throw std::runtime_error("get_channel_requests failed due to query.exec");
     }
 
     std::vector<std::string> participants;
     while (query.next()) {
         participants.push_back(get_status_info(query.value("participant_id").toULongLong()).username_);
+    }
+
+    return participants;
+}
+
+std::vector<std::string> LinkDoveSQLDataBase::get_channel_requests(unsigned long long channel_id) {
+    QSqlQuery query(data_base_);
+
+    query.prepare(" SELECT user_id FROM CHANNEL_REQUESTS "
+                  " WHERE channel_id=:channel_id; ");
+
+    query.bindValue(":channel_id", channel_id);
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString() << '\n';
+        throw std::runtime_error("get_channel_requests failed due to query.exec");
+    }
+
+    std::vector<std::string> participants;
+    while (query.next()) {
+        participants.push_back(get_status_info(query.value("user_id").toULongLong()).username_);
     }
 
     return participants;
@@ -1360,7 +1431,7 @@ bool LinkDoveSQLDataBase::quit_channel(unsigned long long user_id, unsigned long
 bool LinkDoveSQLDataBase::add_chat(const ChatInfo &chat_info) {
     QSqlQuery query(data_base_);
     query.prepare(" INSERT INTO CHATS "
-                  " (owner_id, name, is_banned) "
+                  " (owner_id, name, is_private) "
                   " VALUES (:owner_id, :name, 0); ");
 
     query.bindValue(":owner_id", chat_info.owner_id_);
@@ -1856,7 +1927,7 @@ namespace link_dove_database_details__ {
         channel_info.id_        = query.value("ID").toULongLong();
         channel_info.owner_id_  = query.value("owner_id").toULongLong();
         channel_info.name_      = query.value("name").toString().toStdString();
-        channel_info.is_banned_ = query.value("is_banned").toBool();
+        channel_info.is_private_ = query.value("is_private").toBool();
 
         return channel_info;
     }
@@ -1866,7 +1937,7 @@ namespace link_dove_database_details__ {
         chat_info.id_        = query.value("ID").toULongLong();
         chat_info.owner_id_  = query.value("owner_id").toULongLong();
         chat_info.name_      = query.value("name").toString().toStdString();
-        chat_info.is_banned_ = query.value("is_banned").toBool();
+        chat_info.is_private_ = query.value("is_private").toBool();
 
         return chat_info;
     }

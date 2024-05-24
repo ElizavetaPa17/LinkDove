@@ -5,6 +5,7 @@
 
 #include "channelinfo.h"
 #include "imessage.h"
+#include "requestlistdialog.h"
 
 namespace Ui {
 class ChannelWidget;
@@ -140,12 +141,28 @@ private slots:
     /**
      * <p> Слот, который обрабатывает собатие удаление сообщения. </p>
      * @brief slotDeleteMessageResult
-     * @param result
+     * @param result - Результат запроса.
      */
     void slotDeleteMessageResult(int result);
 
+    /**
+     * <p> Слот, который обрабатывает результат отправки запроса на вступление в приватный канал. </p>
+     * @brief slotHandleRequestChannel
+     * @param result - Результат запроса.
+     */
+    void slotHandleRequestChannel(int result);
+
+    /**
+     * <p> Слот, который обрабатывает результат получения списка запросов на вступления в канал. </p>
+     * @brief slotGetChannelRequestResult
+     * @param result - Результат запроса.
+     * @param request - Список запросов.
+     */
+    void slotGetChannelRequestResult(int result, std::vector<std::string> request);
+
 private:
     Ui::ChannelWidget *ui;
+    RequestListDialog request_dialog_;
     ChannelInfo channel_info_;
 
     int         send_msg_type_;  // Тип крайнего отправленного сообщения

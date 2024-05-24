@@ -261,6 +261,24 @@ public:
     bool add_participant_to_channel(unsigned long long participant_id, unsigned long long channel_id);
 
     /**
+     * <p> Добавляет пользователя в приватный канал. </p>
+     * @brief request_participant_to_channel
+     * @param user_id - Идентификатор добавляемого пользователя.
+     * @param channel_id - Идентификатор канала, в который добавляется пользователь.
+     * @return - В случае успеха возвращает true, иначе - false.
+     */
+    bool request_participant_to_channel(unsigned long long user_id, unsigned long long channel_id);
+
+    /**
+     * <p> Удаляет запрос на вступление в приватный канал. </p>
+     * @brief remove_request_channel
+     * @param user_id - Никнейм пользователя (автора запроса).
+     * @param channel_id - Идентификатор канала, из которого удаляется запрос.
+     * @return - В случае успеха возвращает true, иначе - false.
+     */
+    bool remove_request_channel(unsigned long long user_id, unsigned long long channel_id);
+
+    /**
      * <p> Проверяет, является ли пользователь участником канала. </p>
      * @brief is_channel_participant
      * @param participant_id - Идентификатор пользователя.
@@ -284,6 +302,14 @@ public:
      * @return - Список участников канала.
      */
     std::vector<std::string> get_channel_participants(unsigned long long channel_id);
+
+    /**
+     * <p> Возвращает список никнеймов тех, кто отправлял запрос на вступление в частный канал. </p>
+     * @brief get_channel_requests
+     * @param channel_id
+     * @return - Список отправителей запроса.
+     */
+    std::vector<std::string> get_channel_requests(unsigned long long channel_id);
 
     /**
      * <p> Удаляет канал из БД. </p>

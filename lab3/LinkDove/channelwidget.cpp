@@ -38,24 +38,29 @@ void ChannelWidget::slotOpenChannel(const ChannelInfo &channel_info) {
     emit openChannelWidget();
 }
 
-void ChannelWidget::slotHandleIsChannelParticipantResult(int result, bool is_participant) {
+void ChannelWidget::slotHandleIsChannelParticipantResult(int result, bool is_participant) { 
     if (result == IS_CHANNEL_PARTICIPANT_SUCCESS_ANSWER) {
         if (is_participant) {
             ui->stackedWidget->setCurrentIndex(0); // PARTICIPANT_PAGE
             ui->quitButton->show();
+            ui->participantsButton->show();
 
             if (channel_info_.owner_id_ == ClientSingleton::get_client()->get_status_info().id_
                 || ADMIN_ID == ClientSingleton::get_client()->get_status_info().id_) { // если текущий пользователь - владелец канала,
                 ui->stackedWidget->show();                                                         // отображаем панель для отправки сообщений или админ
                 ui->deleteButton->show();
                 ui->removeUserButton->show();
+                ui->requestButton->show();
             } else {
+                ui->requestButton->hide();
                 ui->stackedWidget->hide();
                 ui->deleteButton->hide();
                 ui->removeUserButton->hide();
             }
         } else {
             ui->stackedWidget->show();
+            ui->requestButton->hide();
+            ui->participantsButton->hide();
             ui->deleteButton->hide();
             ui->quitButton->hide();
             ui->removeUserButton->hide();
@@ -70,7 +75,11 @@ void ChannelWidget::slotHandleIsChannelParticipantResult(int result, bool is_par
         ui->stackedWidget->setCurrentIndex(1); // NOT_PARTICIPANT_PAGE
     }
 
-    ClientSingleton::get_client()->async_get_channel_messages(channel_info_.id_);
+    if (!channel_info_.is_private_ || is_participant) {
+        ClientSingleton::get_client()->async_get_channel_messages(channel_info_.id_);
+    }
+
+    request_dialog_.setBroadChatId(channel_info_.id_);
 }
 
 void ChannelWidget::slotClear() {
@@ -254,6 +263,41 @@ void ChannelWidget::slotDeleteMessageResult(int result) {
     }
 }
 
+void ChannelWidget::slotHandleRequestChannel(int result) {
+    std::string text;
+
+    if (result == REQUEST_PARTICIPANT_TO_CHANNEL_SUCCESS_ANSWER) {
+        text = "Запрос на вступление в канал был отправлен.";
+    } else if (result == REQUEST_PARTICIPANT_TO_CHANNEL_FAILED_ANSWER){
+        text = "Что-то пошло не так при попытке отправить запрос на вступление в канал.";
+    }
+
+    std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, text);
+    dialog_ptr->exec();
+}
+
+void ChannelWidget::slotGetChannelRequestResult(int result, std::vector<std::string> requests) {
+    if (result == GET_CHANNEL_REQUESTS_FAILED_ANSWER) {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Что-то пошло не так при попытке получить список запросов.");
+        dialog_ptr->exec();
+        return;
+    }
+
+    request_dialog_.removeAllRequests();
+    size_t sz = requests.size();
+
+    if (sz == 0) {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Список запросов пуст.");
+        dialog_ptr->exec();
+    } else {
+        for (int i = 0; i < sz; ++i) {
+            request_dialog_.addRequestUsername(requests[i]);
+        }
+
+        request_dialog_.exec();
+    }
+}
+
 void ChannelWidget::setupConnection() {
     connect(ui->messageEdit,       &QLineEdit::returnPressed, this, &ChannelWidget::slotSendMessage);
     connect(ui->sendButton,        &QPushButton::clicked,     this, &ChannelWidget::slotSendMessage);
@@ -269,10 +313,20 @@ void ChannelWidget::setupConnection() {
     connect(ClientSingleton::get_client(), &Client::remove_user_from_channel_result,   this, &ChannelWidget::slotRemoveUserResult);
     connect(ClientSingleton::get_client(), &Client::get_channel_participants_result,   this, &ChannelWidget::slotGetParticipantListResult);
     connect(ClientSingleton::get_client(), &Client::delete_msg_result,                 this, &ChannelWidget::slotDeleteMessageResult);
+    connect(ClientSingleton::get_client(), &Client::request_participant_to_channel_result, this, &ChannelWidget::slotHandleRequestChannel);
+    connect(ClientSingleton::get_client(), &Client::get_channel_requests_result,       this, &ChannelWidget::slotGetChannelRequestResult);
 
     connect(ui->joinButton, &QPushButton::clicked, ClientSingleton::get_client(), [this] () {
-                                                                                    ClientSingleton::get_client()->async_add_channel_participant_request(channel_info_.id_);
+                                                                                    if (!channel_info_.is_private_) {
+                                                                                        ClientSingleton::get_client()->async_add_channel_participant_request(channel_info_.id_);
+                                                                                    } else {
+                                                                                        ClientSingleton::get_client()->async_request_channel_participant_request(channel_info_.id_);
+                                                                                    }
                                                                                   });
+
+    connect(ui->requestButton,      &QPushButton::clicked, this, [this] () {
+                                                                            ClientSingleton::get_client()->async_get_channel_requests_request(channel_info_.id_);
+                                                                          });
     connect(ui->deleteButton,       &QPushButton::clicked, this, &ChannelWidget::slotDeleteChannel);
     connect(ui->quitButton,         &QPushButton::clicked, this, &ChannelWidget::slotQuitChannel);
     connect(ui->removeUserButton,   &QPushButton::clicked, this, &ChannelWidget::slotRemoveUser);

@@ -62,6 +62,8 @@ void LinkDoveServer::setup_connection_tree() {
     handle_tree_[GET_CHANNELS_REQUEST]               = &LinkDoveServer::handle_get_channels_request;
     handle_tree_[IS_CHANNEL_PARTICIPANT_REQUEST]     = &LinkDoveServer::handle_is_channel_participant_request;
     handle_tree_[ADD_PARTICIPANT_TO_CHANNEL_REQUEST] = &LinkDoveServer::handle_add_channel_participant_request;
+    handle_tree_[ADD_PARTICIPANT_TO_PRIVATE_CHANNEL_REQUEST] = &LinkDoveServer::handle_add_private_channel_participant_request;
+    handle_tree_[REQUEST_PARTICIPANT_TO_CHANNEL_REQUEST]     = &LinkDoveServer::handle_request_channel_participant_request;
     handle_tree_[GET_CHNNL_MSG_REQUEST]              = &LinkDoveServer::handle_get_channel_messages_request;
     handle_tree_[DELETE_CHANNEL_REQUEST]             = &LinkDoveServer::handle_delete_channel;
     handle_tree_[CREATE_CHAT_REQUEST]                = &LinkDoveServer::handle_create_chat_request;
@@ -75,8 +77,10 @@ void LinkDoveServer::setup_connection_tree() {
     handle_tree_[QUIT_CHAT_REQUEST]                  = &LinkDoveServer::handle_quit_chat;
     handle_tree_[QUIT_CHANNEL_REQUEST]               = &LinkDoveServer::handle_quit_channel;
     handle_tree_[REMOVE_USER_FROM_CHANNEL_REQUEST]   = &LinkDoveServer::handle_remove_user_from_channel;
+    handle_tree_[REMOVE_REQUEST_CHANNEL_REQUEST]     = &LinkDoveServer::handle_remove_request_channel_request;
     handle_tree_[REMOVE_USER_FROM_CHAT_REQUEST]      = &LinkDoveServer::handle_remove_user_from_chat;
     handle_tree_[GET_CHNNL_PARTICIPANTS_REQUEST]     = &LinkDoveServer::handle_get_channel_participants_request;
+    handle_tree_[GET_CHNNL_REQUESTS_REQUEST]         = &LinkDoveServer::handle_get_channel_requests_request;
     handle_tree_[GET_CHAT_PARTICIPANTS_REQUEST]      = &LinkDoveServer::handle_get_chat_participants_request;
     handle_tree_[SEND_USER_ANSWER_REQUEST]           = &LinkDoveServer::handle_answer_user;
     handle_tree_[GET_NOTIFICATIONS_REQUEST]          = &LinkDoveServer::handle_get_notifications;
@@ -179,7 +183,15 @@ void LinkDoveServer::handle_type_request(ConnectionIterator iterator) {
 
     std::cerr << request_type << '\n';
 
-    (this->*handle_tree_[request_type])(iterator);
+    try {
+        (this->*(handle_tree_.at(request_type)))(iterator);
+    } catch (...) {
+        std::cerr << "incorrect request\n";
+
+        request_type.erase(request_type.find(END_OF_REQUEST), sizeof(END_OF_REQUEST)-1);
+        std::cerr << request_type << '\n';
+        (this->*(handle_tree_.at(request_type)))(iterator);
+    }
 }
 
 void LinkDoveServer::handle_login_request(ConnectionIterator iterator) {
@@ -190,11 +202,10 @@ void LinkDoveServer::handle_login_request(ConnectionIterator iterator) {
 
     if (data_base_.login_user(login_info)) {
         try {
-            iterator->out_stream_ << LOGIN_SUCCESS << "\n";
-
             StatusInfo status_info = data_base_.get_status_info(login_info.username_);
-            status_info.serialize(iterator->out_stream_);
 
+            iterator->out_stream_ << LOGIN_SUCCESS << "\n";
+            status_info.serialize(iterator->out_stream_);
         } catch (std::runtime_error &error) {
             std::cerr << "Failed to login user: " << error.what() << '\n';
             iterator->out_stream_ << LOGIN_FAILED << "\n";
@@ -214,10 +225,9 @@ void LinkDoveServer::handle_register_request(ConnectionIterator iterator) {
     remove_delimeter(iterator);
 
     std::stringstream answer;
-    if (data_base_.register_user(user_info)) {
+    if (ServerUtility::check_password(user_info.password_) && data_base_.register_user(user_info)) {
         // В случае удачной регистрации отправляем клиенту структуру StatusInfo (в ней содержится ID)
         user_info.status_info_ = data_base_.get_status_info(user_info.status_info_.username_);
-
 
         answer << REGISTER_SUCCESS << "\n";
         user_info.status_info_.serialize(answer);
@@ -284,10 +294,10 @@ void LinkDoveServer::handle_get_complaints_request(ConnectionIterator iterator) 
             std::cerr << "Failed to get complaints: " << ex.what() << '\n';
             answer << GET_COMPLAINTS_FAILED << "\n" << END_OF_REQUEST;
         }
-
-        iterator->out_stream_ << answer.str();
-        async_write(iterator);
     }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
 }
 
 void LinkDoveServer::handle_update_user_request(ConnectionIterator iterator) {
@@ -309,7 +319,6 @@ void LinkDoveServer::handle_update_user_request(ConnectionIterator iterator) {
 
 void LinkDoveServer::handle_find_user_request(ConnectionIterator iterator) {
     std::string username = UtilitySerializator::deserialize_string(iterator->in_stream_).second;
-    std::cerr << username << '\n';
 
     remove_delimeter(iterator);
 
@@ -673,6 +682,75 @@ void LinkDoveServer::handle_add_channel_participant_request(ConnectionIterator i
     async_write(iterator);
 }
 
+void LinkDoveServer::handle_request_channel_participant_request(ConnectionIterator iterator) {
+    unsigned long long user_id    = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second,
+                       channel_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    if (data_base_.request_participant_to_channel(user_id, channel_id)) {
+        answer << REQUEST_PARTICIPANT_TO_CHANNEL_SUCCESS << "\n" << END_OF_REQUEST;
+    } else {
+        answer << REQUEST_PARTICIPANT_TO_CHANNEL_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_add_private_channel_participant_request(ConnectionIterator iterator) {
+    std::string username = UtilitySerializator::deserialize_string(iterator->in_stream_).second;
+    unsigned long long channel_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    try {
+        StatusInfo user_info;
+        user_info = data_base_.get_status_info(username);
+
+        if (data_base_.remove_request_channel(user_info.id_, channel_id) && data_base_.add_participant_to_channel(user_info.id_, channel_id)) {
+            answer << ADD_PARTICIPANT_TO_PRIVATE_CHANNEL_SUCCESS << "\n" << END_OF_REQUEST;
+        } else {
+            answer << ADD_PARTICIPANT_TO_PRIVATE_CHANNEL_FAILED << "\n" << END_OF_REQUEST;
+        }
+    } catch (std::runtime_error &ex) {
+        std::cerr << "Failed to add participant to private channel: " << ex.what() << '\n';
+        answer << ADD_PARTICIPANT_TO_PRIVATE_CHANNEL_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_remove_request_channel_request(ConnectionIterator iterator) {
+    std::cerr << "here\n";
+
+    std::string username = UtilitySerializator::deserialize_string(iterator->in_stream_).second;
+    unsigned long long channel_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    try {
+        StatusInfo user_info;
+        user_info = data_base_.get_status_info(username);
+
+        if (data_base_.remove_request_channel(user_info.id_, channel_id)) {
+            answer << REMOVE_REQUEST_CHANNEL_SUCCESS << "\n" << END_OF_REQUEST;
+        } else {
+            answer << REMOVE_REQUEST_CHANNEL_FAILED << "\n" << END_OF_REQUEST;
+        }
+    } catch (std::runtime_error &ex) {
+        std::cerr << "Failed to remove channel request: " << ex.what() << '\n';
+        answer << REMOVE_REQUEST_CHANNEL_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
 void LinkDoveServer::handle_get_channel_messages_request(ConnectionIterator iterator) {
     unsigned long long channel_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
 
@@ -713,6 +791,27 @@ void LinkDoveServer::handle_get_channel_participants_request(ConnectionIterator 
     } catch (std::runtime_error &ex) {
         std::cerr << "Failed to get channel participants: " << ex.what() << '\n';
         answer << GET_CHNNL_PARTICIPANTS_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_get_channel_requests_request(ConnectionIterator iterator) {
+    unsigned long long channel_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    try {
+        std::vector<std::string> participants = data_base_.get_channel_requests(channel_id);
+
+        answer << GET_CHNNL_REQUESTS_SUCCESS << "\n";
+        UtilitySerializator::serialize(answer, participants);
+        answer << END_OF_REQUEST;
+    } catch (std::runtime_error &ex) {
+        std::cerr << "Failed to get channel requests: " << ex.what() << '\n';
+        answer << GET_CHNNL_REQUESTS_FAILED << "\n" << END_OF_REQUEST;
     }
 
     iterator->out_stream_ << answer.str();
@@ -1095,4 +1194,26 @@ void LinkDoveServer::run_context() {
 
 void LinkDoveServer::remove_delimeter(ConnectionIterator iterator) {
     iterator->buffer_.consume(sizeof(END_OF_REQUEST));
+}
+
+namespace ServerUtility {
+    bool check_password(std::string &password) {
+        bool has_number   = false,
+             has_letter   = false,
+             correct_size = false;
+
+        if (password.size() >= 9) {
+            correct_size = true;
+        }
+
+        for (auto elem : password) {
+            if (isdigit(elem)) {
+                has_number = true;
+            } else if (isalpha(elem)) {
+                has_letter = true;
+            }
+        }
+
+        return has_number && has_letter && correct_size;
+    }
 }

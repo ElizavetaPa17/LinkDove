@@ -1,26 +1,29 @@
-#ifndef TYPESTRINGDIALOG_H
-#define TYPESTRINGDIALOG_H
+#ifndef CREATEBROADCHATDIALOG_H
+#define CREATEBROADCHATDIALOG_H
 
 #include <QDialog>
+#include <utility>
+#include <string>
 
 namespace Ui {
-class TypeStringDialog;
+class CreateBroadChatDialog;
 }
 
-
-class TypeStringDialog : public QDialog
+// Диалоговое окно создания чата.
+class CreateBroadChatDialog : public QDialog
 {
     Q_OBJECT
+
 public:
-    explicit TypeStringDialog(QWidget *parent, const QString &text);
-    ~TypeStringDialog();
+    explicit CreateBroadChatDialog(QWidget *parent, const QString &text);
+    ~CreateBroadChatDialog();
 
     /**
-     * <p> Возвращает строку, введенную пользователем. . </p>
-     * @brief getString
-     * @return
+     * <p> Возвращает информацию, необходимую для создания чата. </p>
+     * @brief getInfo
+     * @return - Пара <название чата, флаг приватности"
      */
-    std::string getString();
+    std::pair<std::string, bool> getInfo();
 
 private slots:
     /**
@@ -30,7 +33,7 @@ private slots:
     void slotEnableSendButton();
 
 private:
-    Ui::TypeStringDialog *ui;
+    Ui::CreateBroadChatDialog *ui;
 
     /**
      * <p> Делает кнопку "Готово" доступной/недоступной и меняет ее внешний вид. </p>
@@ -46,4 +49,4 @@ private:
     void setupConnection();
 };
 
-#endif // TYPESTRINGDIALOG_H
+#endif // CREATEBROADCHATDIALOG_H

@@ -10,7 +10,7 @@ public:
     unsigned long long id_ = CREATED_ENTITY_ID;
     unsigned long long owner_id_ = CREATED_ENTITY_ID;
     std::string name_;
-    bool is_banned_ = false;
+    bool is_private_ = false;
 
     /**
      * <p> Сериализует текущее состояние объекта. </p>

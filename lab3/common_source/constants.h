@@ -101,6 +101,18 @@ enum ResponseTypes {
     ADD_PARTICIPANT_TO_CHANNEL_SUCCESS_ANSWER,
     ADD_PARTICIPANT_TO_CHANNEL_FAILED_ANSWER,
 
+    ADD_PARTICIPANT_TO_PRIVATE_CHANNEL_SUCCESS_ANSWER,
+    ADD_PARTICIPANT_TO_PRIVATE_CHANNEL_FAILED_ANSWER,
+
+    REQUEST_PARTICIPANT_TO_CHANNEL_SUCCESS_ANSWER,
+    REQUEST_PARTICIPANT_TO_CHANNEL_FAILED_ANSWER,
+
+    REMOVE_REQUEST_CHANNEL_SUCCESS_ANSWER,
+    REMOVE_REQUEST_CHANNEL_FAILED_ANSWER,
+
+    GET_CHANNEL_REQUESTS_SUCCESS_ANSWER,
+    GET_CHANNEL_REQUESTS_FAILED_ANSWER,
+
     GET_CHNNL_MSG_SUCCESS_ANSWER,
     GET_CHNNL_MSG_FAILED_ANSWER,
 
@@ -190,6 +202,8 @@ const unsigned long long INVALID_USER_ID = 0;
 
 // Идентификатор админа (суперпользователя)
 const unsigned long long ADMIN_ID = 1;
+
+#define ADMIN_USERNAME "admin"
 
 // Ограничение на размер списка жалоб, который отправляется администратору при запросе на его получение
 const int GET_COMPLAINTS_LIMIT = 100;
@@ -412,6 +426,27 @@ extern const std::string ADD_PARTICIPANT_TO_CHANNEL_SUCCESS;
 // Ответ сервера на неудачное добавление текущего пользователя в канал
 extern const std::string ADD_PARTICIPANT_TO_CHANNEL_FAILED;
 
+// Запрос на добавление текущего пользователя в приватный канал
+extern const std::string ADD_PARTICIPANT_TO_PRIVATE_CHANNEL_REQUEST;
+// Ответ сервера на успешное добавление текущего пользователя в приватный канал
+extern const std::string ADD_PARTICIPANT_TO_PRIVATE_CHANNEL_SUCCESS;
+// Ответ сервера на неудачное добавление текущего пользователя в приватный канал
+extern const std::string ADD_PARTICIPANT_TO_PRIVATE_CHANNEL_FAILED;
+
+// Запрос на добавление удаление запроса вступления в приватный канал
+extern const std::string REQUEST_PARTICIPANT_TO_CHANNEL_REQUEST;
+// Ответ сервера на успешное удаление запроса вступления в приватный канал
+extern const std::string REQUEST_PARTICIPANT_TO_CHANNEL_SUCCESS;
+// Ответ сервера на неудачное удаление запроса вступления в приватный канал
+extern const std::string REQUEST_PARTICIPANT_TO_CHANNEL_FAILED;
+
+// Запрос на добавление текущего пользователя в приватный канал
+extern const std::string REMOVE_REQUEST_CHANNEL_REQUEST;
+// Ответ сервера на успешное добавление текущего пользователя приватный в канал
+extern const std::string REMOVE_REQUEST_CHANNEL_SUCCESS;
+// Ответ сервера на неудачное добавление текущего пользователя приватный в канал
+extern const std::string REMOVE_REQUEST_CHANNEL_FAILED;
+
 // Запрос на получение сообщений из канала
 extern const std::string GET_CHNNL_MSG_REQUEST;
 // Ответ сервера на успешное получение сообщений из канала
@@ -425,6 +460,13 @@ extern const std::string GET_CHNNL_PARTICIPANTS_REQUEST;
 extern const std::string GET_CHNNL_PARTICIPANTS_SUCCESS;
 // Ответ сервера на неудачное получение списка участников канала
 extern const std::string GET_CHNNL_PARTICIPANTS_FAILED;
+
+// Запрос на получение списка запросов вступления в приватный канал
+extern const std::string GET_CHNNL_REQUESTS_REQUEST;
+// Ответ сервера на успешное получение списка запросов вступления в приватный канал
+extern const std::string GET_CHNNL_REQUESTS_SUCCESS;
+// Ответ сервера на неудачное получение списка запросов вступления в приватный канал
+extern const std::string GET_CHNNL_REQUESTS_FAILED;
 
 // Запрос на удаление канала
 extern const std::string DELETE_CHANNEL_REQUEST;

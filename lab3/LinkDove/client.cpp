@@ -26,7 +26,7 @@ void Client::async_connect() {
 
 void Client::async_login(const LoginInfo& login_info) {
     connection_.out_stream_ << LOGIN_REQUEST << "\n";
-    login_info.serialize(connection_.out_stream_) << '\n';
+    login_info.serialize(connection_.out_stream_);
     connection_.out_stream_ << END_OF_REQUEST;
 
     write_to_server();
@@ -56,7 +56,7 @@ void Client::async_send_complaint(const std::string& text) {
 
 // выделить отдельный stringstream, чтобы каждый раз не создавать на стеке новый
 void Client::async_del_complaint(unsigned long long complaint_id) {
-    connection_.out_stream_ << DEL_COMPLAINT_REQUEST << "\n";
+    connection_.out_stream_ << DEL_COMPLAINT_REQUEST << '\n';
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, complaint_id);
     connection_.out_stream_ << END_OF_REQUEST;
 
@@ -64,7 +64,7 @@ void Client::async_del_complaint(unsigned long long complaint_id) {
 }
 
 void Client::async_get_complaints() {
-    connection_.out_stream_ << GET_COMPLAINTS_REQUEST << "\n" << END_OF_REQUEST;
+    connection_.out_stream_ << GET_COMPLAINTS_REQUEST << '\n' << END_OF_REQUEST;
 
     write_to_server();
 }
@@ -83,7 +83,7 @@ void Client::async_update_user(StatusInfo& status_info) {
 }
 
 void Client::async_find_user(const std::string &username) {
-    connection_.out_stream_ << FIND_USER_REQUEST << "\n";
+    connection_.out_stream_ << FIND_USER_REQUEST << '\n';
     UtilitySerializator::serialize(connection_.out_stream_, username);
     connection_.out_stream_ << END_OF_REQUEST;
 
@@ -146,7 +146,7 @@ void Client::async_get_banned_interlocutors() {
 }
 
 void Client::async_send_message(const IMessage& message) {
-    connection_.out_stream_ << SEND_MSG_REQUEST << "\n";
+    connection_.out_stream_ << SEND_MSG_REQUEST << '\n';
     UtilitySerializator::serialize(connection_.out_stream_, message);
     connection_.out_stream_ << END_OF_REQUEST;
 
@@ -163,7 +163,7 @@ void Client::async_get_ind_messages(unsigned long long other_id) {
 }
 
 void Client::async_get_interlocutors() {
-    connection_.out_stream_ << GET_INTERLOCUTORS_REQUEST << "\n";
+    connection_.out_stream_ << GET_INTERLOCUTORS_REQUEST << '\n';
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, status_info_.id_);
     connection_.out_stream_ << END_OF_REQUEST;
 
@@ -171,7 +171,7 @@ void Client::async_get_interlocutors() {
 }
 
 void Client::async_delete_ind_chat(unsigned long long interlocutor_id) {
-    connection_.out_stream_ << DELETE_IND_CHAT_REQUEST  << "\n";
+    connection_.out_stream_ << DELETE_IND_CHAT_REQUEST  << '\n';
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, status_info_.id_);
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, interlocutor_id);
     connection_.out_stream_ << END_OF_REQUEST;
@@ -179,12 +179,13 @@ void Client::async_delete_ind_chat(unsigned long long interlocutor_id) {
     write_to_server();
 }
 
-void Client::async_create_channel(const std::string &channel_name) {
-    connection_.out_stream_ << CREATE_CHANNEL_REQUEST << "\n";
+void Client::async_create_channel(const std::pair<std::string, bool> &info) {
+    connection_.out_stream_ << CREATE_CHANNEL_REQUEST << '\n';
 
     ChannelInfo channel_info;
-    channel_info.name_ = channel_name;
+    channel_info.name_ = info.first;
     channel_info.owner_id_ = status_info_.id_;
+    channel_info.is_private_ = info.second;
     channel_info.serialize(connection_.out_stream_);
     connection_.out_stream_ << END_OF_REQUEST;
 
@@ -192,7 +193,7 @@ void Client::async_create_channel(const std::string &channel_name) {
 }
 
 void Client::async_find_channel(const std::string &channel_name) {
-    connection_.out_stream_ << FIND_CHANNEL_REQUEST << "\n";
+    connection_.out_stream_ << FIND_CHANNEL_REQUEST << '\n';
     UtilitySerializator::serialize(connection_.out_stream_, channel_name);
     connection_.out_stream_ << END_OF_REQUEST;
 
@@ -200,7 +201,7 @@ void Client::async_find_channel(const std::string &channel_name) {
 }
 
 void Client::async_get_channels() {
-    connection_.out_stream_ << GET_CHANNELS_REQUEST << "\n";
+    connection_.out_stream_ << GET_CHANNELS_REQUEST << '\n';
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, status_info_.id_);
     connection_.out_stream_ << END_OF_REQUEST;
 
@@ -209,7 +210,7 @@ void Client::async_get_channels() {
 }
 
 void Client::async_is_channel_participant_request(unsigned long long channel_id) {
-    connection_.out_stream_ << IS_CHANNEL_PARTICIPANT_REQUEST << "\n";
+    connection_.out_stream_ << IS_CHANNEL_PARTICIPANT_REQUEST << '\n';
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, status_info_.id_);
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, channel_id);
     connection_.out_stream_ << END_OF_REQUEST;
@@ -218,7 +219,7 @@ void Client::async_is_channel_participant_request(unsigned long long channel_id)
 }
 
 void Client::async_add_channel_participant_request(unsigned long long channel_id) {
-    connection_.out_stream_ << ADD_PARTICIPANT_TO_CHANNEL_REQUEST << "\n";
+    connection_.out_stream_ << ADD_PARTICIPANT_TO_CHANNEL_REQUEST << '\n';
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, status_info_.id_);
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, channel_id);
     connection_.out_stream_ << END_OF_REQUEST;
@@ -226,8 +227,35 @@ void Client::async_add_channel_participant_request(unsigned long long channel_id
     write_to_server();
 }
 
+void Client::async_add_private_channel_participant_request(const std::string &username, unsigned long long channel_id) {
+    connection_.out_stream_ << ADD_PARTICIPANT_TO_PRIVATE_CHANNEL_REQUEST << '\n';
+    UtilitySerializator::serialize(connection_.out_stream_, username);
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, channel_id);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    write_to_server();
+}
+
+void Client::async_request_channel_participant_request(unsigned long long channel_id) {
+    connection_.out_stream_ << REQUEST_PARTICIPANT_TO_CHANNEL_REQUEST << '\n';
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, status_info_.id_);
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, channel_id);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    write_to_server();
+}
+
+void Client::async_delete_request_channel_request(const std::string &username, unsigned long long channel_id) {
+    connection_.out_stream_ << REMOVE_REQUEST_CHANNEL_REQUEST << '\n';
+    UtilitySerializator::serialize(connection_.out_stream_, username);
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, channel_id);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    write_to_server();
+}
+
 void Client::async_get_channel_messages(unsigned long long channel_id) {
-    connection_.out_stream_ << GET_CHNNL_MSG_REQUEST << "\n";
+    connection_.out_stream_ << GET_CHNNL_MSG_REQUEST << '\n';
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, channel_id);
     connection_.out_stream_ << END_OF_REQUEST;
 
@@ -235,7 +263,15 @@ void Client::async_get_channel_messages(unsigned long long channel_id) {
 }
 
 void Client::async_get_channel_participants(unsigned long long channel_id) {
-    connection_.out_stream_ << GET_CHNNL_PARTICIPANTS_REQUEST << "\n";
+    connection_.out_stream_ << GET_CHNNL_PARTICIPANTS_REQUEST << '\n';
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, channel_id);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    write_to_server();
+}
+
+void Client::async_get_channel_requests_request(unsigned long long channel_id) {
+    connection_.out_stream_ << GET_CHNNL_REQUESTS_REQUEST << '\n';
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, channel_id);
     connection_.out_stream_ << END_OF_REQUEST;
 
@@ -243,7 +279,7 @@ void Client::async_get_channel_participants(unsigned long long channel_id) {
 }
 
 void Client::async_delete_channel(unsigned long long channel_id) {
-    connection_.out_stream_ << DELETE_CHANNEL_REQUEST << "\n";
+    connection_.out_stream_ << DELETE_CHANNEL_REQUEST << '\n';
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, channel_id);
     connection_.out_stream_ << END_OF_REQUEST;
 
@@ -251,7 +287,7 @@ void Client::async_delete_channel(unsigned long long channel_id) {
 }
 
 void Client::async_remove_user_from_channel(unsigned long long channel_id, const std::string &user_name) {
-    connection_.out_stream_ << REMOVE_USER_FROM_CHANNEL_REQUEST << "\n";
+    connection_.out_stream_ << REMOVE_USER_FROM_CHANNEL_REQUEST << '\n';
     UtilitySerializator::serialize(connection_.out_stream_, user_name);
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, channel_id);
     connection_.out_stream_ << END_OF_REQUEST;
@@ -260,7 +296,7 @@ void Client::async_remove_user_from_channel(unsigned long long channel_id, const
 }
 
 void Client::async_quit_channel(unsigned long long user_id, unsigned long long channel_id) {
-    connection_.out_stream_ << QUIT_CHANNEL_REQUEST << "\n";
+    connection_.out_stream_ << QUIT_CHANNEL_REQUEST << '\n';
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, user_id);
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, channel_id);
     connection_.out_stream_ << END_OF_REQUEST;
@@ -269,7 +305,7 @@ void Client::async_quit_channel(unsigned long long user_id, unsigned long long c
 }
 
 void Client::async_create_chat(const std::string &chat_name) {
-    connection_.out_stream_ << CREATE_CHAT_REQUEST << "\n";
+    connection_.out_stream_ << CREATE_CHAT_REQUEST << '\n';
 
     ChatInfo chat_info;
     chat_info.name_ = chat_name;
@@ -281,7 +317,7 @@ void Client::async_create_chat(const std::string &chat_name) {
 }
 
 void Client::async_get_chats() {
-    connection_.out_stream_ << GET_CHATS_REQUEST << "\n";
+    connection_.out_stream_ << GET_CHATS_REQUEST << '\n';
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, status_info_.id_);
     connection_.out_stream_ << END_OF_REQUEST;
 
@@ -297,7 +333,7 @@ void Client::async_find_chat(const std::string &chat_name) {
 }
 
 void Client::async_is_chat_participant_request(unsigned long long chat_id) {
-    connection_.out_stream_ << IS_CHAT_PARTICIPANT_REQUEST << "\n";
+    connection_.out_stream_ << IS_CHAT_PARTICIPANT_REQUEST << '\n';
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, status_info_.id_);
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, chat_id);
     connection_.out_stream_ << END_OF_REQUEST;
@@ -306,7 +342,7 @@ void Client::async_is_chat_participant_request(unsigned long long chat_id) {
 }
 
 void Client::async_add_chat_participant_request(unsigned long long chat_id) {
-    connection_.out_stream_ << ADD_PARTICIPANT_TO_CHAT_REQUEST << "\n";
+    connection_.out_stream_ << ADD_PARTICIPANT_TO_CHAT_REQUEST << '\n';
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, status_info_.id_);
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, chat_id);
     connection_.out_stream_ << END_OF_REQUEST;
@@ -315,7 +351,7 @@ void Client::async_add_chat_participant_request(unsigned long long chat_id) {
 }
 
 void Client::async_get_chat_messages(unsigned long long chat_id) {
-    connection_.out_stream_ << GET_CHAT_MSG_REQUEST << "\n";
+    connection_.out_stream_ << GET_CHAT_MSG_REQUEST << '\n';
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, chat_id);
     connection_.out_stream_ << END_OF_REQUEST;
 
@@ -323,7 +359,7 @@ void Client::async_get_chat_messages(unsigned long long chat_id) {
 }
 
 void Client::async_get_chat_participants(unsigned long long group_id) {
-    connection_.out_stream_ << GET_CHAT_PARTICIPANTS_REQUEST << "\n";
+    connection_.out_stream_ << GET_CHAT_PARTICIPANTS_REQUEST << '\n';
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, group_id);
     connection_.out_stream_ << END_OF_REQUEST;
 
@@ -331,7 +367,7 @@ void Client::async_get_chat_participants(unsigned long long group_id) {
 }
 
 void Client::async_delete_chat(unsigned long long group_id) {
-    connection_.out_stream_ << DELETE_CHAT_REQUEST << "\n";
+    connection_.out_stream_ << DELETE_CHAT_REQUEST << '\n';
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, group_id);
     connection_.out_stream_ << END_OF_REQUEST;
 
@@ -339,7 +375,7 @@ void Client::async_delete_chat(unsigned long long group_id) {
 }
 
 void Client::async_quit_chat(unsigned long long user_id, unsigned long long group_id) {
-    connection_.out_stream_ << QUIT_CHAT_REQUEST << "\n";
+    connection_.out_stream_ << QUIT_CHAT_REQUEST << '\n';
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, user_id);
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, group_id);
 
@@ -349,7 +385,7 @@ void Client::async_quit_chat(unsigned long long user_id, unsigned long long grou
 }
 
 void Client::async_remove_user_from_chat(unsigned long long group_id, const std::string &user_name) {
-    connection_.out_stream_ << REMOVE_USER_FROM_CHAT_REQUEST << "\n";
+    connection_.out_stream_ << REMOVE_USER_FROM_CHAT_REQUEST << 'n';
     UtilitySerializator::serialize(connection_.out_stream_, user_name);
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, group_id);
     connection_.out_stream_ << END_OF_REQUEST;
@@ -358,7 +394,7 @@ void Client::async_remove_user_from_chat(unsigned long long group_id, const std:
 }
 
 void Client::async_answer_user(unsigned long long user_id, const std::string &text) {
-    connection_.out_stream_ << SEND_USER_ANSWER_REQUEST << "\n";
+    connection_.out_stream_ << SEND_USER_ANSWER_REQUEST << '\n';
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, user_id);
     UtilitySerializator::serialize(connection_.out_stream_, text);
     connection_.out_stream_ << END_OF_REQUEST;
@@ -367,7 +403,7 @@ void Client::async_answer_user(unsigned long long user_id, const std::string &te
 }
 
 void Client::async_get_notifications() {
-    connection_.out_stream_ << GET_NOTIFICATIONS_REQUEST << "\n";
+    connection_.out_stream_ << GET_NOTIFICATIONS_REQUEST << '\n';
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, status_info_.id_);
 
     connection_.out_stream_ << END_OF_REQUEST;
@@ -375,7 +411,7 @@ void Client::async_get_notifications() {
 }
 
 void Client::async_del_notification(unsigned long long id) {
-    connection_.out_stream_ << DEL_NOTIFICATION_REQUEST << "\n";
+    connection_.out_stream_ << DEL_NOTIFICATION_REQUEST << '\n';
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, id);
     connection_.out_stream_ << END_OF_REQUEST;
 
@@ -383,7 +419,7 @@ void Client::async_del_notification(unsigned long long id) {
 }
 
 void Client::async_delete_msg(const IMessage &msg) {
-    connection_.out_stream_ << DEL_MSG_REQUEST << "\n";
+    connection_.out_stream_ << DEL_MSG_REQUEST << '\n';
     UtilitySerializator::serialize(connection_.out_stream_, msg);
     connection_.out_stream_ << END_OF_REQUEST;
 
@@ -454,7 +490,6 @@ void Client::setup_response_tree() {
 
     response_tree_[IS_BANNED_CHAT_USER_SUCCESS] = [this] () { bool is_banned = UtilitySerializator::deserialize_fundamental<bool>(connection_.in_stream_).second;
                                                               emit is_banned_user_result(IS_CHAT_BANNED_USER_SUCCESS_ANSWER, is_banned);
-                                                              std::cerr << "wow\n";
                                                             };
     response_tree_[IS_BANNED_CHAT_USER_FAILED]  = [this] () { emit is_banned_user_result(IS_CHAT_BANNED_USER_FAILED_ANSWER, true); };
 
@@ -490,6 +525,9 @@ void Client::setup_response_tree() {
 
     response_tree_[ADD_PARTICIPANT_TO_CHANNEL_SUCCESS] = [this] () { emit add_participant_to_channel_result(ADD_PARTICIPANT_TO_CHANNEL_SUCCESS_ANSWER); };
     response_tree_[ADD_PARTICIPANT_TO_CHANNEL_FAILED]  = [this] () { emit add_participant_to_channel_result(ADD_PARTICIPANT_TO_CHANNEL_FAILED_ANSWER); };
+
+    response_tree_[REQUEST_PARTICIPANT_TO_CHANNEL_SUCCESS] = [this] () { emit request_participant_to_channel_result(REQUEST_PARTICIPANT_TO_CHANNEL_SUCCESS_ANSWER); };
+    response_tree_[REQUEST_PARTICIPANT_TO_CHANNEL_FAILED]  = [this] () { emit request_participant_to_channel_result(REQUEST_PARTICIPANT_TO_CHANNEL_FAILED_ANSWER); };
 
     response_tree_[SEND_CHNNL_MSG_SUCCESS] = [this] () { emit send_msg_result(SEND_CHNNL_MSG_SUCCESS_ANSWER); };
     response_tree_[SEND_CHNNL_MSG_FAILED]  = [this] () { emit send_msg_result(SEND_CHNNL_MSG_FAILED_ANSWER); };
@@ -548,6 +586,10 @@ void Client::setup_response_tree() {
                                                                  emit get_channel_participants_result(GET_CHNNL_PARTICIPANTS_SUCCESS_ANSWER, participants); };
     response_tree_[GET_CHNNL_PARTICIPANTS_FAILED]  = [this] () { emit get_channel_participants_result(GET_CHNNL_PARTICIPANTS_FAILED_ANSWER, std::vector<std::string>()); };
 
+    response_tree_[GET_CHNNL_REQUESTS_SUCCESS] = [this] () { std::vector<std::string> participants = UtilitySerializator::deserialize_vec_string(connection_.in_stream_).second;
+                                                             emit get_channel_requests_result(GET_CHNNL_PARTICIPANTS_SUCCESS_ANSWER, participants); };
+    response_tree_[GET_CHNNL_REQUESTS_FAILED]  = [this] () { emit get_channel_requests_result(GET_CHNNL_PARTICIPANTS_FAILED_ANSWER, std::vector<std::string>()); };
+
     response_tree_[GET_CHAT_PARTICIPANTS_SUCCESS] = [this] () { std::vector<std::string> participants = UtilitySerializator::deserialize_vec_string(connection_.in_stream_).second;
                                                                 emit get_chat_participants_result(GET_CHAT_PARTICIPANTS_SUCCESS_ANSWER, participants); };
     response_tree_[GET_CHAT_PARTICIPANTS_FAILED]  = [this] () { emit get_chat_participants_result(GET_CHAT_PARTICIPANTS_FAILED_ANSWER, std::vector<std::string>()); };
@@ -570,6 +612,12 @@ void Client::setup_response_tree() {
 
     response_tree_[DEL_CHAT_MSG_SUCCESS] = [this] () { emit delete_msg_result(DEL_CHAT_MSG_SUCCESS_ANSWER); };
     response_tree_[DEL_CHAT_MSG_FAILED]  = [this] () { emit delete_msg_result(DEL_CHAT_MSG_FAILED_ANSWER); };
+
+    response_tree_[ADD_PARTICIPANT_TO_PRIVATE_CHANNEL_SUCCESS] = [this] () { emit add_private_channel_participant_result(ADD_PARTICIPANT_TO_PRIVATE_CHANNEL_SUCCESS_ANSWER); };
+    response_tree_[ADD_PARTICIPANT_TO_PRIVATE_CHANNEL_FAILED]  = [this] () { emit add_private_channel_participant_result(ADD_PARTICIPANT_TO_PRIVATE_CHANNEL_FAILED_ANSWER); };
+
+    response_tree_[REMOVE_REQUEST_CHANNEL_SUCCESS] = [this] () { emit remove_request_channel_result(REMOVE_REQUEST_CHANNEL_SUCCESS_ANSWER); };
+    response_tree_[REMOVE_REQUEST_CHANNEL_FAILED]  = [this] () { emit remove_request_channel_result(REMOVE_REQUEST_CHANNEL_FAILED_ANSWER); };
 }
 
 void Client::async_read() {
@@ -622,12 +670,14 @@ void Client::handle_async_read(boost::system::error_code error, size_t bytes_tra
         std::cerr << answer_type << '\n';
 
         response_tree_[answer_type]();
-
         remove_delimeter();
     }
 }
 
 void Client::write_to_server() {
+    std::stringstream buf;
+    std::cerr << "SEND: \n" << buf.str() << '\n';
+
     asio::async_write(connection_.socket_, connection_.buffer_,
                        boost::bind(&Client::handle_async_write,
                                    shared_from_this(),

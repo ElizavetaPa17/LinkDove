@@ -37,6 +37,7 @@ ComplaintsListDialog::ComplaintsListDialog(QWidget *parent)
 }
 
 ComplaintsListDialog::~ComplaintsListDialog() {
+
 }
 
 void ComplaintsListDialog::addComplaint(const Complaint& complaint) {

@@ -8,7 +8,7 @@ size_t ChannelInfo::serialize(std::ostream& os) const {
     size += UtilitySerializator::serialize_fundamental<unsigned long long>(os, id_);
     size += UtilitySerializator::serialize_fundamental<unsigned long long>(os, owner_id_);
     size += UtilitySerializator::serialize(os, name_);
-    size += UtilitySerializator::serialize_fundamental<bool>(os, is_banned_);
+    size += UtilitySerializator::serialize_fundamental<bool>(os, is_private_);
 
     return size;
 }
@@ -33,7 +33,7 @@ size_t ChannelInfo::deserialize(std::istream& is) {
     std::pair<size_t, bool> temp_bool_pair;
     temp_bool_pair = UtilitySerializator::deserialize_fundamental<bool>(is);
     size += temp_bool_pair.first;
-    is_banned_ = temp_bool_pair.second;
+    is_private_ = temp_bool_pair.second;
 
     return size;
 }

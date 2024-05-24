@@ -56,6 +56,15 @@ void UsersList::slotsHandleReturnPress() {
     if (ui->searchEdit->text().isEmpty()) {
         ClientSingleton::get_client()->async_get_interlocutors();
     } else {
+        if (ui->searchEdit->text().toStdString() != ADMIN_USERNAME) {
+            ClientSingleton::get_client()->async_find_user(ui->searchEdit->text().toStdString());
+            return;
+        } else {
+            std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Вы не можете написать администратору, пока он не напишет вам первым.");
+            dialog_ptr->exec();
+            return;
+        }
+
         if (ui->searchEdit->text().toStdString() != ClientSingleton::get_client()->get_status_info().username_) {
             ClientSingleton::get_client()->async_find_user(ui->searchEdit->text().toStdString());
         } else {

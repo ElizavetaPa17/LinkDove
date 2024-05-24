@@ -161,9 +161,9 @@ public:
     /**
      * <p> Отправляет запрос на создание канала. </p>
      * @brief async_create_channel
-     * @param channel_name - Название создаваемого канала.
+     * @param info - Пара <название создаваемого канала, флаг приватности>
      */
-    void async_create_channel(const std::string &channel_info);
+    void async_create_channel(const std::pair<std::string, bool> &info);
 
     /**
      * <p> Отправляет запрос на получение информации о канале с названием channel_name. </p>
@@ -193,6 +193,29 @@ public:
     void async_add_channel_participant_request(unsigned long long channel_id);
 
     /**
+     * <p> Отправляет запрос на добавление пользователя в приватный канал с идентификатором channel_id.</p>
+     * @brief async_add_private_channel_participant_request
+     * @param username - Идентификатор добавляемого пользователя.
+     * @param channel_id - Идентификатор канала, в который добавляется текущий пользователь.
+     */
+    void async_add_private_channel_participant_request(const std::string &username, unsigned long long channel_id);
+
+    /**
+     * <p> Отправляет запрос на вступление текущего пользователя в канал с идентификатором channel_id.</p>
+     * @brief async_request_channel_participant_request
+     * @param channel_id - Идентификатор канала, в который отправляется запрос на вступление.
+     */
+    void async_request_channel_participant_request(unsigned long long channel_id);
+
+    /**
+     * <p> Отправляет запрос на удаление запроса вступления в канал. </p>
+     * @brief async_delete_request_channel_request
+     * @param username - Никнейм пользователя (автора запроса).
+     * @param channel_id - Идентификатор канала, из которого удаляется запрос.
+     */
+    void async_delete_request_channel_request(const std::string &username, unsigned long long channel_id);
+
+    /**
      * <p> Отправляет запрос на получение всех сообщений из канала. </p>
      * @brief async_get_channel_messages
      * @param channel_id - Идентификатор канала, из которого извлекаются сообщения.
@@ -205,6 +228,13 @@ public:
      * @param channel_id - Идентификатор канала, из которого извлекаются участники.
      */
     void async_get_channel_participants(unsigned long long channel_id);
+
+    /**
+     * <p> Отправляет запрос на получение запросов вступления в приватный канал. </p>
+     * @brief async_get_channel_requests_request
+     * @param channel_id
+     */
+    void async_get_channel_requests_request(unsigned long long channel_id);
 
     /**
      * <p> Отправляет запрос на удаление канала. </p>
@@ -497,6 +527,13 @@ signals:
     void add_participant_to_channel_result(int result);
 
     /**
+     * <p> Генерирует сигнал после получения результата запроса на добавление текущего пользователя в приватный канал. </p>
+     * @brief add_participant_to_channel_result
+     * @param result - Параметр, содеращий результат запроса.
+     */
+    void request_participant_to_channel_result(int result);
+
+    /**
      * <p> Генерирует сигнал после получение результата запроса на получение из канала. </p>
      * @brief get_chnnl_messages_result
      * @param result - Параметр, содеращий результат запроса.
@@ -511,6 +548,14 @@ signals:
      * @param participants - Список участников канала.
      */
     void get_channel_participants_result(int result, std::vector<std::string> participants);
+
+    /**
+     * <p> Генерирует сигнал после получения результата запроса на получение списка отправителей запроса на вступление в приватный канал. </p>
+     * @brief get_channel_requests_result
+     * @param result - Параметр, содеращий результат запроса.
+     * @param participants - Список отправителей запроса.
+     */
+    void get_channel_requests_result(int result, std::vector<std::string> requests);
 
     /**
      * <p> Генерирует сигнал после получения результата удаления канала. </p>
@@ -635,6 +680,20 @@ signals:
      * @param result - Параметр, содержащий результат запроса.
      */
     void delete_msg_result(int result);
+
+    /**
+     * <p> Генерирует сигнал после получения результата добавления пользователя в приватный канал. </p>
+     * @brief add_private_channel_participant_result
+     * @param result
+     */
+    void add_private_channel_participant_result(int result);
+
+    /**
+     * <p> Генерирует сигнал после получения результата удаления запроса вступления в приватный канал. </p>
+     * @brief remove_request_channel_result
+     * @param result
+     */
+    void remove_request_channel_result(int result);
 
 private:
     std::shared_ptr<asio::io_context> io_context_ptr_;
