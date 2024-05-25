@@ -113,6 +113,18 @@ enum ResponseTypes {
     GET_CHANNEL_REQUESTS_SUCCESS_ANSWER,
     GET_CHANNEL_REQUESTS_FAILED_ANSWER,
 
+    ADD_PARTICIPANT_TO_PRIVATE_CHAT_SUCCESS_ANSWER,
+    ADD_PARTICIPANT_TO_PRIVATE_CHAT_FAILED_ANSWER,
+
+    REQUEST_PARTICIPANT_TO_CHAT_SUCCESS_ANSWER,
+    REQUEST_PARTICIPANT_TO_CHAT_FAILED_ANSWER,
+
+    REMOVE_REQUEST_CHAT_SUCCESS_ANSWER,
+    REMOVE_REQUEST_CHAT_FAILED_ANSWER,
+
+    GET_CHAT_REQUESTS_SUCCESS_ANSWER,
+    GET_CHAT_REQUESTS_FAILED_ANSWER,
+
     GET_CHNNL_MSG_SUCCESS_ANSWER,
     GET_CHNNL_MSG_FAILED_ANSWER,
 
@@ -447,6 +459,27 @@ extern const std::string REMOVE_REQUEST_CHANNEL_SUCCESS;
 // Ответ сервера на неудачное добавление текущего пользователя приватный в канал
 extern const std::string REMOVE_REQUEST_CHANNEL_FAILED;
 
+// Запрос на добавление текущего пользователя в приватный чат
+extern const std::string ADD_PARTICIPANT_TO_PRIVATE_CHAT_REQUEST;
+// Ответ сервера на успешное добавление текущего пользователя в приватный чат
+extern const std::string ADD_PARTICIPANT_TO_PRIVATE_CHAT_SUCCESS;
+// Ответ сервера на неудачное добавление текущего пользователя в приватный чат
+extern const std::string ADD_PARTICIPANT_TO_PRIVATE_CHAT_FAILED;
+
+// Запрос на добавление удаление запроса вступления в приватный чат
+extern const std::string REQUEST_PARTICIPANT_TO_CHAT_REQUEST;
+// Ответ сервера на успешное удаление запроса вступления в приватный чат
+extern const std::string REQUEST_PARTICIPANT_TO_CHAT_SUCCESS;
+// Ответ сервера на неудачное удаление запроса вступления в приватный чат
+extern const std::string REQUEST_PARTICIPANT_TO_CHAT_FAILED;
+
+// Запрос на добавление текущего пользователя в приватный чат
+extern const std::string REMOVE_REQUEST_CHAT_REQUEST;
+// Ответ сервера на успешное добавление текущего пользователя приватный в чат
+extern const std::string REMOVE_REQUEST_CHAT_SUCCESS;
+// Ответ сервера на неудачное добавление текущего пользователя приватный в чат
+extern const std::string REMOVE_REQUEST_CHAT_FAILED;
+
 // Запрос на получение сообщений из канала
 extern const std::string GET_CHNNL_MSG_REQUEST;
 // Ответ сервера на успешное получение сообщений из канала
@@ -467,6 +500,13 @@ extern const std::string GET_CHNNL_REQUESTS_REQUEST;
 extern const std::string GET_CHNNL_REQUESTS_SUCCESS;
 // Ответ сервера на неудачное получение списка запросов вступления в приватный канал
 extern const std::string GET_CHNNL_REQUESTS_FAILED;
+
+// Запрос на получение списка запросов вступления в приватный чат
+extern const std::string GET_CHAT_REQUESTS_REQUEST;
+// Ответ сервера на успешное получение списка запросов вступления в приватный чат
+extern const std::string GET_CHAT_REQUESTS_SUCCESS;
+// Ответ сервера на неудачное получение списка запросов вступления в приватный чат
+extern const std::string GET_CHAT_REQUESTS_FAILED;
 
 // Запрос на удаление канала
 extern const std::string DELETE_CHANNEL_REQUEST;

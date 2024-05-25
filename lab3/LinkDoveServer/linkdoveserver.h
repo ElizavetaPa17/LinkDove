@@ -292,6 +292,27 @@ private:
     void handle_remove_request_channel_request(ConnectionIterator iterator);
 
     /**
+     * <p> Обрабатывает запрос на добавление пользователя в приватный чат. </p>
+     * @brief handle_request_chat_participant
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_request_chat_participant_request(ConnectionIterator iterator);
+
+    /**
+     * <p> Обрабатывает запрос на добавление пользователя в приватный чат владельцем чата. </p>
+     * @brief handle_add_private_chat_participant_request
+     * @param iterator - Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_add_private_chat_participant_request(ConnectionIterator iterator);
+
+    /**
+     * <p> Обрабатывает запрос на удаление запроса вступления в приватный чат. </p>
+     * @brief handle_remove_request_chat_request
+     * @param iterator
+     */
+    void handle_remove_request_chat_request(ConnectionIterator iterator);
+
+    /**
      * <p> Обрабатывает запрос на получение сообщений из канала. </p>
      * @brief handle_get_channel_messages
      * @param iterator - Итератор на сокет, запрос которого обрабатывается.
@@ -311,6 +332,13 @@ private:
      * @param iterator
      */
     void handle_get_channel_requests_request(ConnectionIterator iterator);
+
+    /**
+     * <p> Обрабатывает запрос на получение списка запросов вступления в приватный чат. </p>
+     * @brief handle_get_chat_requests_request
+     * @param iterator
+     */
+    void handle_get_chat_requests_request(ConnectionIterator iterator);
 
     /**
      * <p> Обрабатывает запрос на удаление канала. </p>

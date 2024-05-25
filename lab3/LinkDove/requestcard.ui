@@ -79,7 +79,9 @@
       <cursorShape>PointingHandCursor</cursorShape>
      </property>
      <property name="styleSheet">
-      <string notr="true">color: rgb(60, 45, 50);</string>
+      <string notr="true">color: rgb(60, 45, 50); 
+border: 5px solid rgb(60, 45, 50);
+border-radius: 10;</string>
      </property>
      <property name="text">
       <string>+</string>
@@ -113,7 +115,9 @@
       <cursorShape>PointingHandCursor</cursorShape>
      </property>
      <property name="styleSheet">
-      <string notr="true">color: rgb(60, 45, 50);</string>
+      <string notr="true">color: rgb(60, 45, 50); 
+border: 5px solid rgb(60, 45, 50);
+border-radius: 10;</string>
      </property>
      <property name="text">
       <string>x</string>

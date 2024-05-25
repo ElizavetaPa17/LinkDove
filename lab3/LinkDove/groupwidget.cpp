@@ -50,10 +50,12 @@ void GroupWidget::slotHandleIsGroupParticipantResult(int result, bool is_partici
                 ui->deleteButton->show();
                 ui->removeUserButton->show();
                 ui->banButton->show();
+                ui->requestButton->show();
             } else {
                 ui->removeUserButton->hide();
                 ui->deleteButton->hide();
                 ui->banButton->hide();
+                ui->requestButton->hide();
             }
 
         } else {
@@ -62,7 +64,13 @@ void GroupWidget::slotHandleIsGroupParticipantResult(int result, bool is_partici
             ui->quitButton->hide();
             ui->removeUserButton->hide();
             ui->banButton->hide();
+            ui->requestButton->hide();
 
+            if (!chat_info_.is_private_ || is_participant) {
+                ClientSingleton::get_client()->async_get_chat_messages(chat_info_.id_);
+            }
+
+            request_dialog_.setBroadChatInfo(chat_info_.id_, false);
         }
     } else {
         std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Ошибка получения информации об участниках группы. Попытайтесь позже. ");
@@ -73,6 +81,8 @@ void GroupWidget::slotHandleIsGroupParticipantResult(int result, bool is_partici
         ui->quitButton->hide();
         ui->removeUserButton->hide();
         ui->banButton->hide();
+
+        request_dialog_.setBroadChatInfo(chat_info_.id_, false);
     }
 
     ClientSingleton::get_client()->async_get_chat_messages(chat_info_.id_);
@@ -293,6 +303,42 @@ void GroupWidget::slotDeleteMessageResult(int result) {
     }
 }
 
+
+void GroupWidget::slotHandleRequestChat(int result) {
+    std::string text;
+
+    if (result == REQUEST_PARTICIPANT_TO_CHAT_SUCCESS_ANSWER) {
+        text = "Запрос на вступление в группу был отправлен.";
+    } else if (result == REQUEST_PARTICIPANT_TO_CHAT_FAILED_ANSWER){
+        text = "Что-то пошло не так при попытке отправить запрос на вступление в группу.";
+    }
+
+    std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, text);
+    dialog_ptr->exec();
+}
+
+void GroupWidget::slotGetChatRequestResult(int result, std::vector<std::string> requests) {
+    if (result == GET_CHAT_REQUESTS_FAILED_ANSWER) {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Что-то пошло не так при попытке получить список запросов.");
+        dialog_ptr->exec();
+        return;
+    }
+
+    request_dialog_.removeAllRequests();
+    size_t sz = requests.size();
+
+    if (sz == 0) {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Список запросов пуст.");
+        dialog_ptr->exec();
+    } else {
+        for (int i = 0; i < sz; ++i) {
+            request_dialog_.addRequestUsername(requests[i]);
+        }
+
+        request_dialog_.exec();
+    }
+}
+
 void GroupWidget::setupConnection() {
     connect(ui->messageEdit,       &QLineEdit::returnPressed, this, &GroupWidget::slotSendMessage);
     connect(ui->sendButton,        &QPushButton::clicked,     this, &GroupWidget::slotSendMessage);
@@ -309,11 +355,20 @@ void GroupWidget::setupConnection() {
     connect(ClientSingleton::get_client(), &Client::get_chat_participants_result,   this, &GroupWidget::slotGetParticipantListResult);
     connect(ClientSingleton::get_client(), &Client::delete_msg_result,              this, &GroupWidget::slotDeleteMessageResult);
     connect(ClientSingleton::get_client(), &Client::ban_user_result,                this, &GroupWidget::slotBanUserResult);
+    connect(ClientSingleton::get_client(), &Client::request_participant_to_chat_result, this, &GroupWidget::slotHandleRequestChat);
+    connect(ClientSingleton::get_client(), &Client::get_chat_requests_result,       this, &GroupWidget::slotGetChatRequestResult);
 
     connect(ui->joinButton, &QPushButton::clicked, ClientSingleton::get_client(), [this] () {
-                                                                                    ClientSingleton::get_client()->async_add_chat_participant_request(chat_info_.id_);
+                                                                                    if (!chat_info_.is_private_ || ADMIN_ID == ClientSingleton::get_client()->get_status_info().id_) {
+                                                                                        ClientSingleton::get_client()->async_add_chat_participant_request(chat_info_.id_);
+                                                                                    } else {
+                                                                                        ClientSingleton::get_client()->async_request_chat_participant_request(chat_info_.id_);
+                                                                                    }
                                                                                   });
 
+    connect(ui->requestButton,      &QPushButton::clicked, this, [this] () {
+                                                                            ClientSingleton::get_client()->async_get_chat_requests_request(chat_info_.id_);
+                                                                          });
     connect(ui->deleteButton,       &QPushButton::clicked, this, &GroupWidget::slotDeleteGroup);
     connect(ui->quitButton,         &QPushButton::clicked, this, &GroupWidget::slotQuitGroup);
     connect(ui->removeUserButton,   &QPushButton::clicked, this, &GroupWidget::slotRemoveUser);

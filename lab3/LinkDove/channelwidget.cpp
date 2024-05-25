@@ -70,7 +70,7 @@ void ChannelWidget::slotHandleIsChannelParticipantResult(int result, bool is_par
                 ClientSingleton::get_client()->async_get_channel_messages(channel_info_.id_);
             }
 
-            request_dialog_.setBroadChatId(channel_info_.id_);
+            request_dialog_.setBroadChatInfo(channel_info_.id_, true);
         }
 
     } else {
@@ -79,6 +79,7 @@ void ChannelWidget::slotHandleIsChannelParticipantResult(int result, bool is_par
 
         ui->stackedWidget->show();
         ui->stackedWidget->setCurrentIndex(1); // NOT_PARTICIPANT_PAGE
+        request_dialog_.setBroadChatInfo(channel_info_.id_, true);
     }
 }
 
@@ -317,7 +318,7 @@ void ChannelWidget::setupConnection() {
     connect(ClientSingleton::get_client(), &Client::get_channel_requests_result,       this, &ChannelWidget::slotGetChannelRequestResult);
 
     connect(ui->joinButton, &QPushButton::clicked, ClientSingleton::get_client(), [this] () {
-                                                                                    if (!channel_info_.is_private_ || || ADMIN_ID == ClientSingleton::get_client()->get_status_info().id_) {
+                                                                                    if (!channel_info_.is_private_ || ADMIN_ID == ClientSingleton::get_client()->get_status_info().id_) {
                                                                                         ClientSingleton::get_client()->async_add_channel_participant_request(channel_info_.id_);
                                                                                     } else {
                                                                                         ClientSingleton::get_client()->async_request_channel_participant_request(channel_info_.id_);

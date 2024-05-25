@@ -174,7 +174,8 @@ bool LinkDoveSQLDataBase::setup_tables() {
                        " channel_id BIGINT NOT NULL, "
                        " user_id MEDIUMINT NOT NULL, "
                        " FOREIGN KEY (channel_id) REFERENCES CHANNELS(ID) ON DELETE CASCADE, "
-                       " FOREIGN KEY (user_id) REFERENCES USERS(ID) ON DELETE CASCADE); ");
+                       " FOREIGN KEY (user_id) REFERENCES USERS(ID) ON DELETE CASCADE); "
+                       " ALTER TABLE CHANNEL_REQUESTS ADD UNIQUE unique_index (channel_id, user_id); ");
 
     if (!is_ok) {
         std::cerr << "Failed to setup CHANNEL_REQUESTS table: " << query.lastError().text().toStdString() << '\n';
@@ -260,6 +261,19 @@ bool LinkDoveSQLDataBase::setup_tables() {
 
     if (!is_ok) {
         std::cerr << "Failed to setup CHAT_PARTICIPANT table: " << query.lastError().text().toStdString() << '\n';
+        return false;
+    }
+
+    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS CHAT_REQUESTS "
+                       " (ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
+                       " chat_id BIGINT NOT NULL, "
+                       " user_id MEDIUMINT NOT NULL, "
+                       " FOREIGN KEY (chat_id) REFERENCES CHATS(ID) ON DELETE CASCADE, "
+                       " FOREIGN KEY (user_id) REFERENCES USERS(ID) ON DELETE CASCADE); "
+                       " ALTER TABLE CHAT_REQUESTS ADD UNIQUE unique_index (chat_id, user_id); ");
+
+    if (!is_ok) {
+        std::cerr << "Failed to setup CHAT_REQUESTS table: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
@@ -1309,6 +1323,42 @@ bool LinkDoveSQLDataBase::remove_request_channel(unsigned long long user_id, uns
     }
 }
 
+bool LinkDoveSQLDataBase::request_participant_to_chat(unsigned long long user_id, unsigned long long chat_id) {
+    QSqlQuery query(data_base_);
+    query.prepare(" INSERT INTO CHAT_REQUESTS "
+                  " (chat_id, user_id) "
+                  " VALUES (:chat_id, :user_id); ");
+
+    query.bindValue(":chat_id", chat_id);
+    query.bindValue(":user_id", user_id);
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString();
+        return false;
+    } else {
+        // если вставка была успешна, то row affected > 0, иначе row affected == 0 (false).
+        return query.numRowsAffected();
+    }
+}
+
+bool LinkDoveSQLDataBase::remove_request_chat(unsigned long long user_id, unsigned long long chat_id) {
+    QSqlQuery query(data_base_);
+
+    query.prepare(" DELETE FROM CHAT_REQUESTS "
+                  " WHERE user_id=:user_id AND chat_id=:chat_id;");
+
+    query.bindValue(":chat_id", chat_id);
+    query.bindValue(":user_id", user_id);
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString();
+        return false;
+    } else {
+        // если удаление было успешно, то row affected > 0, иначе row affected == 0 (false).
+        return query.numRowsAffected();
+    }
+}
+
 bool LinkDoveSQLDataBase::is_channel_participant(unsigned long long participant_id, unsigned long long channel_id) {
     QSqlQuery query(data_base_);
     query.prepare(" SELECT * FROM CHANNEL_PARTICIPANTS "
@@ -1393,6 +1443,27 @@ std::vector<std::string> LinkDoveSQLDataBase::get_channel_requests(unsigned long
     return participants;
 }
 
+std::vector<std::string> LinkDoveSQLDataBase::get_chat_requests(unsigned long long chat_id) {
+    QSqlQuery query(data_base_);
+
+    query.prepare(" SELECT user_id FROM CHAT_REQUESTS "
+                  " WHERE chat_id=:chat_id; ");
+
+    query.bindValue(":chat_id", chat_id);
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString() << '\n';
+        throw std::runtime_error("get_channel_requests failed due to query.exec");
+    }
+
+    std::vector<std::string> participants;
+    while (query.next()) {
+        participants.push_back(get_status_info(query.value("user_id").toULongLong()).username_);
+    }
+
+    return participants;
+}
+
 bool LinkDoveSQLDataBase::delete_channel(unsigned long long channel_id) {
     QSqlQuery query(data_base_);
 
@@ -1432,10 +1503,11 @@ bool LinkDoveSQLDataBase::add_chat(const ChatInfo &chat_info) {
     QSqlQuery query(data_base_);
     query.prepare(" INSERT INTO CHATS "
                   " (owner_id, name, is_private) "
-                  " VALUES (:owner_id, :name, 0); ");
+                  " VALUES (:owner_id, :name, :private); ");
 
     query.bindValue(":owner_id", chat_info.owner_id_);
     query.bindValue(":name", chat_info.name_.c_str());
+    query.bindValue(":private", chat_info.is_private_);
 
     if (data_base_.transaction()) {
         if (!query.exec()) {

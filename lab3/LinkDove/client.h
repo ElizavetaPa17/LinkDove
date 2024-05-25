@@ -201,6 +201,14 @@ public:
     void async_add_private_channel_participant_request(const std::string &username, unsigned long long channel_id);
 
     /**
+     * <p> Отправляет запрос на добавление пользователя в приватный чат с идентификатором chat_id.</p>
+     * @brief async_add_private_chat_participant_request
+     * @param username - Идентификатор добавляемого пользователя.
+     * @param chat_id - Идентификатор чата, в который добавляется текущий пользователь.
+     */
+    void async_add_private_chat_participant_request(const std::string &username, unsigned long long chat_id);
+
+    /**
      * <p> Отправляет запрос на вступление текущего пользователя в канал с идентификатором channel_id.</p>
      * @brief async_request_channel_participant_request
      * @param channel_id - Идентификатор канала, в который отправляется запрос на вступление.
@@ -214,6 +222,21 @@ public:
      * @param channel_id - Идентификатор канала, из которого удаляется запрос.
      */
     void async_delete_request_channel_request(const std::string &username, unsigned long long channel_id);
+
+    /**
+     * <p> Отправляет запрос на вступление текущего пользователя в канал с идентификатором channel_id.</p>
+     * @brief async_request_channel_participant_request
+     * @param channel_id - Идентификатор канала, в который отправляется запрос на вступление.
+     */
+    void async_request_chat_participant_request(unsigned long long channel_id);
+
+    /**
+     * <p> Отправляет запрос на удаление запроса вступления в чат. </p>
+     * @brief async_delete_request_chat_request
+     * @param username - Никнейм пользователя (автора запроса).
+     * @param channel_id - Идентификатор канала, из которого удаляется запрос.
+     */
+    void async_delete_request_chat_request(const std::string &username, unsigned long long chat_id);
 
     /**
      * <p> Отправляет запрос на получение всех сообщений из канала. </p>
@@ -261,10 +284,10 @@ public:
 
     /**
      * <p> Отправляет запрос на создание чата. </p>
-     * @brief async_create_chat
-     * @param chat_name - Название чата.
+     * @brief async_create_channel
+     * @param info - Пара <название создаваемого чата (группы), флаг приватности>
      */
-    void async_create_chat(const std::string &chat_name);
+    void async_create_chat(const std::pair<std::string, bool> &info);
 
     /**
      * <p> Отправляет запрос на получение чатов текущего пользователя. </p>
@@ -306,6 +329,13 @@ public:
      * @param group_id - Идентификатор чата (группы), из которого извлекается список участников.
      */
     void async_get_chat_participants(unsigned long long group_id);
+
+    /**
+     * <p> Отправляет запрос на получение запросов вступления в приватный чат. </p>
+     * @brief async_get_chat_requests_request
+     * @param channel_id
+     */
+    void async_get_chat_requests_request(unsigned long long chat_id);
 
     /**
      * <p> Отправляет запрос на удаление чата (группы). </p>
@@ -534,6 +564,13 @@ signals:
     void request_participant_to_channel_result(int result);
 
     /**
+     * <p> Генерирует сигнал после получения результата запроса на добавление текущего пользователя в приватный чат. </p>
+     * @brief add_participant_to_chat_result
+     * @param result - Параметр, содеращий результат запроса.
+     */
+    void request_participant_to_chat_result(int result);
+
+    /**
      * <p> Генерирует сигнал после получение результата запроса на получение из канала. </p>
      * @brief get_chnnl_messages_result
      * @param result - Параметр, содеращий результат запроса.
@@ -556,6 +593,14 @@ signals:
      * @param participants - Список отправителей запроса.
      */
     void get_channel_requests_result(int result, std::vector<std::string> requests);
+
+    /**
+     * <p> Генерирует сигнал после получения результата запроса на получение списка отправителей запроса на вступление в приватный чат. </p>
+     * @brief get_chat_requests_result
+     * @param result - Параметр, содеращий результат запроса.
+     * @param participants - Список отправителей запроса.
+     */
+    void get_chat_requests_result(int result, std::vector<std::string> requests);
 
     /**
      * <p> Генерирует сигнал после получения результата удаления канала. </p>
@@ -694,6 +739,20 @@ signals:
      * @param result
      */
     void remove_request_channel_result(int result);
+
+    /**
+     * <p> Генерирует сигнал после получения результата добавления пользователя в приватный чат. </p>
+     * @brief add_private_chat_participant_result
+     * @param result
+     */
+    void add_private_chat_participant_result(int result);
+
+    /**
+     * <p> Генерирует сигнал после получения результата удаления запроса вступления в приватный чат. </p>
+     * @brief remove_request_chat_result
+     * @param result
+     */
+    void remove_request_chat_result(int result);
 
 private:
     std::shared_ptr<asio::io_context> io_context_ptr_;

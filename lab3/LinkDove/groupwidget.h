@@ -5,6 +5,7 @@
 
 #include "chatinfo.h"
 #include "imessage.h"
+#include "requestlistdialog.h"
 
 namespace Ui {
 class GroupWidget;
@@ -157,8 +158,24 @@ private slots:
      */
     void slotBanUserResult(int result);
 
+    /**
+     * <p> Слот, который обрабатывает результат отправки запроса на вступление в приватный чат. </p>
+     * @brief slotHandleRequestChat
+     * @param result - Результат запроса.
+     */
+    void slotHandleRequestChat(int result);
+
+    /**
+     * <p> Слот, который обрабатывает результат получения списка запросов на вступления в чат. </p>
+     * @brief slotGetChannelRequestResult
+     * @param result - Результат запроса.
+     * @param request - Список запросов.
+     */
+    void slotGetChatRequestResult(int result, std::vector<std::string> request);
+
 private:
     Ui::GroupWidget *ui;
+    RequestListDialog request_dialog_;
     ChatInfo chat_info_;
 
     int                send_msg_type_;  // Тип крайнего отправленного сообщения

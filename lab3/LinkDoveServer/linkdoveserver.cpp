@@ -64,6 +64,8 @@ void LinkDoveServer::setup_connection_tree() {
     handle_tree_[ADD_PARTICIPANT_TO_CHANNEL_REQUEST] = &LinkDoveServer::handle_add_channel_participant_request;
     handle_tree_[ADD_PARTICIPANT_TO_PRIVATE_CHANNEL_REQUEST] = &LinkDoveServer::handle_add_private_channel_participant_request;
     handle_tree_[REQUEST_PARTICIPANT_TO_CHANNEL_REQUEST]     = &LinkDoveServer::handle_request_channel_participant_request;
+    handle_tree_[ADD_PARTICIPANT_TO_PRIVATE_CHAT_REQUEST] = &LinkDoveServer::handle_add_private_chat_participant_request;
+    handle_tree_[REQUEST_PARTICIPANT_TO_CHAT_REQUEST]     = &LinkDoveServer::handle_request_chat_participant_request;
     handle_tree_[GET_CHNNL_MSG_REQUEST]              = &LinkDoveServer::handle_get_channel_messages_request;
     handle_tree_[DELETE_CHANNEL_REQUEST]             = &LinkDoveServer::handle_delete_channel;
     handle_tree_[CREATE_CHAT_REQUEST]                = &LinkDoveServer::handle_create_chat_request;
@@ -78,9 +80,11 @@ void LinkDoveServer::setup_connection_tree() {
     handle_tree_[QUIT_CHANNEL_REQUEST]               = &LinkDoveServer::handle_quit_channel;
     handle_tree_[REMOVE_USER_FROM_CHANNEL_REQUEST]   = &LinkDoveServer::handle_remove_user_from_channel;
     handle_tree_[REMOVE_REQUEST_CHANNEL_REQUEST]     = &LinkDoveServer::handle_remove_request_channel_request;
+    handle_tree_[REMOVE_REQUEST_CHAT_REQUEST]        = &LinkDoveServer::handle_remove_request_chat_request;
     handle_tree_[REMOVE_USER_FROM_CHAT_REQUEST]      = &LinkDoveServer::handle_remove_user_from_chat;
     handle_tree_[GET_CHNNL_PARTICIPANTS_REQUEST]     = &LinkDoveServer::handle_get_channel_participants_request;
     handle_tree_[GET_CHNNL_REQUESTS_REQUEST]         = &LinkDoveServer::handle_get_channel_requests_request;
+    handle_tree_[GET_CHAT_REQUESTS_REQUEST]          = &LinkDoveServer::handle_get_chat_requests_request;
     handle_tree_[GET_CHAT_PARTICIPANTS_REQUEST]      = &LinkDoveServer::handle_get_chat_participants_request;
     handle_tree_[SEND_USER_ANSWER_REQUEST]           = &LinkDoveServer::handle_answer_user;
     handle_tree_[GET_NOTIFICATIONS_REQUEST]          = &LinkDoveServer::handle_get_notifications;
@@ -725,8 +729,6 @@ void LinkDoveServer::handle_add_private_channel_participant_request(ConnectionIt
 }
 
 void LinkDoveServer::handle_remove_request_channel_request(ConnectionIterator iterator) {
-    std::cerr << "here\n";
-
     std::string username = UtilitySerializator::deserialize_string(iterator->in_stream_).second;
     unsigned long long channel_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
 
@@ -745,6 +747,74 @@ void LinkDoveServer::handle_remove_request_channel_request(ConnectionIterator it
     } catch (std::runtime_error &ex) {
         std::cerr << "Failed to remove channel request: " << ex.what() << '\n';
         answer << REMOVE_REQUEST_CHANNEL_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_request_chat_participant_request(ConnectionIterator iterator) {
+    unsigned long long user_id    = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second,
+                       chat_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    std::cerr << "ADD\n";
+    if (data_base_.request_participant_to_chat(user_id, chat_id)) {
+        answer << REQUEST_PARTICIPANT_TO_CHAT_SUCCESS << "\n" << END_OF_REQUEST;
+    } else {
+        answer << REQUEST_PARTICIPANT_TO_CHAT_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_add_private_chat_participant_request(ConnectionIterator iterator) {
+    std::string username = UtilitySerializator::deserialize_string(iterator->in_stream_).second;
+    unsigned long long chat_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    try {
+        StatusInfo user_info;
+        user_info = data_base_.get_status_info(username);
+
+        if (data_base_.remove_request_chat(user_info.id_, chat_id) && data_base_.add_participant_to_chat(user_info.id_, chat_id)) {
+            answer << ADD_PARTICIPANT_TO_PRIVATE_CHAT_SUCCESS << "\n" << END_OF_REQUEST;
+        } else {
+            answer << ADD_PARTICIPANT_TO_PRIVATE_CHAT_FAILED << "\n" << END_OF_REQUEST;
+        }
+    } catch (std::runtime_error &ex) {
+        std::cerr << "Failed to add participant to private chat: " << ex.what() << '\n';
+        answer << ADD_PARTICIPANT_TO_PRIVATE_CHAT_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_remove_request_chat_request(ConnectionIterator iterator) {
+    std::string username = UtilitySerializator::deserialize_string(iterator->in_stream_).second;
+    unsigned long long chat_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    try {
+        StatusInfo user_info;
+        user_info = data_base_.get_status_info(username);
+
+        if (data_base_.remove_request_chat(user_info.id_, chat_id)) {
+            answer << REMOVE_REQUEST_CHAT_SUCCESS << "\n" << END_OF_REQUEST;
+        } else {
+            answer << REMOVE_REQUEST_CHAT_FAILED << "\n" << END_OF_REQUEST;
+        }
+    } catch (std::runtime_error &ex) {
+        std::cerr << "Failed to remove chat request: " << ex.what() << '\n';
+        answer << REMOVE_REQUEST_CHAT_FAILED << "\n" << END_OF_REQUEST;
     }
 
     iterator->out_stream_ << answer.str();
@@ -812,6 +882,27 @@ void LinkDoveServer::handle_get_channel_requests_request(ConnectionIterator iter
     } catch (std::runtime_error &ex) {
         std::cerr << "Failed to get channel requests: " << ex.what() << '\n';
         answer << GET_CHNNL_REQUESTS_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_get_chat_requests_request(ConnectionIterator iterator) {
+    unsigned long long chat_id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    try {
+        std::vector<std::string> participants = data_base_.get_chat_requests(chat_id);
+
+        answer << GET_CHAT_REQUESTS_SUCCESS << "\n";
+        UtilitySerializator::serialize(answer, participants);
+        answer << END_OF_REQUEST;
+    } catch (std::runtime_error &ex) {
+        std::cerr << "Failed to get chat requests: " << ex.what() << '\n';
+        answer << GET_CHAT_REQUESTS_FAILED << "\n" << END_OF_REQUEST;
     }
 
     iterator->out_stream_ << answer.str();

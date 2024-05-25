@@ -30,10 +30,10 @@ public:
     void removeAllRequests();
 
     /**
-     * <p> Устанавливает идентификатор канала. </p>
+     * <p> Устанавливает информацию о чате. </p>
      * @brief setBroadChatId
      */
-    void setBroadChatId(unsigned long long broad_chat_id);
+    void setBroadChatInfo(unsigned long long broad_chat_id, bool is_channel);
 
 private slots:
     /**
@@ -67,6 +67,7 @@ private slots:
 private:
     QScrollArea *scroll_area_;
     unsigned long long broad_chat_id_;
+    bool is_channel_;
     std::string removed_request_username_;
 
     /**

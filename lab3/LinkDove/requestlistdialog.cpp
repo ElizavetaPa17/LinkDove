@@ -34,8 +34,9 @@ RequestListDialog::~RequestListDialog() {
 
 }
 
-void RequestListDialog::setBroadChatId(unsigned long long broad_chat_id) {
+void RequestListDialog::setBroadChatInfo(unsigned long long broad_chat_id, bool is_channel) {
     broad_chat_id_ = broad_chat_id;
+    is_channel_ = is_channel;
 }
 
 void RequestListDialog::addRequestUsername(const std::string &username) {
@@ -44,8 +45,6 @@ void RequestListDialog::addRequestUsername(const std::string &username) {
     scroll_area_->widget()->layout()->addWidget(request_card);
     connect(request_card, &RequestCard::add, this, &RequestListDialog::slotAddParticipant);
     connect(request_card, &RequestCard::remove, this, &RequestListDialog::slotRemoveRequest);
-
-    std::cerr << "added\n";
 }
 
 void RequestListDialog::removeAllRequests() {
@@ -56,19 +55,34 @@ void RequestListDialog::removeAllRequests() {
 void RequestListDialog::slotRemoveRequest(std::string username) {
     removed_request_username_ = username;
 
-    ClientSingleton::get_client()->async_delete_request_channel_request(username, broad_chat_id_);
+    if (is_channel_) {
+        ClientSingleton::get_client()->async_delete_request_channel_request(username, broad_chat_id_);
+    } else {
+        ClientSingleton::get_client()->async_delete_request_chat_request(username, broad_chat_id_);
+    }
 }
 
 void RequestListDialog::slotAddParticipant(std::string username) {
     removed_request_username_ = username;
 
-    ClientSingleton::get_client()->async_add_private_channel_participant_request(username, broad_chat_id_);
+    if (is_channel_) {
+        ClientSingleton::get_client()->async_add_private_channel_participant_request(username, broad_chat_id_);
+    } else {
+        ClientSingleton::get_client()->async_add_private_chat_participant_request(username, broad_chat_id_);
+    }
 }
 
 void RequestListDialog::slotRemoveRequestResult(int result) {
     if (result == REMOVE_REQUEST_CHANNEL_SUCCESS_ANSWER) {
         removeRequest(removed_request_username_);
     } else if (result == REMOVE_REQUEST_CHANNEL_FAILED_ANSWER) {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Что-то пошло не так при попытке удалить запрос.");
+        dialog_ptr->exec();
+    }
+
+    if (result == REMOVE_REQUEST_CHAT_SUCCESS_ANSWER) {
+        removeRequest(removed_request_username_);
+    } else if (result == REMOVE_REQUEST_CHAT_FAILED_ANSWER) {
         std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Что-то пошло не так при попытке удалить запрос.");
         dialog_ptr->exec();
     }
@@ -81,6 +95,11 @@ void RequestListDialog::slotAddParticipantResult(int result) {
         removeRequest(removed_request_username_);
     } else if (result == ADD_PARTICIPANT_TO_PRIVATE_CHANNEL_FAILED_ANSWER) {
         text = "Что-то пошло не так при попытке добавить пользователя в канал.";
+    } else if (result == ADD_PARTICIPANT_TO_CHAT_SUCCESS_ANSWER && !is_channel_) {
+        text = "Пользователь был добавлен в чат.";
+        removeRequest(removed_request_username_);
+    } else if (result == ADD_PARTICIPANT_TO_CHAT_FAILED_ANSWER && !is_channel_){
+        text = "Что-то пошло не так при попытке добавить пользователя в чат.";
     }
 
     std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, text);
@@ -105,5 +124,7 @@ void RequestListDialog::removeRequest(const std::string &username) {
 
 void RequestListDialog::setupConnections() {
     connect(ClientSingleton::get_client(), &Client::add_private_channel_participant_result, this, &RequestListDialog::slotAddParticipantResult);
-    connect(ClientSingleton::get_client(), &Client::remove_request_channel_result, this, &RequestListDialog::slotRemoveRequestResult);
+    connect(ClientSingleton::get_client(), &Client::remove_request_channel_result,          this, &RequestListDialog::slotRemoveRequestResult);
+    connect(ClientSingleton::get_client(), &Client::add_private_chat_participant_result,    this, &RequestListDialog::slotAddParticipantResult);
+    connect(ClientSingleton::get_client(), &Client::remove_request_chat_result,             this, &RequestListDialog::slotRemoveRequestResult);
 }

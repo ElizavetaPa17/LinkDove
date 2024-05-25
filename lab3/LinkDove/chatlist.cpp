@@ -4,7 +4,7 @@
 #include <QStyleOption>
 #include <QPainter>
 
-#include "typestringdialog.h"
+#include "createbroadchatdialog.h"
 #include "clientsingleton.h"
 #include "infodialog.h"
 #include "chatcard.h"
@@ -77,9 +77,9 @@ void ChatList::slotGetChatsResult(int result, std::vector<ChatInfo> chats) {
 }
 
 void ChatList::slotCreateChat() {
-    std::unique_ptr<TypeStringDialog> dialog_ptr = std::make_unique<TypeStringDialog>(nullptr, "Введите название чата: ");
+    std::unique_ptr<CreateBroadChatDialog> dialog_ptr = std::make_unique<CreateBroadChatDialog>(nullptr, "Введите название чата: ");
     if (dialog_ptr->exec() == QDialog::Accepted) {
-        ClientSingleton::get_client()->async_create_chat(dialog_ptr->getString());
+        ClientSingleton::get_client()->async_create_chat(dialog_ptr->getInfo());
     }
 }
 

@@ -236,6 +236,15 @@ void Client::async_add_private_channel_participant_request(const std::string &us
     write_to_server();
 }
 
+void Client::async_add_private_chat_participant_request(const std::string &username, unsigned long long chat_id) {
+    connection_.out_stream_ << ADD_PARTICIPANT_TO_PRIVATE_CHAT_REQUEST << '\n';
+    UtilitySerializator::serialize(connection_.out_stream_, username);
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, chat_id);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    write_to_server();
+}
+
 void Client::async_request_channel_participant_request(unsigned long long channel_id) {
     connection_.out_stream_ << REQUEST_PARTICIPANT_TO_CHANNEL_REQUEST << '\n';
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, status_info_.id_);
@@ -249,6 +258,24 @@ void Client::async_delete_request_channel_request(const std::string &username, u
     connection_.out_stream_ << REMOVE_REQUEST_CHANNEL_REQUEST << '\n';
     UtilitySerializator::serialize(connection_.out_stream_, username);
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, channel_id);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    write_to_server();
+}
+
+void Client::async_request_chat_participant_request(unsigned long long chat_id) {
+    connection_.out_stream_ << REQUEST_PARTICIPANT_TO_CHAT_REQUEST << '\n';
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, status_info_.id_);
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, chat_id);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    write_to_server();
+}
+
+void Client::async_delete_request_chat_request(const std::string &username, unsigned long long chat_id) {
+    connection_.out_stream_ << REMOVE_REQUEST_CHAT_REQUEST << '\n';
+    UtilitySerializator::serialize(connection_.out_stream_, username);
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, chat_id);
     connection_.out_stream_ << END_OF_REQUEST;
 
     write_to_server();
@@ -304,12 +331,13 @@ void Client::async_quit_channel(unsigned long long user_id, unsigned long long c
     write_to_server();
 }
 
-void Client::async_create_chat(const std::string &chat_name) {
+void Client::async_create_chat(const std::pair<std::string, bool> &info) {
     connection_.out_stream_ << CREATE_CHAT_REQUEST << '\n';
 
     ChatInfo chat_info;
-    chat_info.name_ = chat_name;
+    chat_info.name_ = info.first;
     chat_info.owner_id_ = status_info_.id_;
+    chat_info.is_private_ = info.second;
     chat_info.serialize(connection_.out_stream_);
     connection_.out_stream_ << END_OF_REQUEST;
 
@@ -361,6 +389,14 @@ void Client::async_get_chat_messages(unsigned long long chat_id) {
 void Client::async_get_chat_participants(unsigned long long group_id) {
     connection_.out_stream_ << GET_CHAT_PARTICIPANTS_REQUEST << '\n';
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, group_id);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    write_to_server();
+}
+
+void Client::async_get_chat_requests_request(unsigned long long chat_id) {
+    connection_.out_stream_ << GET_CHAT_REQUESTS_REQUEST << '\n';
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, chat_id);
     connection_.out_stream_ << END_OF_REQUEST;
 
     write_to_server();
@@ -529,6 +565,9 @@ void Client::setup_response_tree() {
     response_tree_[REQUEST_PARTICIPANT_TO_CHANNEL_SUCCESS] = [this] () { emit request_participant_to_channel_result(REQUEST_PARTICIPANT_TO_CHANNEL_SUCCESS_ANSWER); };
     response_tree_[REQUEST_PARTICIPANT_TO_CHANNEL_FAILED]  = [this] () { emit request_participant_to_channel_result(REQUEST_PARTICIPANT_TO_CHANNEL_FAILED_ANSWER); };
 
+    response_tree_[REQUEST_PARTICIPANT_TO_CHAT_SUCCESS] = [this] () { emit request_participant_to_chat_result(REQUEST_PARTICIPANT_TO_CHAT_SUCCESS_ANSWER); };
+    response_tree_[REQUEST_PARTICIPANT_TO_CHAT_FAILED]  = [this] () { emit request_participant_to_chat_result(REQUEST_PARTICIPANT_TO_CHAT_FAILED_ANSWER); };
+
     response_tree_[SEND_CHNNL_MSG_SUCCESS] = [this] () { emit send_msg_result(SEND_CHNNL_MSG_SUCCESS_ANSWER); };
     response_tree_[SEND_CHNNL_MSG_FAILED]  = [this] () { emit send_msg_result(SEND_CHNNL_MSG_FAILED_ANSWER); };
 
@@ -590,6 +629,10 @@ void Client::setup_response_tree() {
                                                              emit get_channel_requests_result(GET_CHNNL_PARTICIPANTS_SUCCESS_ANSWER, participants); };
     response_tree_[GET_CHNNL_REQUESTS_FAILED]  = [this] () { emit get_channel_requests_result(GET_CHNNL_PARTICIPANTS_FAILED_ANSWER, std::vector<std::string>()); };
 
+    response_tree_[GET_CHAT_REQUESTS_SUCCESS] = [this] () { std::vector<std::string> participants = UtilitySerializator::deserialize_vec_string(connection_.in_stream_).second;
+                                                             emit get_chat_requests_result(GET_CHAT_PARTICIPANTS_SUCCESS_ANSWER, participants); };
+    response_tree_[GET_CHAT_REQUESTS_FAILED]  = [this] () { emit get_chat_requests_result(GET_CHAT_PARTICIPANTS_FAILED_ANSWER, std::vector<std::string>()); };
+
     response_tree_[GET_CHAT_PARTICIPANTS_SUCCESS] = [this] () { std::vector<std::string> participants = UtilitySerializator::deserialize_vec_string(connection_.in_stream_).second;
                                                                 emit get_chat_participants_result(GET_CHAT_PARTICIPANTS_SUCCESS_ANSWER, participants); };
     response_tree_[GET_CHAT_PARTICIPANTS_FAILED]  = [this] () { emit get_chat_participants_result(GET_CHAT_PARTICIPANTS_FAILED_ANSWER, std::vector<std::string>()); };
@@ -618,6 +661,12 @@ void Client::setup_response_tree() {
 
     response_tree_[REMOVE_REQUEST_CHANNEL_SUCCESS] = [this] () { emit remove_request_channel_result(REMOVE_REQUEST_CHANNEL_SUCCESS_ANSWER); };
     response_tree_[REMOVE_REQUEST_CHANNEL_FAILED]  = [this] () { emit remove_request_channel_result(REMOVE_REQUEST_CHANNEL_FAILED_ANSWER); };
+
+    response_tree_[ADD_PARTICIPANT_TO_PRIVATE_CHAT_SUCCESS] = [this] () { emit add_private_chat_participant_result(ADD_PARTICIPANT_TO_PRIVATE_CHAT_SUCCESS_ANSWER); };
+    response_tree_[ADD_PARTICIPANT_TO_PRIVATE_CHAT_FAILED]  = [this] () { emit add_private_chat_participant_result(ADD_PARTICIPANT_TO_PRIVATE_CHAT_FAILED_ANSWER); };
+
+    response_tree_[REMOVE_REQUEST_CHAT_SUCCESS] = [this] () { emit remove_request_chat_result(REMOVE_REQUEST_CHAT_SUCCESS_ANSWER); };
+    response_tree_[REMOVE_REQUEST_CHAT_FAILED]  = [this] () { emit remove_request_chat_result(REMOVE_REQUEST_CHAT_FAILED_ANSWER); };
 }
 
 void Client::async_read() {

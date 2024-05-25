@@ -261,7 +261,7 @@ public:
     bool add_participant_to_channel(unsigned long long participant_id, unsigned long long channel_id);
 
     /**
-     * <p> Добавляет пользователя в приватный канал. </p>
+     * <p> Добавляет запрос пользователя на вступление в приватный канал. </p>
      * @brief request_participant_to_channel
      * @param user_id - Идентификатор добавляемого пользователя.
      * @param channel_id - Идентификатор канала, в который добавляется пользователь.
@@ -277,6 +277,24 @@ public:
      * @return - В случае успеха возвращает true, иначе - false.
      */
     bool remove_request_channel(unsigned long long user_id, unsigned long long channel_id);
+
+    /**
+     * <p> Добавляет запрос пользователя на вступление в приватный чат. </p>
+     * @brief request_participant_to_chat
+     * @param user_id - Идентификатор добавляемого пользователя.
+     * @param chat_id - Идентификатор чата, в который добавляется пользователь.
+     * @return - В случае успеха возвращает true, иначе - false.
+     */
+    bool request_participant_to_chat(unsigned long long user_id, unsigned long long chat_id);
+
+    /**
+     * <p> Удаляет запрос на вступление в приватный чат. </p>
+     * @brief remove_request_chat
+     * @param user_id - Никнейм пользователя (автора запроса).
+     * @param chat_id - Идентификатор чата, из которого удаляется запрос.
+     * @return - В случае успеха возвращает true, иначе - false.
+     */
+    bool remove_request_chat(unsigned long long user_id, unsigned long long chat_id);
 
     /**
      * <p> Проверяет, является ли пользователь участником канала. </p>
@@ -310,6 +328,14 @@ public:
      * @return - Список отправителей запроса.
      */
     std::vector<std::string> get_channel_requests(unsigned long long channel_id);
+
+    /**
+     * <p> Возвращает список никнеймов тех, кто отправлял запрос на вступление в частный чат. </p>
+     * @brief get_chat_requests
+     * @param chat_id
+     * @return - Список отправителей запроса.
+     */
+    std::vector<std::string> get_chat_requests(unsigned long long chat_id);
 
     /**
      * <p> Удаляет канал из БД. </p>
