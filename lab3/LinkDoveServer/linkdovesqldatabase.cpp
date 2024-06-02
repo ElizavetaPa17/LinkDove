@@ -1638,7 +1638,6 @@ std::vector<ChatInfo> LinkDoveSQLDataBase::get_chats(unsigned long long id) {
 bool LinkDoveSQLDataBase::delete_chat(unsigned long long chat_id) {
     QSqlQuery query(data_base_);
 
-    // Удаляем все текстовые сообщения
     query.prepare(" DELETE FROM CHATS "
                   " WHERE ID=:id; ");
 

@@ -421,7 +421,7 @@ void Client::async_quit_chat(unsigned long long user_id, unsigned long long grou
 }
 
 void Client::async_remove_user_from_chat(unsigned long long group_id, const std::string &user_name) {
-    connection_.out_stream_ << REMOVE_USER_FROM_CHAT_REQUEST << 'n';
+    connection_.out_stream_ << REMOVE_USER_FROM_CHAT_REQUEST << '\n';
     UtilitySerializator::serialize(connection_.out_stream_, user_name);
     UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, group_id);
     connection_.out_stream_ << END_OF_REQUEST;
@@ -656,7 +656,7 @@ void Client::setup_response_tree() {
     response_tree_[DEL_CHAT_MSG_SUCCESS] = [this] () { emit delete_msg_result(DEL_CHAT_MSG_SUCCESS_ANSWER); };
     response_tree_[DEL_CHAT_MSG_FAILED]  = [this] () { emit delete_msg_result(DEL_CHAT_MSG_FAILED_ANSWER); };
 
-    response_tree_[ADD_PARTICIPANT_TO_PRIVATE_CHANNEL_SUCCESS] = [this] () { emit add_private_channel_participant_result(ADD_PARTICIPANT_TO_PRIVATE_CHANNEL_SUCCESS_ANSWER); };
+    response_tree_[ADD_PARTICIPANT_TO_PRIVATE_CHANNEL_SUCCESS] = [this] () { std::cerr << "emit\n"; emit add_private_channel_participant_result(ADD_PARTICIPANT_TO_PRIVATE_CHANNEL_SUCCESS_ANSWER); };
     response_tree_[ADD_PARTICIPANT_TO_PRIVATE_CHANNEL_FAILED]  = [this] () { emit add_private_channel_participant_result(ADD_PARTICIPANT_TO_PRIVATE_CHANNEL_FAILED_ANSWER); };
 
     response_tree_[REMOVE_REQUEST_CHANNEL_SUCCESS] = [this] () { emit remove_request_channel_result(REMOVE_REQUEST_CHANNEL_SUCCESS_ANSWER); };
@@ -675,8 +675,8 @@ void Client::async_read() {
                            END_OF_REQUEST,
                            boost::bind(&Client::handle_async_read,
                                  shared_from_this(),
-                                 asio::placeholders::error(),
-                                 asio::placeholders::bytes_transferred()));
+                                 asio::placeholders::error,
+                                 asio::placeholders::bytes_transferred));
 
     run_context();
 }

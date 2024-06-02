@@ -158,9 +158,18 @@ QPushButton:hover {
       <cursorShape>PointingHandCursor</cursorShape>
      </property>
      <property name="styleSheet">
-      <string notr="true">color: rgb(65, 47, 50);
+      <string notr="true">QCheckBox {
+color: rgb(65, 47, 50);
 padding-left: 10px;
-height: 30px;</string>
+height: 30px;
+}
+
+QCheckBox:checked 
+{ 
+color: rgb(122, 71, 50)
+padding-left: 10px;
+height: 30px;
+}</string>
      </property>
      <property name="text">
       <string>Закрытый</string>

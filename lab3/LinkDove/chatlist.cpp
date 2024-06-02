@@ -77,7 +77,7 @@ void ChatList::slotGetChatsResult(int result, std::vector<ChatInfo> chats) {
 }
 
 void ChatList::slotCreateChat() {
-    std::unique_ptr<CreateBroadChatDialog> dialog_ptr = std::make_unique<CreateBroadChatDialog>(nullptr, "Введите название чата: ");
+    std::unique_ptr<CreateBroadChatDialog> dialog_ptr = std::make_unique<CreateBroadChatDialog>(nullptr, "Введите название группы ");
     if (dialog_ptr->exec() == QDialog::Accepted) {
         ClientSingleton::get_client()->async_create_chat(dialog_ptr->getInfo());
     }
@@ -86,10 +86,10 @@ void ChatList::slotCreateChat() {
 void ChatList::slotCreateChatResult(int result) {
     std::string text;
     if (result == CREATE_CHAT_SUCCESS_ANSWER) {
-        text = "Чат успешно создан.";
+        text = "Группа успешна создана.";
         ClientSingleton::get_client()->async_get_chats();
     } else {
-        text = "Ошибка создания чата. Попытайтесь позже.";
+        text = "Ошибка создания группы. Попытайтесь позже.";
     }
 
     std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, text);

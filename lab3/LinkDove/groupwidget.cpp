@@ -50,7 +50,12 @@ void GroupWidget::slotHandleIsGroupParticipantResult(int result, bool is_partici
                 ui->deleteButton->show();
                 ui->removeUserButton->show();
                 ui->banButton->show();
-                ui->requestButton->show();
+
+                if (chat_info_.is_private_) {
+                    ui->requestButton->show();
+                } else {
+                    ui->requestButton->hide();
+                }
             } else {
                 ui->removeUserButton->hide();
                 ui->deleteButton->hide();
@@ -65,12 +70,10 @@ void GroupWidget::slotHandleIsGroupParticipantResult(int result, bool is_partici
             ui->removeUserButton->hide();
             ui->banButton->hide();
             ui->requestButton->hide();
+        }
 
-            if (!chat_info_.is_private_ || is_participant) {
-                ClientSingleton::get_client()->async_get_chat_messages(chat_info_.id_);
-            }
-
-            request_dialog_.setBroadChatInfo(chat_info_.id_, false);
+        if (!chat_info_.is_private_ || is_participant) {
+            ClientSingleton::get_client()->async_get_chat_messages(chat_info_.id_);
         }
     } else {
         std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Ошибка получения информации об участниках группы. Попытайтесь позже. ");
@@ -81,11 +84,9 @@ void GroupWidget::slotHandleIsGroupParticipantResult(int result, bool is_partici
         ui->quitButton->hide();
         ui->removeUserButton->hide();
         ui->banButton->hide();
-
-        request_dialog_.setBroadChatInfo(chat_info_.id_, false);
     }
 
-    ClientSingleton::get_client()->async_get_chat_messages(chat_info_.id_);
+    request_dialog_.setBroadChatInfo(chat_info_.id_, false);
 }
 
 void GroupWidget::slotClear() {

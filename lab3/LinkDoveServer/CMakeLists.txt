@@ -9,6 +9,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+find_package(Boost REQUIRED system)
 find_package(QT NAMES Qt6 Qt REQUIRED COMPONENTS Sql Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Sql Widgets)
 
@@ -28,6 +29,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(LinkDoveServer
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+        LinkDoveDatabase.h
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET LinkDoveServer APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -48,7 +50,8 @@ else()
 endif()
 
 target_link_libraries(LinkDoveServer PRIVATE Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Widgets
-                                     common_library)
+                                     common_library
+                                     ${Boost_LIBRARIES})
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an

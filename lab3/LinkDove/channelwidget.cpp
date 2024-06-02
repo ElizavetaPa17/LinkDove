@@ -50,7 +50,12 @@ void ChannelWidget::slotHandleIsChannelParticipantResult(int result, bool is_par
                 ui->stackedWidget->show();                                                         // отображаем панель для отправки сообщений или админ
                 ui->deleteButton->show();
                 ui->removeUserButton->show();
-                ui->requestButton->show();
+
+                if (channel_info_.is_private_) {
+                    ui->requestButton->show();
+                } else {
+                    ui->requestButton->hide();
+                }
             } else {
                 ui->requestButton->hide();
                 ui->stackedWidget->hide();
@@ -65,22 +70,20 @@ void ChannelWidget::slotHandleIsChannelParticipantResult(int result, bool is_par
             ui->quitButton->hide();
             ui->removeUserButton->hide();
             ui->stackedWidget->setCurrentIndex(1); // NOT_PARTICIPANT_PAGE
-
-            if (!channel_info_.is_private_ || is_participant) {
-                ClientSingleton::get_client()->async_get_channel_messages(channel_info_.id_);
-            }
-
-            request_dialog_.setBroadChatInfo(channel_info_.id_, true);
         }
 
+        if (!channel_info_.is_private_ || is_participant) {
+            ClientSingleton::get_client()->async_get_channel_messages(channel_info_.id_);
+        }
     } else {
         std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Ошибка получения информации об участниках канала. Попытайтесь позже. ");
         dialog_ptr->exec();
 
         ui->stackedWidget->show();
         ui->stackedWidget->setCurrentIndex(1); // NOT_PARTICIPANT_PAGE
-        request_dialog_.setBroadChatInfo(channel_info_.id_, true);
     }
+
+    request_dialog_.setBroadChatInfo(channel_info_.id_, true);
 }
 
 void ChannelWidget::slotClear() {
@@ -111,18 +114,13 @@ void ChannelWidget::slotHandleSendMessage(int result) {
 void ChannelWidget::slotHandleGetMessages(int result, std::vector<std::shared_ptr<IMessage>> messages) {
     slotClear();
 
-    unsigned long long owner_id = ClientSingleton::get_client()->get_status_info().id_;
+    unsigned long long user_id = ClientSingleton::get_client()->get_status_info().id_;
+    bool delete_flag = ((user_id == ADMIN_ID) || (user_id == channel_info_.owner_id_)) ? true : false; // Владелец или админ могут удалять любые сообщения
 
     if (result == GET_CHNNL_MSG_SUCCESS_ANSWER){
         for (auto& elem : messages) {
             QHBoxLayout *phboxLayout = new QHBoxLayout();
-
-            if (channel_info_.owner_id_ == owner_id) {
-                phboxLayout->addWidget(new MessageCard(nullptr, elem, true));
-            } else {
-                phboxLayout->addWidget(new MessageCard(nullptr, elem));
-            }
-
+            phboxLayout->addWidget(new MessageCard(nullptr, elem, delete_flag));
             phboxLayout->addStretch();
 
             ui->verticalLayout->addLayout(phboxLayout);

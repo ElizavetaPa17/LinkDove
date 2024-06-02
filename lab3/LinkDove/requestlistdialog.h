@@ -44,7 +44,7 @@ private slots:
     void slotRemoveRequest(std::string username);
 
     /**
-     * <p> Слот, который обрабатывает попытку добавить пользователя в приватный канал. </p>
+     * <p> Слот, который обрабатывает попытку добавить пользователя в приватный чат. </p>
      * @brief slotAddParticipant
      * @param username - Никнейм добавляемого пользователя.
      */
@@ -62,7 +62,14 @@ private slots:
      * @brief slotRemoveRequestResult
      * @param result - Результат запроса.
      */
-    void slotAddParticipantResult(int result);
+    void slotChannelAddParticipantResult(int result);
+
+    /**
+     * <p> Слот, который обрабатывает результат запроса на добавление пользователя в приватный канал. </p>
+     * @brief slotRemoveRequestResult
+     * @param result - Результат запроса.
+     */
+    void slotChatAddParticipantResult(int result);
 
 private:
     QScrollArea *scroll_area_;
