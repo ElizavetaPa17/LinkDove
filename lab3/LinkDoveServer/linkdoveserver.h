@@ -10,7 +10,7 @@
 #include <functional>
 
 #include "tcpconnection.h"
-#include "linkdovesqldatabase.h"
+#include "linkdovepsqldatabase.h"
 #include "constants.h"
 
 namespace asio = boost::asio;
@@ -37,7 +37,7 @@ private:
     std::shared_ptr<asio::io_context> io_context_ptr_;
     tcp::acceptor acceptor_;
     std::list<TCPConnection> connections_;
-    LinkDoveSQLDataBase data_base_;
+    LinkDovePSQLDataBase data_base_;
 
     std::unordered_map<std::string, HandleFunction_t> handle_tree_;
 
@@ -471,9 +471,5 @@ private:
      */
     void remove_delimeter(ConnectionIterator iterator);
 };
-
-namespace ServerUtility {
-    bool check_password(std::string &password);
-}
 
 #endif // LINKDOVESERVER_H

@@ -29,7 +29,7 @@ void AudioManager::stop() {
 }
 
 bool AudioManager::is_playing() {
-    return player_.isPlaying();
+    return player_.playbackRate() == QMediaPlayer::PlayingState;
 }
 
 void AudioManager::setup() {

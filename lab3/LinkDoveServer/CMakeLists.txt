@@ -5,6 +5,7 @@ project(LinkDoveServer VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
+set(QT_DEBUG_PLUGINS 1)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -15,8 +16,8 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Sql Widgets)
 
 set(PROJECT_SOURCES
     main.cpp
-    linkdoveserver.h      linkdoveserver.cpp
-    linkdovesqldatabase.h linkdovesqldatabase.cpp
+    linkdoveserver.h       linkdoveserver.cpp
+    linkdovepsqldatabase.h linkdovepsqldatabase.cpp
 )
 
 set(COMMON_SOURCE_PATH ${CMAKE_SOURCE_DIR}/../common_source)

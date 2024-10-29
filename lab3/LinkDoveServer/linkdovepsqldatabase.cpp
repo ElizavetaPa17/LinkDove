@@ -1,4 +1,4 @@
-#include "linkdovesqldatabase.h"
+#include "linkdovepsqldatabase.h"
 
 #include <iostream>
 #include <QSqlError>
@@ -16,19 +16,19 @@
 
 std::mutex modify_mutex;
 
-LinkDoveSQLDataBase::LinkDoveSQLDataBase(const std::string &connection_name)
+LinkDovePSQLDataBase::LinkDovePSQLDataBase(const std::string &connection_name)
     : connection_name_(connection_name)
 {
     setup();
 }
 
-LinkDoveSQLDataBase::~LinkDoveSQLDataBase() {
+LinkDovePSQLDataBase::~LinkDovePSQLDataBase() {
     data_base_.close();
     QSqlDatabase::removeDatabase(data_base_.databaseName());
 }
 
-void LinkDoveSQLDataBase::setup() {
-    data_base_ = QSqlDatabase::addDatabase("MySQL", connection_name_.c_str());
+void LinkDovePSQLDataBase::setup() {
+    data_base_ = QSqlDatabase::addDatabase("QPSQL", connection_name_.c_str());
     data_base_.setHostName("localhost");
     data_base_.setUserName("frog");
     data_base_.setPassword("12345");
@@ -47,311 +47,466 @@ void LinkDoveSQLDataBase::setup() {
     }
 }
 
-bool LinkDoveSQLDataBase::setup_tables() {
+bool LinkDovePSQLDataBase::setup_tables() {
     QSqlQuery query(data_base_);
 
-    bool is_ok = query.exec("CREATE TABLE IF NOT EXISTS USERS "
-                            "( ID MEDIUMINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
-                            "  username VARCHAR(40) UNIQUE NOT NULL, "
-                            "  email VARCHAR(40) UNIQUE NOT NULL, "
-                            "  password VARCHAR(40) NOT NULL, "
-                            "  birthday DATE NOT NULL, "
-                            "  text_status VARCHAR(256), "
-                            "  image VARCHAR(400) DEFAULT 'media/avatars/default_avatar.png', "
-                            "  is_banned TINYINT DEFAULT 0); ");
+    bool is_ok = query.exec("DO $$ BEGIN "
+                            "CREATE TYPE action_type AS ENUM('register', 'login', 'logout', 'edit profile', 'banned', 'unbanned');"
+                            "EXCEPTION "
+                            "WHEN duplicate_object THEN null;"
+                            "END $$;");
 
     if (!is_ok) {
-        std::cerr << "Failed to setup USERS table: " << query.lastError().text().toStdString() << '\n';
+        std::cerr << "Failed to setup action_type type: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
-    is_ok = query.exec("CREATE TABLE IF NOT EXISTS COMPLAINTS "
-                       "( ID MEDIUMINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
-                       " sender_id MEDIUMINT NOT NULL, "
-                       " text TEXT NOT NULL,"
-                       " FOREIGN KEY(sender_id) REFERENCES USERS(ID) ON DELETE CASCADE); ");
+    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS Consumer ("
+                       "id serial PRIMARY KEY,"
+                       "username varchar(40) NOT NULL UNIQUE,"
+                       "email varchar(40) NOT NULL UNIQUE,"
+                       "password varchar(40) NOT NULL CHECK(LENGTH(password) > 8 AND password ~* '[a-zA-Z]' AND password ~* '[0-9]'),"
+                       "is_banned bool DEFAULT false);  ");
+
     if (!is_ok) {
-        std::cerr << "Failed to setup COMPLAINTS table: " << query.lastError().text().toStdString() << '\n';
+        std::cerr << "Failed to setup Consumer table: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
-    is_ok = query.exec("CREATE TABLE IF NOT EXISTS ANSWERS "
-                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
-                       "  receiver_id MEDIUMINT NOT NULL, "
-                       "  text TEXT NOT NULL, "
-                       "  FOREIGN KEY (receiver_id) REFERENCES USERS (ID) ON DELETE CASCADE); ");
-
+    is_ok = query.exec("CREATE TABLE IF NOT EXISTS Action ("
+                       "id serial,"
+                       "consumer integer NOT NULL,"
+                       "type action_type,"
+                       "time timestamp DEFAULT(now()),"
+                       "PRIMARY KEY (id, time),"
+                       "FOREIGN KEY (consumer) REFERENCES Consumer(id)"
+                       ") PARTITION BY RANGE(time); ");
     if (!is_ok) {
-        std::cerr << "Failed to setup ANSWERS table: " << query.lastError().text().toStdString() << '\n';
+        std::cerr << "Failed to setup Action table: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
-    is_ok = query.exec("CREATE TABLE IF NOT EXISTS INDIVIDUAL_MESSAGES "
-                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY , "
-                       " sender_id MEDIUMINT NOT NULL, "
-                       " receiver_id MEDIUMINT NOT NULL, "
-                       " send_datetime DATETIME NOT NULL, "
-                       " content_id BIGINT DEFAULT 0, "
-                       " content_type ENUM('text', 'audio', 'image'), "
-                       " FOREIGN KEY (sender_id) REFERENCES USERS (ID) ON DELETE CASCADE, "
-                       " FOREIGN KEY (receiver_id) REFERENCES USERS (ID) ON DELETE CASCADE); ");
+    is_ok = query.exec("CREATE TABLE IF NOT EXISTS Answer ("
+                       "id serial PRIMARY KEY,"
+                       "receiver integer NOT NULL,"
+                       "description text NOT NULL,"
+                       "FOREIGN KEY (receiver) REFERENCES Consumer(id)"
+                       "); ");
 
     if (!is_ok) {
-        std::cerr << "Failed to setup INDIVIDUAL_MESSAGES table: " << query.lastError().text().toStdString() << '\n';
+        std::cerr << "Failed to setup Answer table: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
-    is_ok = query.exec("CREATE TABLE IF NOT EXISTS IND_TEXT_MESSAGE_CONTENTS "
-                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
-                       " msg_id BIGINT NOT NULL, "
-                       " text_data TEXT NOT NULL, "
-                       " FOREIGN KEY (msg_id) REFERENCES INDIVIDUAL_MESSAGES (ID) ON DELETE CASCADE); ");
+    is_ok = query.exec(" DO $$ BEGIN "
+                       "CREATE TYPE broadchat_type AS ENUM('chat', 'channel');"
+                       "EXCEPTION "
+                       "WHEN duplicate_object THEN null;"
+                       "END $$;");
 
     if (!is_ok) {
-        std::cerr << "Failed to setup IND_TEXT_MESSAGE_CONTENTS table: " << query.lastError().text().toStdString() << '\n';
+        std::cerr << "Failed to setup broadchat_type type:: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
-    is_ok = query.exec("CREATE TABLE IF NOT EXISTS IND_IMAGE_MESSAGE_CONTENTS "
-                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
-                       " msg_id BIGINT NOT NULL, "
-                       " image_path TEXT NOT NULL, "
-                       " FOREIGN KEY (msg_id) REFERENCES INDIVIDUAL_MESSAGES (ID) ON DELETE CASCADE); ");
+    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS Broadchat ("
+                       "id serial PRIMARY KEY,"
+                       "owner integer NOT NULL,"
+                       "name varchar(64) NOT NULL UNIQUE,"
+                       "type broadchat_type,"
+                       "is_private bool DEFAULT(false),"
+                       "FOREIGN KEY (owner) REFERENCES Consumer(id)); ");
 
     if (!is_ok) {
-        std::cerr << "Failed to setup IND_IMAGE_MESSAGE_CONTENTS table: " << query.lastError().text().toStdString() << '\n';
+        std::cerr << "Failed to setup Broadchat table: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
-    is_ok = query.exec("CREATE TABLE IF NOT EXISTS IND_AUDIO_MESSAGE_CONTENTS "
-                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
-                       " msg_id BIGINT NOT NULL, "
-                       " audio_path TEXT NOT NULL, "
-                       " FOREIGN KEY (msg_id) REFERENCES INDIVIDUAL_MESSAGES (ID) ON DELETE CASCADE); ");
+    is_ok = query.exec("CREATE TABLE IF NOT EXISTS BannedInterlocutor ("
+                       "from_id integer NOT NULL,"
+                       "to_id integer NOT NULL CHECK(from_id != to_id),"
+                       "FOREIGN KEY (from_id) REFERENCES Consumer(id) ON DELETE CASCADE,"
+                       "FOREIGN KEY (to_id) REFERENCES Consumer(id) ON DELETE CASCADE"
+                       ");");
 
     if (!is_ok) {
-        std::cerr << "Failed to setup IND_AUDIO_MESSAGE_CONTENTS table: " << query.lastError().text().toStdString() << '\n';
-    }
-
-    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS INTERLOCUTOR_BANNED_USERS "
-                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
-                       " from_id MEDIUMINT NOT NULL, "
-                       " to_id MEDIUMINT NOT NULL, "
-                       " FOREIGN KEY (from_id) REFERENCES USERS (ID) ON DELETE CASCADE, "
-                       " FOREIGN KEY (to_id) REFERENCES USERS (ID) ON DELETE CASCADE); ");
-
-    if (!is_ok) {
-        std::cerr << "Failed to setup INTERLOCUTOR_BANNED_USERS: " << query.lastError().text().toStdString() << '\n';
+        std::cerr << "Failed to setup BannedInterlocutor table: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
-    is_ok = query.exec("CREATE TABLE IF NOT EXISTS CHANNELS "
-                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
-                       " owner_id MEDIUMINT NOT NULL, "
-                       " name VARCHAR(64) UNIQUE NOT NULL, "
-                       " is_private TINYINT DEFAULT 0, "
-                       " FOREIGN KEY (owner_id) REFERENCES USERS(ID) ON DELETE CASCADE); ");
+    is_ok = query.exec("CREATE TABLE IF NOT EXISTS BroadcastNotification ("
+                       "id serial PRIMARY KEY,"
+                       "description text NOT NULL,"
+                       "time timestamp NOT NULL DEFAULT(NOW()));");
 
     if (!is_ok) {
-        std::cerr << "Failed to setup CHANNELS table: " << query.lastError().text().toStdString() << '\n';
+        std::cerr << "Failed to setup BroadcastNotification table: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
-    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS CHANNEL_PARTICIPANTS "
-                       " (ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
-                       " channel_id BIGINT NOT NULL, "
-                       " participant_id MEDIUMINT NOT NULL, "
-                       " FOREIGN KEY (channel_id) REFERENCES CHANNELS(ID) ON DELETE CASCADE, "
-                       " FOREIGN KEY (participant_id) REFERENCES USERS(ID) ON DELETE CASCADE); ");
+    is_ok = query.exec("CREATE TABLE IF NOT EXISTS BroadchatBanned ("
+                       "id serial PRIMARY KEY,"
+                       "broad_chat integer NOT NULL,"
+                       "banned_consumer integer NOT NULL,"
+                       "FOREIGN KEY (broad_chat) REFERENCES Broadchat(id) ON DELETE CASCADE,"
+                       "FOREIGN KEY (banned_consumer) REFERENCES Consumer(id) ON DELETE CASCADE); ");
 
     if (!is_ok) {
-        std::cerr << "Failed to setup CHANNEL_PARTICIPANTS table: " << query.lastError().text().toStdString() << '\n';
+        std::cerr << "Failed to setup BroadchatBanned table: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
-    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS CHANNEL_REQUESTS "
-                       " (ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
-                       " channel_id BIGINT NOT NULL, "
-                       " user_id MEDIUMINT NOT NULL, "
-                       " FOREIGN KEY (channel_id) REFERENCES CHANNELS(ID) ON DELETE CASCADE, "
-                       " FOREIGN KEY (user_id) REFERENCES USERS(ID) ON DELETE CASCADE); "
-                       " ALTER TABLE CHANNEL_REQUESTS ADD UNIQUE unique_index (channel_id, user_id); ");
+    is_ok = query.exec("DO $$ BEGIN "
+                       "CREATE TYPE msg_type as ENUM('text', 'image', 'audio');"
+                       "EXCEPTION "
+                       "WHEN duplicate_object THEN null;"
+                       "END $$;");
 
     if (!is_ok) {
-        std::cerr << "Failed to setup CHANNEL_REQUESTS table: " << query.lastError().text().toStdString() << '\n';
+        std::cerr << "Failed to setup msg_type type: " << query.lastError().text().toStdString() << '\n';
+    }
+
+    is_ok = query.exec("CREATE TABLE IF NOT EXISTS BroadchatParticipant ("
+                       "id serial PRIMARY KEY,"
+                       "broad_chat integer NOT NULL,"
+                       "participant integer NOT NULL,"
+                       "FOREIGN KEY (broad_chat) REFERENCES Broadchat(id) ON DELETE CASCADE,"
+                       "FOREIGN KEY (participant) REFERENCES Consumer(id) ON DELETE CASCADE,"
+                       "CONSTRAINT unique_part_in_chat UNIQUE(broad_chat, participant) ); ");
+
+    if (!is_ok) {
+        std::cerr << "Failed to setup BroadchatParticipant table: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
-    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS CHANNEL_MESSAGES "
-                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
-                       " channel_id BIGINT NOT NULL, "
-                       " send_datetime DATETIME NOT NULL, "
-                       " content_id BIGINT DEFAULT 0, "
-                       " content_type ENUM('text', 'audio', 'image'), "
-                       " FOREIGN KEY (channel_id) REFERENCES CHANNELS (ID) ON DELETE CASCADE); ");
+    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS BroadchatMessage ("
+                       "id serial, "
+                       "broad_chat integer NOT NULL,"
+                       "sender integer NOT NULL,"
+                       "time timestamp DEFAULT(now()),"
+                       "content_type msg_type,"
+                       "info text NOT NULL,"
+                       "PRIMARY KEY (id),"
+                       "FOREIGN KEY (broad_chat, sender) REFERENCES BroadchatParticipant(broad_chat, participant) ON DELETE CASCADE); ");
 
     if (!is_ok) {
-        std::cerr << "Failed to setup CHANNEL_MESSAGES table: " << query.lastError().text().toStdString() << '\n';
+        std::cerr << "Failed to setup BroadchatMessage table: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
-    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS CHANNEL_TEXT_MESSAGE_CONTENTS "
-                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
-                       " msg_id BIGINT NOT NULL, "
-                       " text_data TEXT NOT NULL, "
-                       " FOREIGN KEY (msg_id) REFERENCES CHANNEL_MESSAGES (ID) ON DELETE CASCADE); ");
+    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS BroadchatRequest ("
+                       "id serial PRIMARY KEY,"
+                       "broad_chat integer NOT NULL,"
+                       "consumer integer NOT NULL,"
+                       "FOREIGN KEY (broad_chat) REFERENCES Broadchat(id) ON DELETE CASCADE,"
+                       "FOREIGN KEY (consumer) REFERENCES Consumer(id) ON DELETE CASCADE);  ");
 
     if (!is_ok) {
-        std::cerr << "Failed to setup CHANNEL_TEXT_MESSAGE_CONTENTS table: " << query.lastError().text().toStdString() << '\n';
+        std::cerr << "Failed to setup BroadchatRequest table: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
-    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS CHANNEL_IMAGE_MESSAGE_CONTENTS "
-                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
-                       " msg_id BIGINT NOT NULL, "
-                       " image_path TEXT NOT NULL, "
-                       " FOREIGN KEY (msg_id) REFERENCES CHANNEL_MESSAGES (ID) ON DELETE CASCADE); ");
+    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS Complaint ("
+                       "id serial PRIMARY KEY,"
+                       "sender integer NOT NULL,"
+                       "description text NOT NULL,"
+                       "FOREIGN KEY (sender) REFERENCES Consumer(id)); ");
 
     if (!is_ok) {
-        std::cerr << "Failed to setup CHANNEL_IMAGE_MESSAGE_CONTENTS table: " << query.lastError().text().toStdString() << '\n';
+        std::cerr << "Failed to setup Complaint table: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
-    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS CHANNEL_AUDIO_MESSAGE_CONTENTS "
-                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
-                       " msg_id BIGINT NOT NULL, "
-                       " audio_path TEXT NOT NULL, "
-                       " FOREIGN KEY (msg_id) REFERENCES CHANNEL_MESSAGES (ID) ON DELETE CASCADE); ");
+    is_ok = query.exec(" CREATE OR REPLACE VIEW BannedConsumer AS "
+                       "SELECT * "
+                       "FROM Consumer "
+                       "WHERE is_banned=true; ");
 
     if (!is_ok) {
-        std::cerr << "Failed to setup CHANNEL_AUDIO_MESSAGE_CONTENTS table: " << query.lastError().text().toStdString() << '\n';
+        std::cerr << "Failed to setup BannedConsumer view: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
-    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS CHANNEL_BANNED_USERS "
-                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
-                       " user_id MEDIUMINT NOT NULL, "
-                       " channel_id BIGINT NOT NULL, "
-                       " FOREIGN KEY (user_id) REFERENCES USERS (ID) ON DELETE CASCADE, "
-                       " FOREIGN KEY (channel_id) REFERENCES CHANNELS (ID) ON DELETE CASCADE); ");
+    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS Country ("
+                       "id serial PRIMARY KEY,"
+                       "name varchar(128) NOT NULL UNIQUE);  ");
 
     if (!is_ok) {
-        std::cerr << "Failed to setup CHANNEL_BANNED_USERS: " << query.lastError().text().toStdString() << '\n';
+        std::cerr << "Failed to setup Country table: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
-    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS CHATS "
-                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
-                       " owner_id MEDIUMINT NOT NULL, "
-                       " name VARCHAR(64) UNIQUE NOT NULL, "
-                       " is_private TINYINT DEFAULT 0, "
-                       " FOREIGN KEY (owner_id) REFERENCES USERS(ID) ON DELETE CASCADE); ");
+    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS IndividualMessage ("
+                       "id serial, "
+                       "sender integer NOT NULL,"
+                       "receiver integer NOT NULL CHECK(sender != receiver),"
+                       "time timestamp DEFAULT(now()),"
+                       "content_type msg_type,"
+                       "info text NOT NULL,"
+                       "PRIMARY KEY (id),"
+                       "FOREIGN KEY (sender) REFERENCES Consumer(id) ON DELETE CASCADE, "
+                       "FOREIGN KEY (receiver) REFERENCES Consumer(id) ON DELETE CASCADE); ");
 
     if (!is_ok) {
-        std::cerr << "Failed to setup CHATS table: " << query.lastError().text().toStdString() << '\n';
+        std::cerr << "Failed to setup IndividualMessage table: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
-    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS CHAT_PARTICIPANTS "
-                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
-                       " chat_id BIGINT NOT NULL, "
-                       " participant_id MEDIUMINT NOT NULL, "
-                       " FOREIGN KEY (chat_id) REFERENCES CHATS(ID) ON DELETE CASCADE, "
-                       " FOREIGN KEY (participant_id) REFERENCES USERS(ID) ON DELETE CASCADE); ");
+    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS Profile ("
+                       "id serial PRIMARY KEY,"
+                       "status varchar(256),"
+                       "avatar varchar(400) NOT NULL DEFAULT('media/avatars/default_avatar.png'),"
+                       "birthday date NOT NULL CHECK(birthday <= (NOW() - '18 years'::interval)),"
+                       "country integer NOT NULL,"
+                       "consumer integer NOT NULL UNIQUE,"
+                       "FOREIGN KEY (country) REFERENCES Country(id) ON DELETE RESTRICT,"
+                       "FOREIGN KEY (consumer) REFERENCES Consumer(id) ON DELETE CASCADE);  ");
 
     if (!is_ok) {
-        std::cerr << "Failed to setup CHAT_PARTICIPANT table: " << query.lastError().text().toStdString() << '\n';
+        std::cerr << "Failed to setup Profile table: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
-    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS CHAT_REQUESTS "
-                       " (ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
-                       " chat_id BIGINT NOT NULL, "
-                       " user_id MEDIUMINT NOT NULL, "
-                       " FOREIGN KEY (chat_id) REFERENCES CHATS(ID) ON DELETE CASCADE, "
-                       " FOREIGN KEY (user_id) REFERENCES USERS(ID) ON DELETE CASCADE); "
-                       " ALTER TABLE CHAT_REQUESTS ADD UNIQUE unique_index (chat_id, user_id); ");
+    is_ok = query.exec(" CREATE OR REPLACE FUNCTION on_message_insert() RETURNS trigger AS $$"
+                       "DECLARE"
+                       "    banned_words TEXT ARRAY DEFAULT ARRAY ['%наркотик%', '%оружие%', '%дура%'];"
+                       "BEGIN"
+                       "    IF NEW.content_type = 'text' AND NEW.info ILIKE ANY (banned_words) THEN "
+                       "        RAISE EXCEPTION 'Сообщение содержит запрещенное слово';"
+                       "    END IF;"
+                       ""
+                       "    RETURN NEW;"
+                       "END;"
+                       "$$ LANGUAGE plpgsql;  ");
 
     if (!is_ok) {
-        std::cerr << "Failed to setup CHAT_REQUESTS table: " << query.lastError().text().toStdString() << '\n';
+        std::cerr << "Failed to setup on_message_insert function: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
-    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS CHAT_MESSAGES "
-                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
-                       " chat_id BIGINT NOT NULL, "
-                       " owner_id MEDIUMINT NOT NULL, "
-                       " send_datetime DATETIME NOT NULL, "
-                       " content_id BIGINT DEFAULT 0, "
-                       " content_type ENUM('text', 'audio', 'image'), "
-                       " FOREIGN KEY (owner_id) REFERENCES USERS (ID) ON DELETE CASCADE, "
-                       " FOREIGN KEY (chat_id) REFERENCES CHATS (ID) ON DELETE CASCADE); ");
+    is_ok = query.exec(" CREATE OR REPLACE  TRIGGER BroadchatMessage_INSERT "
+                       "BEFORE INSERT ON BroadchatMessage "
+                       "FOR EACH ROW "
+                       "EXECUTE FUNCTION on_message_insert(); ");
 
     if (!is_ok) {
-        std::cerr << "Failed to setup CHAT_MESSAGES table: " << query.lastError().text().toStdString() << '\n';
+        std::cerr << "Failed to setup BroadchatMessage_INSERT trigger: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
-    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS CHAT_TEXT_MESSAGE_CONTENTS "
-                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
-                       " msg_id BIGINT NOT NULL, "
-                       " text_data TEXT NOT NULL, "
-                       " FOREIGN KEY (msg_id) REFERENCES CHAT_MESSAGES (ID) ON DELETE CASCADE); ");
+    is_ok = query.exec(" CREATE OR REPLACE TRIGGER IndividualMessage_INSERT "
+                       "BEFORE INSERT ON BroadchatMessage "
+                       "FOR EACH ROW "
+                       "EXECUTE FUNCTION on_message_insert(); ");
 
     if (!is_ok) {
-        std::cerr << "Failed to setup CHAT_TEXT_MESSAGE_CONTENTS table: " << query.lastError().text().toStdString() << '\n';
+        std::cerr << "Failed to setup IndividualMessage_INSERT trigger: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
-    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS CHAT_IMAGE_MESSAGE_CONTENTS "
-                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
-                       " msg_id BIGINT NOT NULL, "
-                       " image_path TEXT NOT NULL, "
-                       " FOREIGN KEY (msg_id) REFERENCES CHAT_MESSAGES (ID) ON DELETE CASCADE); ");
+    is_ok = query.exec(" CREATE OR REPLACE  FUNCTION on_profile_update() RETURNS trigger AS $$"
+                       "DECLARE"
+                       "    banned_words TEXT ARRAY DEFAULT ARRAY ['%наркотик%', '%оружие%', '%дура%'];"
+                       "BEGIN"
+                       "    IF NEW.status ILIKE ANY (banned_words) THEN "
+                       "        RAISE EXCEPTION 'Статус содержит запрещённое слово';"
+                       "    END IF;"
+                       "    RETURN NEW;"
+                       "END;"
+                       "$$ LANGUAGE plpgsql;");
 
     if (!is_ok) {
-        std::cerr << "Failed to setup CHAT_IMAGE_MESSAGE_CONTENTS table: " << query.lastError().text().toStdString() << '\n';
+        std::cerr << "Failed to setup on_profile_update function: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
-    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS CHAT_AUDIO_MESSAGE_CONTENTS "
-                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
-                       " msg_id BIGINT NOT NULL, "
-                       " audio_path TEXT NOT NULL, "
-                       " FOREIGN KEY (msg_id) REFERENCES CHAT_MESSAGES (ID) ON DELETE CASCADE); ");
+    is_ok = query.exec("CREATE OR REPLACE  TRIGGER Profile_UPDATE "
+                       "BEFORE UPDATE ON Profile "
+                       "FOR EACH ROW "
+                       "EXECUTE FUNCTION on_profile_update();");
 
     if (!is_ok) {
-        std::cerr << "Failed to setup CHAT_AUDIO_MESSAGE_CONTENTS table: " << query.lastError().text().toStdString() << '\n';
+        std::cerr << "Failed to setup Profile_UPDATE trigger: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
-    is_ok = query.exec(" CREATE TABLE IF NOT EXISTS CHAT_BANNED_USERS "
-                       "( ID BIGINT UNIQUE AUTO_INCREMENT PRIMARY KEY, "
-                       " user_id MEDIUMINT NOT NULL, "
-                       " chat_id BIGINT NOT NULL, "
-                       " FOREIGN KEY (user_id) REFERENCES USERS (ID) ON DELETE CASCADE, "
-                       " FOREIGN KEY (chat_id) REFERENCES CHATS (ID) ON DELETE CASCADE); ");
+    is_ok = query.exec("CREATE OR REPLACE PROCEDURE add_action(id integer, user_action action_type) "
+                       "LANGUAGE SQL "
+                       "AS $$ "
+                       "    INSERT INTO Action(consumer, type) "
+                       "    VALUES (id, user_action); "
+                       "$$;");
 
     if (!is_ok) {
-        std::cerr << "Failed to setup CHAT_BANNED_USERS: " << query.lastError().text().toStdString() << '\n';
+        std::cerr << "Failed to setup add_action procedure: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
+
+    is_ok = query.exec("CREATE OR REPLACE FUNCTION on_user_registration() RETURNS trigger AS $$ "
+                       "BEGIN "
+                       "    call add_action(NEW.id, 'register'); "
+                       "    call add_action(NEW.id, 'login'); "
+                       "    RETURN NEW; "
+                       "END; "
+                       "$$ LANGUAGE plpgsql;");
+
+    if (!is_ok) {
+        std::cerr << "Failed to setup on_user_registration function: " << query.lastError().text().toStdString() << '\n';
+        return false;
+    }
+
+    is_ok = query.exec("CREATE OR REPLACE FUNCTION add_user(username varchar(40), email varchar(40), password varchar(40), birthday date, text_status varchar(256), country_id integer) "
+                       "RETURNS integer AS $$ "
+                       "DECLARE "
+                       "   v_id integer; "
+                       "BEGIN "
+                       "    INSERT INTO Consumer(username, email, password) "
+                       "    VALUES (username, email, password) "
+                       "    RETURNING id INTO v_id; "
+                       " "
+                       "    INSERT INTO Profile (status, birthday, country, consumer) "
+                       "    VALUES "
+                       "        (text_status, birthday, country_id, v_id); "
+                       " "
+                       "    RETURN v_id; "
+                       "END; "
+                       "$$ LANGUAGE plpgsql;");
+
+    if (!is_ok) {
+        std::cerr << "Failed to setup add_user function: " << query.lastError().text().toStdString() << '\n';
+        return false;
+    }
+
+    is_ok = query.exec("CREATE OR REPLACE FUNCTION update_userinfo(id integer, username varchar(40), email varchar(40), birthday date, text_status varchar(256), avatar varchar(400)) "
+                       "RETURNS integer AS $$ "
+                       "BEGIN "
+                       "    UPDATE Consumer SET (username, email) = (username, email) "
+                       "    WHERE id=id; "
+                       "    UPDATE Profile SET (status, avatar) = (text_status, avatar) "
+                       "    WHERE consumer=id; "
+                       "    return id; "
+                       "END; "
+                       "$$ LANGUAGE plpgsql;  ");
+
+    if (!is_ok) {
+        std::cerr << "Failed to setup update_userinfo function: " << query.lastError().text().toStdString() << '\n';
+        return false;
+    }
+
+    is_ok = query.exec("CREATE OR REPLACE PROCEDURE ban_user(username varchar(40), is_banned boolean) "
+                       "LANGUAGE SQL "
+                       "AS $$ "
+                       "    UPDATE Consumer SET is_banned = is_banned "
+                       "    WHERE username=username; "
+                       "$$; ");
+
+    if (!is_ok) {
+        std::cerr << "Failed to setup ban_user procedure: " << query.lastError().text().toStdString() << '\n';
+        return false;
+    }
+
+    is_ok = query.exec("CREATE OR REPLACE PROCEDURE update_banned_interlocutor_status(from_id integer, to_id integer, is_banned boolean) "
+                       "AS $$ "
+                       "BEGIN "
+                       "    IF is_banned=true THEN "
+                       "        INSERT INTO BannedInterlocutor(from_id, to_id) "
+                       "        VALUES "
+                       "            (from_id, to_id); "
+                       "    ELSE  "
+                       "        DELETE FROM BannedInterlocutor "
+                       "        WHERE to_id=to_id AND from_id=from_id; "
+                       "    END IF; "
+                       "END; "
+                       "$$ LANGUAGE PLPGSQL;");
+
+    if (!is_ok) {
+        std::cerr << "Failed to setup update_banned_interlocutor_status procedure: " << query.lastError().text().toStdString() << '\n';
+        return false;
+    }
+
+    is_ok = query.exec("CREATE OR REPLACE PROCEDURE update_banned_broadchat_status(broad_chat integer, banned_consumer integer, is_banned boolean) "
+                       "AS $$ "
+                       "BEGIN "
+                       "    IF is_banned THEN "
+                       "        INSERT INTO BroadchatBanned (broad_chat, banned_consumer) "
+                       "        VALUES  "
+                       "            (broad_chat, banned_consumer); "
+                       "    ELSE  "
+                       "        DELETE FROM BroadchatBanned "
+                       "        WHERE broad_chat=broad_chat AND banned_consumer=banned_consumer; "
+                       "    END IF; "
+                       "END; "
+                       "$$ LANGUAGE PLPGSQL;");
+
+    if (!is_ok) {
+        std::cerr << "Failed to setup update_banned_broadchat_status procedure: " << query.lastError().text().toStdString() << '\n';
+        return false;
+    }
+
+    is_ok = query.exec("CREATE OR REPLACE PROCEDURE add_channel_message(broad_chat integer, content_type msg_type, info text) "
+                       "AS $$ "
+                       "DECLARE "
+                       "    sender integer; "
+                       "BEGIN "
+                       "    SELECT owner INTO sender FROM Broadchat "
+                       "    WHERE id=broad_chat; "
+                       "    INSERT INTO BroadchatMessage (broad_chat, sender, content_type, info) "
+                       "    VALUES  "
+                       "        (broad_chat, sender, content_type, info); "
+                       "END; "
+                       "$$ LANGUAGE PLPGSQL;");
+
+    if (!is_ok) {
+        std::cerr << "Failed to setup add_channel_message procedure: " << query.lastError().text().toStdString() << '\n';
+        return false;
+    }
+
+    is_ok = query.exec("CREATE OR REPLACE PROCEDURE add_broadchat(owner integer, chat_name varchar(64), chat_type broadchat_type, is_private boolean) "
+                       "AS $$ "
+                       "BEGIN "
+                       "    INSERT INTO Broadchat (owner, name, type, is_private) "
+                       "   VALUES "
+                       "        (owner, chat_name, chat_type, is_private); "
+                       "    INSERT INTO BroadchatParticipant (broad_chat, participant) "
+                       "    VALUES "
+                       "        (broad_chat, participant); "
+                       "COMMIT; "
+                       "$$ LANGUAGE PLPGSQL;");
+
+    if (!is_ok) {
+        std::cerr << "Failed to setup add_broadchat procedure: " << query.lastError().text().toStdString() << '\n';
+        return false;
+    }
+
+    is_ok = query.exec("INSERT INTO Country (name) "
+                       "VALUES "
+                       "    ('Беларусь'), "
+                       "    ('Россия'), "
+                       "    ('Польша'), "
+                       "    ('Украина') "
+                       "ON CONFLICT DO NOTHING;");
+
+    if (!is_ok) {
+        std::cerr << "Failed to setup add_user function: " << query.lastError().text().toStdString() << '\n';
+        return false;
+    }
+
 
     return true;
 }
 
-bool LinkDoveSQLDataBase::register_user(const UserInfo& info) {
+bool LinkDovePSQLDataBase::register_user(const UserInfo& info) {
     QSqlQuery query(data_base_);
-    query.prepare("INSERT INTO USERS (username, email, password, birthday, text_status, image, is_banned) "
-                  "VALUES (:username, :email, :password, :birthday, :text_status, :image, :is_banned); ");
+    query.prepare("DO $$ BEGIN "
+                  "PERFORM \"add_user\"(:username, :email, :password, :birthday, :text_status, :country_id); "
+                  "END $$;");
 
     query.bindValue(":username",    info.status_info_.username_.c_str());
     query.bindValue(":email",       info.status_info_.email_.c_str());
     query.bindValue(":password",    info.password_.c_str());
     query.bindValue(":birthday",    info.status_info_.birthday_.toString("yyyy-MM-dd"));
     query.bindValue(":text_status", info.status_info_.text_status_.c_str());
-    query.bindValue(":is_banned",   0); // при создании пользователя его аккаунт не блокируется
-    query.bindValue(":image",       DEFAULT_AVATAR_PATH);
+    query.bindValue(":country_id",  1); // FIX IT
 
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString();
@@ -362,11 +517,11 @@ bool LinkDoveSQLDataBase::register_user(const UserInfo& info) {
     }
 }
 
-bool LinkDoveSQLDataBase::login_user(const LoginInfo& info) {
+bool LinkDovePSQLDataBase::login_user(const LoginInfo& info) {
     QSqlQuery query(data_base_);
-    query.prepare("SELECT * FROM USERS "
-                  "WHERE "
-                  "username = :username AND email = :email AND password = :password; ");
+    query.prepare("SELECT "
+                  "EXISTS (SELECT 1 FROM Consumer "
+                  "        WHERE username=:username AND email=:email AND password=:password) AS PassedAuthentification;");
 
     query.bindValue(":username", info.username_.c_str());
     query.bindValue(":email",    info.email_.c_str());
@@ -384,61 +539,27 @@ bool LinkDoveSQLDataBase::login_user(const LoginInfo& info) {
     }
 }
 
-bool LinkDoveSQLDataBase::update_user(const StatusInfo& status_info) {
+bool LinkDovePSQLDataBase::update_user(const StatusInfo& status_info) {
     StatusInfo inner_info;
     bool is_username_changed = false,
          is_email_changed    = false;
-    try {
+    try { // Такого пользователя нет
         inner_info = get_status_info(status_info.id_);
-        if (inner_info.username_ != status_info.username_) {
-            is_username_changed = true;
-        }
-        if (inner_info.email_ != status_info.email_) {
-            is_email_changed = true;
-        }
-
     } catch(std::runtime_error& ex) {
         return false;
     }
 
     QSqlQuery query(data_base_);
 
-    // Если никнейм или почта меняется, нужно изменить вид запроса,
-    // так как БД даже в случае установки тех же значений выдаст ошибку (из-за UNIQUE флагов для никнейма и почты)
-    if (is_username_changed && is_email_changed) {
-        query.prepare("UPDATE USERS "
-                  "SET username = :username,"
-                  "    email = :email, "
-                  "    text_status = :text_status, "
-                  "    image = :image "
-                  "WHERE ID = :id; ");
-        query.bindValue(":username",    status_info.username_.c_str());
-        query.bindValue(":email",       status_info.email_.c_str());
-    } else if (is_username_changed) {
-        query.prepare("UPDATE USERS "
-                  "SET username = :username,"
-                  "    text_status = :text_status, "
-                  "    image = :image "
-                  "WHERE ID = :id; ");
-        query.bindValue(":username",    status_info.username_.c_str());
-    } else if (is_email_changed) {
-        query.prepare("UPDATE USERS "
-                  "SET email       = :email, "
-                  "    text_status = :text_status, "
-                  "    image = :image "
-                  "WHERE ID = :id; ");
-        query.bindValue(":email",       status_info.email_.c_str());
-        query.bindValue(":image", status_info.image_path_.c_str());
-    } else {
-        query.prepare("UPDATE USERS "
-                      "SET text_status = :text_status, "
-                      "    image = :image "
-                      "WHERE ID = :id; ");
-    }
-
-    query.bindValue(":text_status", status_info.text_status_.c_str());
-    query.bindValue(":image", status_info.image_path_.c_str());
+    query.prepare("DO $$ BEGIN "
+                  "PERFORM \"update_userinfo\"(:id, :username, :email, :birthday, :text_status, :avatar); "
+                  "END $$;");
     query.bindValue(":id",          status_info.id_);
+    query.bindValue(":username",    status_info.username_.c_str());
+    query.bindValue(":email",       status_info.email_.c_str());
+    query.bindValue(":birthday",    status_info.birthday_.toString("yyyy-MM-dd"));
+    query.bindValue(":text_status", status_info.text_status_.c_str());
+    query.bindValue(":avatar",      status_info.image_path_.c_str());
 
     if (!query.exec()) {
         std::cerr  << query.lastError().text().toStdString() << '\n';
@@ -447,7 +568,7 @@ bool LinkDoveSQLDataBase::update_user(const StatusInfo& status_info) {
         // если изменение было успешно, то row affected > 0, иначе row affected == 0 (false).
         int num = query.numRowsAffected();
         // Если num == 0, а поля никнейма или почты изменились, то на вход пришел дубликат.
-        if (num == 0 && is_username_changed || num == 0 && is_email_changed) {
+        if (num == 0) {
             return false;
         } else {
             return true;
@@ -455,12 +576,9 @@ bool LinkDoveSQLDataBase::update_user(const StatusInfo& status_info) {
     }
 }
 
-bool LinkDoveSQLDataBase::ban_user(const std::string &username, bool is_ban) {
+bool LinkDovePSQLDataBase::ban_user(const std::string &username, bool is_ban) {
     QSqlQuery query(data_base_);
-    query.prepare(" UPDATE USERS "
-                  " SET "
-                  "     is_banned=:is_banned "
-                  " WHERE username=:username; ");
+    query.prepare("CALL ban_user(:username, :is_banned);");
 
     query.bindValue(":username", username.c_str());
     query.bindValue(":is_banned", is_ban);
@@ -474,20 +592,14 @@ bool LinkDoveSQLDataBase::ban_user(const std::string &username, bool is_ban) {
     }
 }
 
-bool LinkDoveSQLDataBase::ban_ind_user(unsigned long long from_id, unsigned long long to_id, bool is_ban) {
+bool LinkDovePSQLDataBase::ban_ind_user(unsigned long long from_id, unsigned long long to_id, bool is_ban) {
     QSqlQuery query(data_base_);
 
-    if (is_ban) {
-        query.prepare(" INSERT INTO INTERLOCUTOR_BANNED_USERS "
-                      " (from_id, to_id) "
-                      " VALUES (:from_id, :to_id); ");
-    } else {
-        query.prepare(" DELETE FROM INTERLOCUTOR_BANNED_USERS "
-                      " WHERE from_id=:from_id AND to_id=:to_id; ");
-    }
+    query.prepare("CALL update_banned_interlocutor_status(:from_id, :to_id, :is:banned);");
 
     query.bindValue(":from_id", from_id);
     query.bindValue(":to_id", to_id);
+    query.bindValue(":is_banned", is_ban);
 
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString() << '\n';
@@ -498,20 +610,14 @@ bool LinkDoveSQLDataBase::ban_ind_user(unsigned long long from_id, unsigned long
     }
 }
 
-bool LinkDoveSQLDataBase::ban_chat_user(unsigned long long chat_id, unsigned long long user_id, bool is_ban) {
+bool LinkDovePSQLDataBase::ban_chat_user(unsigned long long chat_id, unsigned long long user_id, bool is_ban) {
     QSqlQuery query(data_base_);
 
-    if (is_ban) {
-        query.prepare(" INSERT INTO CHAT_BANNED_USERS "
-                      " (chat_id, user_id) "
-                      " VALUES (:chat_id, :user_id); ");
-    } else {
-        query.prepare(" DELETE FROM CHAT_BANNED_USERS "
-                      " WHERE chat_id=:chat_id AND user_id=:user_id; ");
-    }
+    query.prepare("CALL update_banned_interlocutor_status(:chat_id, :user_id, :is:banned);");
 
     query.bindValue(":chat_id", chat_id);
     query.bindValue(":user_id", user_id);
+    query.bindValue(":is_banned", is_ban);
 
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString() << '\n';
@@ -527,11 +633,11 @@ bool LinkDoveSQLDataBase::ban_chat_user(unsigned long long chat_id, unsigned lon
     }
 }
 
-bool LinkDoveSQLDataBase::is_banned_ind_user(unsigned long long from_id, unsigned long long to_id) {
+bool LinkDovePSQLDataBase::is_banned_ind_user(unsigned long long from_id, unsigned long long to_id) {
     QSqlQuery query(data_base_);
 
-    query.prepare(" SELECT * FROM INTERLOCUTOR_BANNED_USERS "
-                  " WHERE from_id=:from_id AND to_id=:to_id; ");
+    query.prepare(" SELECT "
+                  " EXISTS (SELECT * FROM BannedInterlocutor WHERE to_id=:to_id AND from_id=:from_id) As IsBanned; ");
 
     query.bindValue(":from_id", from_id);
     query.bindValue(":to_id", to_id);
@@ -548,11 +654,11 @@ bool LinkDoveSQLDataBase::is_banned_ind_user(unsigned long long from_id, unsigne
     }
 }
 
-bool LinkDoveSQLDataBase::is_banned_chat_user(unsigned long long chat_id, unsigned long long user_id) {
+bool LinkDovePSQLDataBase::is_banned_chat_user(unsigned long long chat_id, unsigned long long user_id) {
     QSqlQuery query(data_base_);
 
-    query.prepare(" SELECT * FROM CHAT_BANNED_USERS "
-                  " WHERE chat_id=:chat_id AND user_id=:user_id; ");
+    query.prepare(" SELECT "
+                  " EXISTS (SELECT * FROM BroadchatBanned WHERE banned_consumer=:user_id AND broad_chat=:chat_id) As IsBanned; ");
 
     query.bindValue(":chat_id", chat_id);
     query.bindValue(":user_id", user_id);
@@ -569,9 +675,9 @@ bool LinkDoveSQLDataBase::is_banned_chat_user(unsigned long long chat_id, unsign
     }
 }
 
-bool LinkDoveSQLDataBase::get_user_banned_status(const std::string &username) {
+bool LinkDovePSQLDataBase::get_user_banned_status(const std::string &username) {
     QSqlQuery query(data_base_);
-    query.prepare(" SELECT * FROM USERS "
+    query.prepare(" SELECT is_banned FROM Consumer "
                   " WHERE username=:username; ");
 
     query.bindValue(":username", username.c_str());
@@ -584,9 +690,9 @@ bool LinkDoveSQLDataBase::get_user_banned_status(const std::string &username) {
     }
 }
 
-std::vector<std::string> LinkDoveSQLDataBase::get_banned_interlocutors(unsigned long long id) {
+std::vector<std::string> LinkDovePSQLDataBase::get_banned_interlocutors(unsigned long long id) {
     QSqlQuery query(data_base_);
-    query.prepare(" SELECT * FROM INTERLOCUTOR_BANNED_USERS "
+    query.prepare(" SELECT * FROM BannedInterlocutor "
                   " WHERE from_id=:id; ");
 
     query.bindValue(":id", id);
@@ -604,13 +710,14 @@ std::vector<std::string> LinkDoveSQLDataBase::get_banned_interlocutors(unsigned 
     return interlocutors;
 }
 
-bool LinkDoveSQLDataBase::add_complaint(const Complaint& complaint) {
+bool LinkDovePSQLDataBase::add_complaint(const Complaint& complaint) {
     QSqlQuery query(data_base_);
-    query.prepare("INSERT INTO COMPLAINTS (sender_id, text) "
-                  "VALUES (:sender_id, :text); ");
+    query.prepare("INSERT INTO Complaint (sender, description) "
+                  "VALUES "
+                  "     (:sender, :description);");
 
-    query.bindValue(":sender_id", complaint.sender_id_);
-    query.bindValue(":text", complaint.text_.c_str());
+    query.bindValue(":sender", complaint.sender_id_);
+    query.bindValue(":description", complaint.text_.c_str());
 
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString() << '\n';
@@ -621,10 +728,10 @@ bool LinkDoveSQLDataBase::add_complaint(const Complaint& complaint) {
     }
 }
 
-bool LinkDoveSQLDataBase::del_complaint(unsigned long long complaint_id) {
+bool LinkDovePSQLDataBase::del_complaint(unsigned long long complaint_id) {
     QSqlQuery query(data_base_);
-    query.prepare("DELETE FROM COMPLAINTS "
-                  "WHERE ID=:id; ");
+    query.prepare("DELETE FROM Complaint "
+                  "WHERE id=:id;");
 
     query.bindValue(":id", complaint_id);
     if (!query.exec()) {
@@ -636,9 +743,9 @@ bool LinkDoveSQLDataBase::del_complaint(unsigned long long complaint_id) {
     }
 }
 
-int LinkDoveSQLDataBase::get_complaints_count() {
+int LinkDovePSQLDataBase::get_complaints_count() {
     QSqlQuery query(data_base_);
-    query.prepare("SELECT COUNT(*) FROM COMPLAINTS; ");
+    query.prepare("SELECT COUNT(*) FROM Complaint; ");
 
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString() << '\n';
@@ -652,9 +759,9 @@ int LinkDoveSQLDataBase::get_complaints_count() {
     }
 }
 
-std::vector<Complaint> LinkDoveSQLDataBase::get_complaints(int count) {
+std::vector<Complaint> LinkDovePSQLDataBase::get_complaints(int count) {
     QSqlQuery query(data_base_);
-    query.prepare("SELECT * FROM COMPLAINTS");
+    query.prepare("SELECT * FROM Complaint");
 
     std::vector<Complaint> complaints;
     if (!query.exec()) {
@@ -669,15 +776,15 @@ std::vector<Complaint> LinkDoveSQLDataBase::get_complaints(int count) {
     }
 }
 
-bool LinkDoveSQLDataBase::add_answer(unsigned long long user_id, const std::string &text) {
+bool LinkDovePSQLDataBase::add_answer(unsigned long long user_id, const std::string &text) {
     QSqlQuery query(data_base_);
 
-    query.prepare(" INSERT INTO ANSWERS "
-                  " (receiver_id, text) "
-                  " VALUES (:user_id, :text); ");
+    query.prepare("INSERT INTO Answer(receiver, description) "
+                  "VALUES "
+                  "    (:receiver, :description); ");
 
-    query.bindValue(":user_id", user_id);
-    query.bindValue(":text", text.c_str());
+    query.bindValue(":receiver", user_id);
+    query.bindValue(":description", text.c_str());
 
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString() << '\n';
@@ -688,10 +795,10 @@ bool LinkDoveSQLDataBase::add_answer(unsigned long long user_id, const std::stri
     }
 }
 
-std::vector<Notification> LinkDoveSQLDataBase::get_notifications(unsigned long long user_id, int count) {
+std::vector<Notification> LinkDovePSQLDataBase::get_notifications(unsigned long long user_id, int count) {
     QSqlQuery query(data_base_);
-    query.prepare(" SELECT * FROM ANSWERS "
-                  " WHERE receiver_id=:user_id; ");
+    query.prepare(" SELECT * FROM Answer "
+                  " WHERE receiver=:user_id; ");
 
     query.bindValue(":user_id", user_id);
 
@@ -707,11 +814,11 @@ std::vector<Notification> LinkDoveSQLDataBase::get_notifications(unsigned long l
     }
 }
 
-bool LinkDoveSQLDataBase::delete_notification(unsigned long long id) {
+bool LinkDovePSQLDataBase::delete_notification(unsigned long long id) {
     QSqlQuery query(data_base_);
 
-    query.prepare(" DELETE FROM ANSWERS "
-                  " where ID=:id; ");
+    query.prepare(" DELETE FROM Answer "
+                  " WHERE id=:id; ");
 
     query.bindValue(":id", id);
 
@@ -724,7 +831,7 @@ bool LinkDoveSQLDataBase::delete_notification(unsigned long long id) {
     }
 }
 
-bool LinkDoveSQLDataBase::add_ind_message(const IMessage& msg) {
+bool LinkDovePSQLDataBase::add_ind_message(const IMessage& msg) {
     QSqlQuery query(data_base_);
     unsigned long long msg_id = 0;
 
@@ -734,141 +841,29 @@ bool LinkDoveSQLDataBase::add_ind_message(const IMessage& msg) {
     // используем транзакцию, чтобы в случае ошибки добавления сообщения данные в БД были
     // в согласованном состоянии
     if (data_base_.transaction()) {
-        query.prepare(" INSERT INTO INDIVIDUAL_MESSAGES "
-                      " (sender_id, send_datetime, receiver_id) "
-                      " VALUES (:sender_id, NOW(), :receiver_id); ");
+        query.prepare(" INSERT INTO IndividualMessage(sender, receiver, content_type, info) "
+                      " VALUES "
+                      "    (:sender, :receiver, :content_type, :info); ");
 
-        query.bindValue(":sender_id", static_cast<const IndividualMessage&>(msg).get_msg_edges().first);
-        query.bindValue(":receiver_id", static_cast<const IndividualMessage&>(msg).get_msg_edges().second);
+        query.bindValue(":sender", static_cast<const IndividualMessage&>(msg).get_msg_edges().first);
+        query.bindValue(":receiver", static_cast<const IndividualMessage&>(msg).get_msg_edges().second);
 
-        if (!query.exec()) {
-            std::cerr << query.lastError().text().toStdString() << '\n';
-            return false;
-        }
-
-        query.prepare("SELECT * FROM INDIVIDUAL_MESSAGES "
-                      "WHERE "
-                      " sender_id=:sender_id AND receiver_id=:receiver_id AND content_id=0; ");
-        query.bindValue(":sender_id", static_cast<const IndividualMessage&>(msg).get_msg_edges().first);
-        query.bindValue(":receiver_id", static_cast<const IndividualMessage&>(msg).get_msg_edges().second);
-
-        if (!query.exec()) {
-            std::cerr << query.lastError().text().toStdString() << '\n';
-            return false;
-        } else {
-            if (!query.next()) {
-                return false;
-            } else {
-                msg_id = query.value("ID").toULongLong();
-            }
-        }
-
-        std::string content_enum;
-        unsigned long long content_id = 0;
         switch (msg.get_msg_content()->get_msg_content_type()) {
             case TEXT_MSG_TYPE: {
-                query.prepare(" INSERT INTO IND_TEXT_MESSAGE_CONTENTS "
-                              " (msg_id, text_data) "
-                              " VALUES (:msg_id, :text_data); ");
-                query.bindValue(":msg_id", msg_id);
-                query.bindValue(":text_data", msg.get_msg_content()->get_raw_data());
-
-                if (!query.exec()) {
-                    std::cerr << query.lastError().text().toStdString() << '\n';
-                    return false;
-                }
-
-                query.prepare(" SELECT * FROM IND_TEXT_MESSAGE_CONTENTS "
-                              " WHERE msg_id = :msg_id; ");
-                query.bindValue(":msg_id", msg_id);
-
-                if (!query.exec()) {
-                    std::cerr << query.lastError().text().toStdString() << '\n';
-                    return false;
-                } else {
-                    if (!query.next()) {
-                        return false;
-                    } else {
-                        content_id = query.value("ID").toULongLong();
-                    }
-                }
-
-                content_enum = "text";
+                query.bindValue(":content_type", "text");
                 break;
             }
             case IMAGE_MSG_TYPE: {
-                query.prepare(" INSERT INTO IND_IMAGE_MESSAGE_CONTENTS "
-                              " (msg_id, image_path) "
-                              " VALUES (:msg_id, :image_path); ");
-                query.bindValue(":msg_id", msg_id);
-                query.bindValue(":image_path", msg.get_msg_content()->get_raw_data());
-
-                // ПОВТОР КОДА!!!
-                if (!query.exec()) {
-                    std::cerr << query.lastError().text().toStdString() << '\n';
-                    return false;
-                }
-
-                query.prepare(" SELECT * FROM IND_IMAGE_MESSAGE_CONTENTS "
-                              " WHERE msg_id = :msg_id; ");
-                query.bindValue(":msg_id", msg_id);
-
-                if (!query.exec()) {
-                    std::cerr << query.lastError().text().toStdString() << '\n';
-                    return false;
-                } else {
-                    if (!query.next()) {
-                        return false;
-                    } else {
-                        content_id = query.value("ID").toULongLong();
-                    }
-                }
-
-                content_enum = "image";
+                query.bindValue(":content_type", "image");
                 break;
             }
-
             case AUDIO_MSG_TYPE: {
-                query.prepare(" INSERT INTO IND_AUDIO_MESSAGE_CONTENTS "
-                              " (msg_id, audio_path) "
-                              " VALUES (:msg_id, :audio_path); ");
-                query.bindValue(":msg_id", msg_id);
-                query.bindValue(":audio_path", msg.get_msg_content()->get_raw_data());
-
-                // ПОВТОР КОДА!!!
-                if (!query.exec()) {
-                    std::cerr << query.lastError().text().toStdString() << '\n';
-                    return false;
-                }
-
-                query.prepare(" SELECT * FROM IND_AUDIO_MESSAGE_CONTENTS "
-                              " WHERE msg_id = :msg_id; ");
-                query.bindValue(":msg_id", msg_id);
-
-                if (!query.exec()) {
-                    std::cerr << query.lastError().text().toStdString() << '\n';
-                    return false;
-                } else {
-                    if (!query.next()) {
-                        return false;
-                    } else {
-                        content_id = query.value("ID").toULongLong();
-                    }
-                }
-
-                content_enum = "audio";
+                query.bindValue(":content_type", "audio");
                 break;
             }
         }
 
-        query.prepare(" UPDATE INDIVIDUAL_MESSAGES "
-                      " SET content_id   = :content_id,"
-                      "     content_type = :content_type "
-                      " WHERE ID = :msg_id; ");
-
-        query.bindValue(":content_id", content_id);
-        query.bindValue(":content_type", content_enum.c_str());
-        query.bindValue(":msg_id", msg_id);
+        query.bindValue(":info",  msg.get_msg_content()->get_raw_data());
 
         if (!query.exec()) {
             std::cerr << query.lastError().text().toStdString() << '\n';
@@ -888,11 +883,11 @@ bool LinkDoveSQLDataBase::add_ind_message(const IMessage& msg) {
     return true;
 }
 
-bool LinkDoveSQLDataBase::delete_ind_message(const IMessage &msg) {
+bool LinkDovePSQLDataBase::delete_ind_message(const IMessage &msg) {
     QSqlQuery query(data_base_);
 
-    query.prepare(" DELETE FROM INDIVIDUAL_MESSAGES "
-                  " WHERE ID=:id; ");
+    query.prepare(" DELETE FROM IndividualMessage "
+                  " WHERE id=:id; ");
 
     query.bindValue(":id", msg.get_id());
     std::cerr << msg.get_id() << '\n';
@@ -906,7 +901,7 @@ bool LinkDoveSQLDataBase::delete_ind_message(const IMessage &msg) {
     }
 }
 
-bool LinkDoveSQLDataBase::add_chnnl_message(const IMessage& msg) {
+bool LinkDovePSQLDataBase::add_chnnl_message(const IMessage& msg) {
     QSqlQuery query(data_base_);
     unsigned long long msg_id = 0;
 
@@ -916,139 +911,28 @@ bool LinkDoveSQLDataBase::add_chnnl_message(const IMessage& msg) {
     // используем транзакцию, чтобы в случае ошибки добавления сообщения данные в БД были
     // в согласованном состоянии
     if (data_base_.transaction()) {
-        query.prepare(" INSERT INTO CHANNEL_MESSAGES "
-                      " (channel_id, send_datetime) "
-                      " VALUES (:channel_id, NOW()); ");
+        query.prepare("CALL add_channel_message(:broad_chat, :content_type, :info)");
 
-        query.bindValue(":channel_id", static_cast<const ChannelMessage&>(msg).get_channel_id());
+        query.bindValue(":broad_chat", static_cast<const ChannelMessage&>(msg).get_channel_id());
+        //query.bindValue(":sender", static_cast<const ChannelMessage&>(msg).get_channel_id()); TO DO FIX
 
-        if (!query.exec()) {
-            std::cerr << query.lastError().text().toStdString() << '\n';
-            return false;
-        }
-
-        query.prepare("SELECT * FROM CHANNEL_MESSAGES "
-                      "WHERE "
-                      " channel_id=:channel_id AND content_id=0; ");
-        query.bindValue(":channel_id", static_cast<const ChannelMessage&>(msg).get_channel_id());
-
-        if (!query.exec()) {
-            std::cerr << query.lastError().text().toStdString() << '\n';
-            return false;
-        } else {
-            if (!query.next()) {
-                return false;
-            } else {
-                msg_id = query.value("ID").toULongLong();
-            }
-        }
-
-
-        std::string content_enum;
-        unsigned long long content_id = 0;
         switch (msg.get_msg_content()->get_msg_content_type()) {
             case TEXT_MSG_TYPE: {
-                query.prepare(" INSERT INTO CHANNEL_TEXT_MESSAGE_CONTENTS "
-                              " (msg_id, text_data) "
-                              " VALUES (:msg_id, :text_data); ");
-                query.bindValue(":msg_id", msg_id);
-                query.bindValue(":text_data", msg.get_msg_content()->get_raw_data());
-
-                if (!query.exec()) {
-                    std::cerr << query.lastError().text().toStdString() << '\n';
-                    return false;
-                }
-
-                query.prepare(" SELECT * FROM CHANNEL_TEXT_MESSAGE_CONTENTS "
-                              " WHERE msg_id = :msg_id; ");
-                query.bindValue(":msg_id", msg_id);
-
-                if (!query.exec()) {
-                    std::cerr << query.lastError().text().toStdString() << '\n';
-                    return false;
-                } else {
-                    if (!query.next()) {
-                        return false;
-                    } else {
-                        content_id = query.value("ID").toULongLong();
-                    }
-                }
-
-                content_enum = "text";
+                query.bindValue(":content_type", "text");
                 break;
             }
             case IMAGE_MSG_TYPE: {
-                query.prepare(" INSERT INTO CHANNEL_IMAGE_MESSAGE_CONTENTS "
-                              " (msg_id, image_path) "
-                              " VALUES (:msg_id, :image_path); ");
-                query.bindValue(":msg_id", msg_id);
-                query.bindValue(":image_path", msg.get_msg_content()->get_raw_data());
-
-                // ПОВТОР КОДА!!!
-                if (!query.exec()) {
-                    std::cerr << query.lastError().text().toStdString() << '\n';
-                    return false;
-                }
-
-                query.prepare(" SELECT * FROM CHANNEL_IMAGE_MESSAGE_CONTENTS "
-                              " WHERE msg_id = :msg_id; ");
-                query.bindValue(":msg_id", msg_id);
-
-                if (!query.exec()) {
-                    std::cerr << query.lastError().text().toStdString() << '\n';
-                    return false;
-                } else {
-                    if (!query.next()) {
-                        return false;
-                    } else {
-                        content_id = query.value("ID").toULongLong();
-                    }
-                }
-
-                content_enum = "image";
+                query.bindValue(":content_type", "image");
                 break;
             }
             case AUDIO_MSG_TYPE: {
-                query.prepare(" INSERT INTO CHANNEL_AUDIO_MESSAGE_CONTENTS "
-                              " (msg_id, audio_path) "
-                              " VALUES (:msg_id, :audio_path); ");
-                query.bindValue(":msg_id", msg_id);
-                query.bindValue(":audio_path", msg.get_msg_content()->get_raw_data());
-
-                // ПОВТОР КОДА!!!
-                if (!query.exec()) {
-                    std::cerr << query.lastError().text().toStdString() << '\n';
-                    return false;
-                }
-
-                query.prepare(" SELECT * FROM CHANNEL_AUDIO_MESSAGE_CONTENTS "
-                              " WHERE msg_id = :msg_id; ");
-                query.bindValue(":msg_id", msg_id);
-
-                if (!query.exec()) {
-                    std::cerr << query.lastError().text().toStdString() << '\n';
-                    return false;
-                } else {
-                    if (!query.next()) {
-                        return false;
-                    } else {
-                        content_id = query.value("ID").toULongLong();
-                    }
-                }
-
-                content_enum = "audio";
+                query.bindValue(":content_type", "audio");
                 break;
             }
         }
 
-        query.prepare(" UPDATE CHANNEL_MESSAGES "
-                      " SET content_id   = :content_id,"
-                      "     content_type = :content_type "
-                      " WHERE ID = :msg_id; ");
+        query.bindValue(":info",  msg.get_msg_content()->get_raw_data());
 
-        query.bindValue(":content_id", content_id);
-        query.bindValue(":content_type", content_enum.c_str());
-        query.bindValue(":msg_id", msg_id);
 
         if (!query.exec()) {
             std::cerr << query.lastError().text().toStdString() << '\n';
@@ -1068,11 +952,11 @@ bool LinkDoveSQLDataBase::add_chnnl_message(const IMessage& msg) {
     return true;
 }
 
-bool LinkDoveSQLDataBase::delete_chnnl_message(const IMessage& msg) {
+bool LinkDovePSQLDataBase::delete_chnnl_message(const IMessage& msg) {
     QSqlQuery query(data_base_);
 
-    query.prepare(" DELETE FROM CHANNEL_MESSAGES "
-                  " WHERE ID=:id; ");
+    query.prepare(" DELETE FROM BroadchatMessage " // TO DO
+                  " WHERE id=:id; ");
 
     query.bindValue(":id", msg.get_id());
 
@@ -1085,11 +969,11 @@ bool LinkDoveSQLDataBase::delete_chnnl_message(const IMessage& msg) {
     }
 }
 
-std::vector<std::shared_ptr<IMessage>> LinkDoveSQLDataBase::get_ind_messages(unsigned long long sender_id, unsigned long long receiver_id) {
+std::vector<std::shared_ptr<IMessage>> LinkDovePSQLDataBase::get_ind_messages(unsigned long long sender_id, unsigned long long receiver_id) {
     QSqlQuery query(data_base_);
 
-    query.prepare("SELECT * FROM INDIVIDUAL_MESSAGES "
-                  " WHERE sender_id=:sender_id and receiver_id=:receiver_id; ");
+    query.prepare("SELECT * FROM IndividualMessage "
+                  " WHERE sender=:sender_id and receiver=:receiver_id; ");
 
     query.bindValue(":sender_id", sender_id);
     query.bindValue(":receiver_id", receiver_id);
@@ -1107,12 +991,11 @@ std::vector<std::shared_ptr<IMessage>> LinkDoveSQLDataBase::get_ind_messages(uns
     }
 }
 
-std::vector<StatusInfo> LinkDoveSQLDataBase::get_interlocutors(unsigned long long id) {
+std::vector<StatusInfo> LinkDovePSQLDataBase::get_interlocutors(unsigned long long id) {
     QSqlQuery query(data_base_);
 
-    query.prepare(" SELECT sender_id FROM INDIVIDUAL_MESSAGES "
-                  " WHERE receiver_id=:id "
-                  " GROUP BY sender_id; ");
+    query.prepare(" SELECT DISTINCT sender FROM IndividualMessage "
+                  " WHERE receiver=:id; ");
 
     query.bindValue(":id", id);
 
@@ -1122,13 +1005,12 @@ std::vector<StatusInfo> LinkDoveSQLDataBase::get_interlocutors(unsigned long lon
         throw std::runtime_error("get_interlocutors failed due to query.exec");
     } else {
         while (query.next()) {
-            interlocutors.push_back(get_status_info(query.value("sender_id").toULongLong()));
+            interlocutors.push_back(get_status_info(query.value("sender").toULongLong()));
         }
     }
 
-    query.prepare(" SELECT receiver_id FROM INDIVIDUAL_MESSAGES "
-                  " WHERE sender_id=:id "
-                  " GROUP BY receiver_id; ");
+    query.prepare(" SELECT DISTINCT receiver FROM IndividualMessage "
+                  " WHERE sender=:id; ");
 
     query.bindValue(":id", id);
 
@@ -1137,7 +1019,7 @@ std::vector<StatusInfo> LinkDoveSQLDataBase::get_interlocutors(unsigned long lon
         throw std::runtime_error("get_interlocutors failed due to query.exec");
     } else {
         while (query.next()) {
-            interlocutors.push_back(get_status_info(query.value("receiver_id").toULongLong()));
+            interlocutors.push_back(get_status_info(query.value("receiver").toULongLong()));
         }
     }
 
@@ -1152,13 +1034,13 @@ std::vector<StatusInfo> LinkDoveSQLDataBase::get_interlocutors(unsigned long lon
     return interlocutors;
 }
 
-bool LinkDoveSQLDataBase::delete_ind_chat(unsigned long long first_id, unsigned long long second_id) {
+bool LinkDovePSQLDataBase::delete_ind_chat(unsigned long long first_id, unsigned long long second_id) {
     QSqlQuery query(data_base_);
-    query.prepare(" DELETE FROM INDIVIDUAL_MESSAGES "
+    query.prepare(" DELETE FROM IndividualMessage "
                   " WHERE "
-                  " sender_id=:first_id AND receiver_id=:second_id "
+                  " sender=:first_id AND receiver=:second_id "
                   " OR "
-                  " sender_id=:second_id AND receiver_id=:first_id; ");
+                  " sender=:second_id AND receiver=:first_id; ");
 
     query.bindValue(":first_id", first_id);
     query.bindValue(":second_id", second_id);
@@ -1172,52 +1054,26 @@ bool LinkDoveSQLDataBase::delete_ind_chat(unsigned long long first_id, unsigned 
     }
 }
 
-bool LinkDoveSQLDataBase::add_channel(const ChannelInfo &channel_info) {
+bool LinkDovePSQLDataBase::add_channel(const ChannelInfo &channel_info) {
     QSqlQuery query(data_base_);
-    query.prepare(" INSERT INTO CHANNELS "
-                  " (owner_id, name, is_private) "
-                  " VALUES (:owner_id, :name, :is_private); ");
+    query.prepare("CALL add_broadchat(:owner, :chat_name, 'channel', :is_private)");
 
-    query.bindValue(":owner_id", channel_info.owner_id_);
-    query.bindValue(":name", channel_info.name_.c_str());
+    query.bindValue(":owner", channel_info.owner_id_);
+    query.bindValue(":chat_name", channel_info.name_.c_str());
     query.bindValue(":is_private", channel_info.is_private_);
 
-    if (data_base_.transaction()) {
-        if (!query.exec()) {
+    if (!query.exec()) {
             std::cerr << query.lastError().text().toStdString();
             return false;
-        } else {
-            // если вставка была успешна, то row affected > 0, иначе row affected == 0 (false).
-            if (query.numRowsAffected()) {
-                try {
-                    ChannelInfo updated_channel_info = get_channel(channel_info.name_);
-                    if (add_participant_to_channel(updated_channel_info.owner_id_, updated_channel_info.id_)) {
-                        if (!data_base_.commit()) {
-                            std::cerr << "Failed to commit adding new channel.\n";
-                            return false;
-                        } else {
-                            return true;
-                        }
-                    } else {
-                        return false;
-                    }
-                } catch (std::runtime_error &ex) {
-                    std::cerr << ex.what() << '\n';
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        }
     } else {
         std::cerr << "Failed to start transaction during adding new channel\n";
         return false;
     }
 }
 
-std::vector<ChannelInfo> LinkDoveSQLDataBase::get_channels(unsigned long long id) {
+std::vector<ChannelInfo> LinkDovePSQLDataBase::get_channels(unsigned long long id) {
     QSqlQuery query(data_base_);
-    query.prepare(" SELECT * FROM CHANNEL_PARTICIPANTS "
+    query.prepare(" SELECT * FROM Broadchat "
                   " WHERE participant_id=:id; ");
 
     query.bindValue(":id", id);
@@ -1235,7 +1091,7 @@ std::vector<ChannelInfo> LinkDoveSQLDataBase::get_channels(unsigned long long id
     return channels;
 }
 
-ChannelInfo LinkDoveSQLDataBase::get_channel(const std::string &channel_name) {
+ChannelInfo LinkDovePSQLDataBase::get_channel(const std::string &channel_name) {
     QSqlQuery query(data_base_);
     query.prepare(" SELECT * FROM CHANNELS "
                   " WHERE name=:name; ");
@@ -1252,7 +1108,7 @@ ChannelInfo LinkDoveSQLDataBase::get_channel(const std::string &channel_name) {
     }
 }
 
-ChannelInfo LinkDoveSQLDataBase::get_channel(unsigned long long channel_id) {
+ChannelInfo LinkDovePSQLDataBase::get_channel(unsigned long long channel_id) {
     QSqlQuery query(data_base_);
     query.prepare(" SELECT * FROM CHANNELS "
                   " WHERE ID=:id; ");
@@ -1269,7 +1125,7 @@ ChannelInfo LinkDoveSQLDataBase::get_channel(unsigned long long channel_id) {
     }
 }
 
-bool LinkDoveSQLDataBase::add_participant_to_channel(unsigned long long participant_id, unsigned long long channel_id) {
+bool LinkDovePSQLDataBase::add_participant_to_channel(unsigned long long participant_id, unsigned long long channel_id) {
     QSqlQuery query(data_base_);
     query.prepare(" INSERT INTO CHANNEL_PARTICIPANTS "
                   " (channel_id, participant_id) "
@@ -1287,7 +1143,7 @@ bool LinkDoveSQLDataBase::add_participant_to_channel(unsigned long long particip
     }
 }
 
-bool LinkDoveSQLDataBase::request_participant_to_channel(unsigned long long user_id, unsigned long long channel_id) {
+bool LinkDovePSQLDataBase::request_participant_to_channel(unsigned long long user_id, unsigned long long channel_id) {
     QSqlQuery query(data_base_);
     query.prepare(" INSERT INTO CHANNEL_REQUESTS "
                   " (channel_id, user_id) "
@@ -1305,7 +1161,7 @@ bool LinkDoveSQLDataBase::request_participant_to_channel(unsigned long long user
     }
 }
 
-bool LinkDoveSQLDataBase::remove_request_channel(unsigned long long user_id, unsigned long long channel_id) {
+bool LinkDovePSQLDataBase::remove_request_channel(unsigned long long user_id, unsigned long long channel_id) {
     QSqlQuery query(data_base_);
 
     query.prepare(" DELETE FROM CHANNEL_REQUESTS "
@@ -1323,7 +1179,7 @@ bool LinkDoveSQLDataBase::remove_request_channel(unsigned long long user_id, uns
     }
 }
 
-bool LinkDoveSQLDataBase::request_participant_to_chat(unsigned long long user_id, unsigned long long chat_id) {
+bool LinkDovePSQLDataBase::request_participant_to_chat(unsigned long long user_id, unsigned long long chat_id) {
     QSqlQuery query(data_base_);
     query.prepare(" INSERT INTO CHAT_REQUESTS "
                   " (chat_id, user_id) "
@@ -1341,7 +1197,7 @@ bool LinkDoveSQLDataBase::request_participant_to_chat(unsigned long long user_id
     }
 }
 
-bool LinkDoveSQLDataBase::remove_request_chat(unsigned long long user_id, unsigned long long chat_id) {
+bool LinkDovePSQLDataBase::remove_request_chat(unsigned long long user_id, unsigned long long chat_id) {
     QSqlQuery query(data_base_);
 
     query.prepare(" DELETE FROM CHAT_REQUESTS "
@@ -1359,7 +1215,7 @@ bool LinkDoveSQLDataBase::remove_request_chat(unsigned long long user_id, unsign
     }
 }
 
-bool LinkDoveSQLDataBase::is_channel_participant(unsigned long long participant_id, unsigned long long channel_id) {
+bool LinkDovePSQLDataBase::is_channel_participant(unsigned long long participant_id, unsigned long long channel_id) {
     QSqlQuery query(data_base_);
     query.prepare(" SELECT * FROM CHANNEL_PARTICIPANTS "
                   " WHERE "
@@ -1380,7 +1236,7 @@ bool LinkDoveSQLDataBase::is_channel_participant(unsigned long long participant_
     }
 }
 
-std::vector<std::shared_ptr<IMessage>> LinkDoveSQLDataBase::get_channel_messages(unsigned long long channel_id) {
+std::vector<std::shared_ptr<IMessage>> LinkDovePSQLDataBase::get_channel_messages(unsigned long long channel_id) {
     QSqlQuery query(data_base_);
 
     query.prepare("SELECT * FROM CHANNEL_MESSAGES "
@@ -1401,7 +1257,7 @@ std::vector<std::shared_ptr<IMessage>> LinkDoveSQLDataBase::get_channel_messages
     }
 }
 
-std::vector<std::string> LinkDoveSQLDataBase::get_channel_participants(unsigned long long channel_id) {
+std::vector<std::string> LinkDovePSQLDataBase::get_channel_participants(unsigned long long channel_id) {
     QSqlQuery query(data_base_);
 
     query.prepare(" SELECT participant_id FROM CHANNEL_PARTICIPANTS "
@@ -1422,7 +1278,7 @@ std::vector<std::string> LinkDoveSQLDataBase::get_channel_participants(unsigned 
     return participants;
 }
 
-std::vector<std::string> LinkDoveSQLDataBase::get_channel_requests(unsigned long long channel_id) {
+std::vector<std::string> LinkDovePSQLDataBase::get_channel_requests(unsigned long long channel_id) {
     QSqlQuery query(data_base_);
 
     query.prepare(" SELECT user_id FROM CHANNEL_REQUESTS "
@@ -1443,7 +1299,7 @@ std::vector<std::string> LinkDoveSQLDataBase::get_channel_requests(unsigned long
     return participants;
 }
 
-std::vector<std::string> LinkDoveSQLDataBase::get_chat_requests(unsigned long long chat_id) {
+std::vector<std::string> LinkDovePSQLDataBase::get_chat_requests(unsigned long long chat_id) {
     QSqlQuery query(data_base_);
 
     query.prepare(" SELECT user_id FROM CHAT_REQUESTS "
@@ -1464,7 +1320,7 @@ std::vector<std::string> LinkDoveSQLDataBase::get_chat_requests(unsigned long lo
     return participants;
 }
 
-bool LinkDoveSQLDataBase::delete_channel(unsigned long long channel_id) {
+bool LinkDovePSQLDataBase::delete_channel(unsigned long long channel_id) {
     QSqlQuery query(data_base_);
 
     // Удаляем все текстовые сообщения
@@ -1482,7 +1338,7 @@ bool LinkDoveSQLDataBase::delete_channel(unsigned long long channel_id) {
     }
 }
 
-bool LinkDoveSQLDataBase::quit_channel(unsigned long long user_id, unsigned long long channel_id) {
+bool LinkDovePSQLDataBase::quit_channel(unsigned long long user_id, unsigned long long channel_id) {
     QSqlQuery query(data_base_);
     query.prepare(" DELETE FROM CHANNEL_PARTICIPANTS "
                   " WHERE participant_id=:participant_id AND channel_id=:channel_id; " );
@@ -1499,7 +1355,7 @@ bool LinkDoveSQLDataBase::quit_channel(unsigned long long user_id, unsigned long
     }
 }
 
-bool LinkDoveSQLDataBase::add_chat(const ChatInfo &chat_info) {
+bool LinkDovePSQLDataBase::add_chat(const ChatInfo &chat_info) {
     QSqlQuery query(data_base_);
     query.prepare(" INSERT INTO CHATS "
                   " (owner_id, name, is_private) "
@@ -1542,7 +1398,7 @@ bool LinkDoveSQLDataBase::add_chat(const ChatInfo &chat_info) {
     }
 }
 
-ChatInfo LinkDoveSQLDataBase::get_chat(const std::string &chat_name) {
+ChatInfo LinkDovePSQLDataBase::get_chat(const std::string &chat_name) {
     QSqlQuery query(data_base_);
     query.prepare(" SELECT * FROM CHATS "
                   " WHERE name=:name; ");
@@ -1559,7 +1415,7 @@ ChatInfo LinkDoveSQLDataBase::get_chat(const std::string &chat_name) {
     }
 }
 
-ChatInfo LinkDoveSQLDataBase::get_chat(unsigned long long id) {
+ChatInfo LinkDovePSQLDataBase::get_chat(unsigned long long id) {
     QSqlQuery query(data_base_);
     query.prepare(" SELECT * FROM CHATS "
                   " WHERE ID=:id; ");
@@ -1576,7 +1432,7 @@ ChatInfo LinkDoveSQLDataBase::get_chat(unsigned long long id) {
     }
 }
 
-bool LinkDoveSQLDataBase::add_participant_to_chat(unsigned long long participant_id, unsigned long long chat_id) {
+bool LinkDovePSQLDataBase::add_participant_to_chat(unsigned long long participant_id, unsigned long long chat_id) {
     QSqlQuery query(data_base_);
     query.prepare(" INSERT INTO CHAT_PARTICIPANTS "
                   " (chat_id, participant_id) "
@@ -1594,7 +1450,7 @@ bool LinkDoveSQLDataBase::add_participant_to_chat(unsigned long long participant
     }
 }
 
-bool LinkDoveSQLDataBase::is_chat_participant(unsigned long long participant_id, unsigned long long chat_id) {
+bool LinkDovePSQLDataBase::is_chat_participant(unsigned long long participant_id, unsigned long long chat_id) {
     QSqlQuery query(data_base_);
     query.prepare(" SELECT * FROM CHAT_PARTICIPANTS "
                   " WHERE "
@@ -1615,7 +1471,7 @@ bool LinkDoveSQLDataBase::is_chat_participant(unsigned long long participant_id,
     }
 }
 
-std::vector<ChatInfo> LinkDoveSQLDataBase::get_chats(unsigned long long id) {
+std::vector<ChatInfo> LinkDovePSQLDataBase::get_chats(unsigned long long id) {
     QSqlQuery query(data_base_);
     query.prepare(" SELECT * FROM CHAT_PARTICIPANTS "
                   " WHERE participant_id=:id; ");
@@ -1635,7 +1491,7 @@ std::vector<ChatInfo> LinkDoveSQLDataBase::get_chats(unsigned long long id) {
     return chats;
 }
 
-bool LinkDoveSQLDataBase::delete_chat(unsigned long long chat_id) {
+bool LinkDovePSQLDataBase::delete_chat(unsigned long long chat_id) {
     QSqlQuery query(data_base_);
 
     query.prepare(" DELETE FROM CHATS "
@@ -1651,7 +1507,7 @@ bool LinkDoveSQLDataBase::delete_chat(unsigned long long chat_id) {
     }
 }
 
-bool LinkDoveSQLDataBase::quit_chat(unsigned long long user_id, unsigned long long chat_id) {
+bool LinkDovePSQLDataBase::quit_chat(unsigned long long user_id, unsigned long long chat_id) {
     QSqlQuery query(data_base_);
     query.prepare(" DELETE FROM CHAT_PARTICIPANTS "
                   " WHERE participant_id=:participant_id AND chat_id=:chat_id; " );
@@ -1668,7 +1524,7 @@ bool LinkDoveSQLDataBase::quit_chat(unsigned long long user_id, unsigned long lo
     }
 }
 
-bool LinkDoveSQLDataBase::add_chat_message(const IMessage& msg) {
+bool LinkDovePSQLDataBase::add_chat_message(const IMessage& msg) {
     QSqlQuery query(data_base_);
     unsigned long long msg_id = 0;
 
@@ -1832,7 +1688,7 @@ bool LinkDoveSQLDataBase::add_chat_message(const IMessage& msg) {
     return true;
 }
 
-bool LinkDoveSQLDataBase::delete_chat_message(const IMessage& msg) {
+bool LinkDovePSQLDataBase::delete_chat_message(const IMessage& msg) {
     QSqlQuery query(data_base_);
 
     query.prepare(" DELETE FROM CHAT_MESSAGES "
@@ -1849,7 +1705,7 @@ bool LinkDoveSQLDataBase::delete_chat_message(const IMessage& msg) {
     }
 }
 
-std::vector<std::shared_ptr<IMessage>> LinkDoveSQLDataBase::get_chat_messages(unsigned long long chat_id) {
+std::vector<std::shared_ptr<IMessage>> LinkDovePSQLDataBase::get_chat_messages(unsigned long long chat_id) {
     QSqlQuery query(data_base_);
 
     query.prepare(" SELECT * FROM CHAT_MESSAGES "
@@ -1933,7 +1789,7 @@ std::vector<std::shared_ptr<IMessage>> LinkDoveSQLDataBase::get_chat_messages(un
     }
 }
 
-std::vector<std::string> LinkDoveSQLDataBase::get_chat_participants(unsigned long long group_id) {
+std::vector<std::string> LinkDovePSQLDataBase::get_chat_participants(unsigned long long group_id) {
     QSqlQuery query(data_base_);
 
     query.prepare(" SELECT participant_id FROM CHAT_PARTICIPANTS "
@@ -1954,11 +1810,14 @@ std::vector<std::string> LinkDoveSQLDataBase::get_chat_participants(unsigned lon
     return participants;
 }
 
-StatusInfo LinkDoveSQLDataBase::get_status_info(const std::string &username) {
+StatusInfo LinkDovePSQLDataBase::get_status_info(const std::string &username) {
     QSqlQuery query(data_base_);
-    query.prepare("SELECT * FROM USERS "
-                  "WHERE "
-                  "username = :username; ");
+    query.prepare("SELECT Cs.username, Cs.email, P.Status, P.avatar, P.birthday, Cr.name FROM Consumer Cs "
+                  "INNER JOIN Profile P "
+                  "ON P.consumer=Cs.id "
+                  "INNER JOIN Country Cr "
+                  "ON P.country = Cr.id "
+                  "WHERE Cs.username=:username;");
 
     query.bindValue(":username", username.c_str());
 
@@ -1973,7 +1832,7 @@ StatusInfo LinkDoveSQLDataBase::get_status_info(const std::string &username) {
     }
 }
 
-StatusInfo LinkDoveSQLDataBase::get_status_info(unsigned long long id) {
+StatusInfo LinkDovePSQLDataBase::get_status_info(unsigned long long id) {
     QSqlQuery query(data_base_);
     query.prepare("SELECT * FROM USERS "
                   "WHERE "
@@ -2015,12 +1874,12 @@ namespace link_dove_database_details__ {
 
     StatusInfo retrieve_status_info(const QSqlQuery& query) {
         StatusInfo status_info;
-        status_info.id_          = query.value("ID").toULongLong();
+        status_info.id_          = query.value("id").toULongLong();
         status_info.username_    = query.value("username").toString().toStdString();
         status_info.email_       = query.value("email").toString().toStdString();
         status_info.birthday_    = QDate::fromString(query.value("birthday").toString(), QString(BIRTHAY_FORMAT));
         status_info.text_status_ = query.value("text_status").toString().toStdString();
-        status_info.image_path_  = query.value("image").toString().toStdString();
+        status_info.image_path_  = query.value("avatar").toString().toStdString();
         status_info.is_banned_   = query.value("is_banned").toBool();
 
         return status_info;
@@ -2031,9 +1890,9 @@ namespace link_dove_database_details__ {
         Complaint complaint;
 
         do {
-            complaint.id_ = query.value("ID").toInt();
-            complaint.sender_id_ = query.value("sender_id").toInt();
-            complaint.text_ = query.value("text").toString().toStdString();
+            complaint.id_ = query.value("id").toInt();
+            complaint.sender_id_ = query.value("sender").toInt();
+            complaint.text_ = query.value("description").toString().toStdString();
 
             complaints.push_back(complaint);
             --count;

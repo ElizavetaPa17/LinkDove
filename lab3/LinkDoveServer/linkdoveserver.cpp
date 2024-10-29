@@ -229,7 +229,7 @@ void LinkDoveServer::handle_register_request(ConnectionIterator iterator) {
     remove_delimeter(iterator);
 
     std::stringstream answer;
-    if (ServerUtility::check_password(user_info.password_) && data_base_.register_user(user_info)) {
+    if (data_base_.register_user(user_info)) {
         // В случае удачной регистрации отправляем клиенту структуру StatusInfo (в ней содержится ID)
         user_info.status_info_ = data_base_.get_status_info(user_info.status_info_.username_);
 
@@ -1285,26 +1285,4 @@ void LinkDoveServer::run_context() {
 
 void LinkDoveServer::remove_delimeter(ConnectionIterator iterator) {
     iterator->buffer_.consume(sizeof(END_OF_REQUEST));
-}
-
-namespace ServerUtility {
-    bool check_password(std::string &password) {
-        bool has_number   = false,
-             has_letter   = false,
-             correct_size = false;
-
-        if (password.size() >= 9) {
-            correct_size = true;
-        }
-
-        for (auto elem : password) {
-            if (isdigit(elem)) {
-                has_number = true;
-            } else if (isalpha(elem)) {
-                has_letter = true;
-            }
-        }
-
-        return has_number && has_letter && correct_size;
-    }
 }
