@@ -50,6 +50,9 @@ void LinkDovePSQLDataBase::setup() {
 bool LinkDovePSQLDataBase::setup_tables() {
     QSqlQuery query(data_base_);
 
+
+
+    query.exec("DROP PROCEDURE add_user;");
     bool is_ok = query.exec("DO $$ BEGIN "
                             "CREATE TYPE action_type AS ENUM('register', 'login', 'logout', 'edit profile', 'banned', 'unbanned');"
                             "EXCEPTION "
@@ -80,7 +83,7 @@ bool LinkDovePSQLDataBase::setup_tables() {
                        "time timestamp DEFAULT(now()),"
                        "PRIMARY KEY (id, time),"
                        "FOREIGN KEY (consumer) REFERENCES Consumer(id)"
-                       ") PARTITION BY RANGE(time); ");
+                       "); ");
     if (!is_ok) {
         std::cerr << "Failed to setup Action table: " << query.lastError().text().toStdString() << '\n';
         return false;
@@ -256,7 +259,7 @@ bool LinkDovePSQLDataBase::setup_tables() {
                        "id serial PRIMARY KEY,"
                        "status varchar(256),"
                        "avatar varchar(400) NOT NULL DEFAULT('media/avatars/default_avatar.png'),"
-                       "birthday date NOT NULL CHECK(birthday <= (NOW() - '18 years'::interval)),"
+                       "birthday date NOT NULL CHECK(birthday <= (NOW() - '14 years'::interval)),"
                        "country integer NOT NULL,"
                        "consumer integer NOT NULL UNIQUE,"
                        "FOREIGN KEY (country) REFERENCES Country(id) ON DELETE RESTRICT,"
@@ -342,6 +345,16 @@ bool LinkDovePSQLDataBase::setup_tables() {
         return false;
     }
 
+    is_ok = query.exec("CREATE OR REPLACE TRIGGER Consumer_UPDATE "
+                       "AFTER INSERT ON Consumer "
+                       "FOR EACH ROW "
+                       "EXECUTE FUNCTION on_user_registration();");
+
+    if (!is_ok) {
+        std::cerr << "Failed to setup Consumer_UPDATE trigger: " << query.lastError().text().toStdString() << '\n';
+        return false;
+    }
+
     is_ok = query.exec("CREATE OR REPLACE FUNCTION on_user_registration() RETURNS trigger AS $$ "
                        "BEGIN "
                        "    call add_action(NEW.id, 'register'); "
@@ -355,25 +368,22 @@ bool LinkDovePSQLDataBase::setup_tables() {
         return false;
     }
 
-    is_ok = query.exec("CREATE OR REPLACE FUNCTION add_user(username varchar(40), email varchar(40), password varchar(40), birthday date, text_status varchar(256), country_id integer) "
-                       "RETURNS integer AS $$ "
+    is_ok = query.exec("CREATE OR REPLACE PROCEDURE add_user(username varchar(40), email varchar(40), password varchar(40), birthday date, country_id integer) "
+                       "AS $$ "
                        "DECLARE "
                        "   v_id integer; "
                        "BEGIN "
                        "    INSERT INTO Consumer(username, email, password) "
                        "    VALUES (username, email, password) "
                        "    RETURNING id INTO v_id; "
-                       " "
-                       "    INSERT INTO Profile (status, birthday, country, consumer) "
+                       "    INSERT INTO Profile (birthday, country, consumer) "
                        "    VALUES "
-                       "        (text_status, birthday, country_id, v_id); "
-                       " "
-                       "    RETURN v_id; "
+                       "        (birthday, country_id, v_id); "
                        "END; "
                        "$$ LANGUAGE plpgsql;");
 
     if (!is_ok) {
-        std::cerr << "Failed to setup add_user function: " << query.lastError().text().toStdString() << '\n';
+        std::cerr << "Failed to setup add_user procedure: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
@@ -463,18 +473,48 @@ bool LinkDovePSQLDataBase::setup_tables() {
 
     is_ok = query.exec("CREATE OR REPLACE PROCEDURE add_broadchat(owner integer, chat_name varchar(64), chat_type broadchat_type, is_private boolean) "
                        "AS $$ "
-                       "BEGIN "
-                       "    INSERT INTO Broadchat (owner, name, type, is_private) "
+                       "BEGIN"
+                       "   INSERT INTO Broadchat (owner, name, type, is_private) "
                        "   VALUES "
                        "        (owner, chat_name, chat_type, is_private); "
                        "    INSERT INTO BroadchatParticipant (broad_chat, participant) "
                        "    VALUES "
                        "        (broad_chat, participant); "
-                       "COMMIT; "
+                       "END; "
                        "$$ LANGUAGE PLPGSQL;");
 
     if (!is_ok) {
         std::cerr << "Failed to setup add_broadchat procedure: " << query.lastError().text().toStdString() << '\n';
+        return false;
+    }
+
+    is_ok = query.exec("CREATE OR REPLACE PROCEDURE add_broadchat_participant(broad_chat integer, participant integer) "
+                       "AS $$  "
+                       "BEGIN "
+                       "    INSERT INTO BroadchatParticipant (broad_chat, participant) "
+                       "    VALUES  "
+                       "        (broad_chat, participant); "
+                       "    DELETE FROM BroadchatRequest "
+                       "    WHERE id=broad_chat AND consumer=participant AND is_private=true; "
+                       "END; "
+                       "$$ LANGUAGE PLPGSQL;");
+
+    if (!is_ok) {
+        std::cerr << "Failed to setup add_broadchat_participant procedure: " << query.lastError().text().toStdString() << '\n';
+        return false;
+    }
+
+    is_ok = query.exec("CREATE OR REPLACE PROCEDURE add_chat_message(broad_chat integer, sender integer, content_type msg_type, info text) "
+                       "AS $$ "
+                       "BEGIN "
+                       "    INSERT INTO BroadchatMessage (broad_chat, sender, content_type, info) "
+                       "    VALUES  "
+                       "        (broad_chat, sender, content_type, info); "
+                       "END; "
+                       "$$ LANGUAGE PLPGSQL;");
+
+    if (!is_ok) {
+        std::cerr << "Failed to setup add_chat_message procedure: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
@@ -487,7 +527,7 @@ bool LinkDovePSQLDataBase::setup_tables() {
                        "ON CONFLICT DO NOTHING;");
 
     if (!is_ok) {
-        std::cerr << "Failed to setup add_user function: " << query.lastError().text().toStdString() << '\n';
+        std::cerr << "Failed to setup Country table content: " << query.lastError().text().toStdString() << '\n';
         return false;
     }
 
@@ -497,23 +537,19 @@ bool LinkDovePSQLDataBase::setup_tables() {
 
 bool LinkDovePSQLDataBase::register_user(const UserInfo& info) {
     QSqlQuery query(data_base_);
-    query.prepare("DO $$ BEGIN "
-                  "PERFORM \"add_user\"(:username, :email, :password, :birthday, :text_status, :country_id); "
-                  "END $$;");
+    QString str_query = QString("CALL add_user(\'%1\', \'%2\', \'%3\', \'%4\', %5)")
+                        .arg(info.status_info_.username_.c_str())
+                        .arg(info.status_info_.email_.c_str())
+                        .arg(info.password_.c_str())
+                        .arg(info.status_info_.birthday_.toString("yyyy-MM-dd"))
+                        .arg(1);
 
-    query.bindValue(":username",    info.status_info_.username_.c_str());
-    query.bindValue(":email",       info.status_info_.email_.c_str());
-    query.bindValue(":password",    info.password_.c_str());
-    query.bindValue(":birthday",    info.status_info_.birthday_.toString("yyyy-MM-dd"));
-    query.bindValue(":text_status", info.status_info_.text_status_.c_str());
-    query.bindValue(":country_id",  1); // FIX IT
-
-    if (!query.exec()) {
-        std::cerr << query.lastError().text().toStdString();
+    if (!query.exec(str_query)) {
+        std::cerr << "Failed to setup Country table content: " << query.lastError().text().toStdString() << '\n';
         return false;
     } else {
         // если вставка была успешна, то row affected > 0, иначе row affected == 0 (false).
-        return query.numRowsAffected();
+        return true;
     }
 }
 
@@ -911,7 +947,7 @@ bool LinkDovePSQLDataBase::add_chnnl_message(const IMessage& msg) {
     // используем транзакцию, чтобы в случае ошибки добавления сообщения данные в БД были
     // в согласованном состоянии
     if (data_base_.transaction()) {
-        query.prepare("CALL add_channel_message(:broad_chat, :content_type, :info)");
+        query.prepare("CALL add_channel_message(:broad_chat, :content_type, :info);");
 
         query.bindValue(":broad_chat", static_cast<const ChannelMessage&>(msg).get_channel_id());
         //query.bindValue(":sender", static_cast<const ChannelMessage&>(msg).get_channel_id()); TO DO FIX
@@ -955,7 +991,7 @@ bool LinkDovePSQLDataBase::add_chnnl_message(const IMessage& msg) {
 bool LinkDovePSQLDataBase::delete_chnnl_message(const IMessage& msg) {
     QSqlQuery query(data_base_);
 
-    query.prepare(" DELETE FROM BroadchatMessage " // TO DO
+    query.prepare(" DELETE FROM BroadchatMessage "
                   " WHERE id=:id; ");
 
     query.bindValue(":id", msg.get_id());
@@ -1056,7 +1092,7 @@ bool LinkDovePSQLDataBase::delete_ind_chat(unsigned long long first_id, unsigned
 
 bool LinkDovePSQLDataBase::add_channel(const ChannelInfo &channel_info) {
     QSqlQuery query(data_base_);
-    query.prepare("CALL add_broadchat(:owner, :chat_name, 'channel', :is_private)");
+    query.prepare("CALL add_broadchat(:owner, :chat_name, 'channel', :is_private);");
 
     query.bindValue(":owner", channel_info.owner_id_);
     query.bindValue(":chat_name", channel_info.name_.c_str());
@@ -1074,7 +1110,7 @@ bool LinkDovePSQLDataBase::add_channel(const ChannelInfo &channel_info) {
 std::vector<ChannelInfo> LinkDovePSQLDataBase::get_channels(unsigned long long id) {
     QSqlQuery query(data_base_);
     query.prepare(" SELECT * FROM Broadchat "
-                  " WHERE participant_id=:id; ");
+                  " WHERE participant_id=:id AND type='channel");
 
     query.bindValue(":id", id);
 
@@ -1085,7 +1121,7 @@ std::vector<ChannelInfo> LinkDovePSQLDataBase::get_channels(unsigned long long i
 
     std::vector<ChannelInfo> channels;
     while (query.next()) {
-        channels.push_back(get_channel(query.value("channel_id").toULongLong()));
+        channels.push_back(get_channel(query.value("id").toULongLong()));
     }
 
     return channels;
@@ -1093,8 +1129,8 @@ std::vector<ChannelInfo> LinkDovePSQLDataBase::get_channels(unsigned long long i
 
 ChannelInfo LinkDovePSQLDataBase::get_channel(const std::string &channel_name) {
     QSqlQuery query(data_base_);
-    query.prepare(" SELECT * FROM CHANNELS "
-                  " WHERE name=:name; ");
+    query.prepare(" SELECT * FROM Broadchat "
+                  " WHERE name = :name AND type='channel'; ");
 
     query.bindValue(":name", channel_name.c_str());
     if (!query.exec()) {
@@ -1110,8 +1146,8 @@ ChannelInfo LinkDovePSQLDataBase::get_channel(const std::string &channel_name) {
 
 ChannelInfo LinkDovePSQLDataBase::get_channel(unsigned long long channel_id) {
     QSqlQuery query(data_base_);
-    query.prepare(" SELECT * FROM CHANNELS "
-                  " WHERE ID=:id; ");
+    query.prepare(" SELECT * FROM Broadchat "
+                  " WHERE id=:id AND type='channel'; ");
 
     query.bindValue(":id", channel_id);
     if (!query.exec()) {
@@ -1127,12 +1163,10 @@ ChannelInfo LinkDovePSQLDataBase::get_channel(unsigned long long channel_id) {
 
 bool LinkDovePSQLDataBase::add_participant_to_channel(unsigned long long participant_id, unsigned long long channel_id) {
     QSqlQuery query(data_base_);
-    query.prepare(" INSERT INTO CHANNEL_PARTICIPANTS "
-                  " (channel_id, participant_id) "
-                  " VALUES (:channel_id, :participant_id); ");
+    query.prepare(" CALL add_broadchat_participant(:broad_chat, participant); ");
 
-    query.bindValue(":channel_id", channel_id);
-    query.bindValue(":participant_id", participant_id);
+    query.bindValue(":broad_chat", channel_id);
+    query.bindValue(":participant", participant_id);
 
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString();
@@ -1145,12 +1179,12 @@ bool LinkDovePSQLDataBase::add_participant_to_channel(unsigned long long partici
 
 bool LinkDovePSQLDataBase::request_participant_to_channel(unsigned long long user_id, unsigned long long channel_id) {
     QSqlQuery query(data_base_);
-    query.prepare(" INSERT INTO CHANNEL_REQUESTS "
-                  " (channel_id, user_id) "
-                  " VALUES (:channel_id, :user_id); ");
+    query.prepare(" INSERT INTO BroadchatRequest (broad_chat, consumer) "
+                  " VALUES "
+                  "    (:broad_chat, :consumer); ");
 
-    query.bindValue(":channel_id", channel_id);
-    query.bindValue(":user_id", user_id);
+    query.bindValue(":broad_chat", channel_id);
+    query.bindValue(":consumer", user_id);
 
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString();
@@ -1164,11 +1198,11 @@ bool LinkDovePSQLDataBase::request_participant_to_channel(unsigned long long use
 bool LinkDovePSQLDataBase::remove_request_channel(unsigned long long user_id, unsigned long long channel_id) {
     QSqlQuery query(data_base_);
 
-    query.prepare(" DELETE FROM CHANNEL_REQUESTS "
-                  " WHERE user_id=:user_id AND channel_id=:channel_id;");
+    query.prepare(" DELETE FROM BroadchatRequest "
+                  " WHERE id=:broad_chat AND consumer=:participant AND is_private=true; ");
 
-    query.bindValue(":channel_id", channel_id);
-    query.bindValue(":user_id", user_id);
+    query.bindValue(":broad_chat", channel_id);
+    query.bindValue(":participant", user_id);
 
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString();
@@ -1181,12 +1215,10 @@ bool LinkDovePSQLDataBase::remove_request_channel(unsigned long long user_id, un
 
 bool LinkDovePSQLDataBase::request_participant_to_chat(unsigned long long user_id, unsigned long long chat_id) {
     QSqlQuery query(data_base_);
-    query.prepare(" INSERT INTO CHAT_REQUESTS "
-                  " (chat_id, user_id) "
-                  " VALUES (:chat_id, :user_id); ");
+    query.prepare(" CALL add_broadchat_participant(:broad_chat, participant); ");
 
-    query.bindValue(":chat_id", chat_id);
-    query.bindValue(":user_id", user_id);
+    query.bindValue(":broad_chat", chat_id);
+    query.bindValue(":participant", user_id);
 
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString();
@@ -1198,31 +1230,17 @@ bool LinkDovePSQLDataBase::request_participant_to_chat(unsigned long long user_i
 }
 
 bool LinkDovePSQLDataBase::remove_request_chat(unsigned long long user_id, unsigned long long chat_id) {
-    QSqlQuery query(data_base_);
-
-    query.prepare(" DELETE FROM CHAT_REQUESTS "
-                  " WHERE user_id=:user_id AND chat_id=:chat_id;");
-
-    query.bindValue(":chat_id", chat_id);
-    query.bindValue(":user_id", user_id);
-
-    if (!query.exec()) {
-        std::cerr << query.lastError().text().toStdString();
-        return false;
-    } else {
-        // если удаление было успешно, то row affected > 0, иначе row affected == 0 (false).
-        return query.numRowsAffected();
-    }
+    return request_participant_to_channel(user_id, chat_id);
 }
 
 bool LinkDovePSQLDataBase::is_channel_participant(unsigned long long participant_id, unsigned long long channel_id) {
     QSqlQuery query(data_base_);
-    query.prepare(" SELECT * FROM CHANNEL_PARTICIPANTS "
-                  " WHERE "
-                  " channel_id=:channel_id AND participant_id=:participant_id; ");
+    query.prepare(" SELECT "
+                  " EXISTS (SELECT 1 FROM BroadchatParticipant "
+                  "        WHERE broad_chat=:broad_chat AND participant=:participant) As IsParticipant; ");
 
-    query.bindValue(":channel_id", channel_id);
-    query.bindValue(":participant_id", participant_id);
+    query.bindValue(":broad_chat", channel_id);
+    query.bindValue(":participant", participant_id);
 
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString();
@@ -1239,10 +1257,11 @@ bool LinkDovePSQLDataBase::is_channel_participant(unsigned long long participant
 std::vector<std::shared_ptr<IMessage>> LinkDovePSQLDataBase::get_channel_messages(unsigned long long channel_id) {
     QSqlQuery query(data_base_);
 
-    query.prepare("SELECT * FROM CHANNEL_MESSAGES "
-                  " WHERE channel_id=:channel_id; ");
+    query.prepare("SELECT * FROM BroadchatMessage "
+                  "WHERE broad_chat=:broad_chat "
+                  "ORDER BY time;  ");
 
-    query.bindValue(":channel_id", channel_id);
+    query.bindValue(":broad_chat", channel_id);
 
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString() << '\n';
@@ -1260,10 +1279,10 @@ std::vector<std::shared_ptr<IMessage>> LinkDovePSQLDataBase::get_channel_message
 std::vector<std::string> LinkDovePSQLDataBase::get_channel_participants(unsigned long long channel_id) {
     QSqlQuery query(data_base_);
 
-    query.prepare(" SELECT participant_id FROM CHANNEL_PARTICIPANTS "
-                  " WHERE channel_id=:channel_id; ");
+    query.prepare(" SELECT participant FROM BroadchatParticipant "
+                  " WHERE broad_chat=:broad_chat; ");
 
-    query.bindValue(":channel_id", channel_id);
+    query.bindValue(":broad_chat", channel_id);
 
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString() << '\n';
@@ -1272,7 +1291,7 @@ std::vector<std::string> LinkDovePSQLDataBase::get_channel_participants(unsigned
 
     std::vector<std::string> participants;
     while (query.next()) {
-        participants.push_back(get_status_info(query.value("participant_id").toULongLong()).username_);
+        participants.push_back(get_status_info(query.value("participant").toULongLong()).username_);
     }
 
     return participants;
@@ -1281,10 +1300,10 @@ std::vector<std::string> LinkDovePSQLDataBase::get_channel_participants(unsigned
 std::vector<std::string> LinkDovePSQLDataBase::get_channel_requests(unsigned long long channel_id) {
     QSqlQuery query(data_base_);
 
-    query.prepare(" SELECT user_id FROM CHANNEL_REQUESTS "
-                  " WHERE channel_id=:channel_id; ");
+    query.prepare(" SELECT consumer FROM BroadchatRequest "
+                  " WHERE broad_chat=:broad_chat; ");
 
-    query.bindValue(":channel_id", channel_id);
+    query.bindValue(":broad_chat", channel_id);
 
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString() << '\n';
@@ -1293,39 +1312,22 @@ std::vector<std::string> LinkDovePSQLDataBase::get_channel_requests(unsigned lon
 
     std::vector<std::string> participants;
     while (query.next()) {
-        participants.push_back(get_status_info(query.value("user_id").toULongLong()).username_);
+        participants.push_back(get_status_info(query.value("consumer").toULongLong()).username_);
     }
 
     return participants;
 }
 
 std::vector<std::string> LinkDovePSQLDataBase::get_chat_requests(unsigned long long chat_id) {
-    QSqlQuery query(data_base_);
-
-    query.prepare(" SELECT user_id FROM CHAT_REQUESTS "
-                  " WHERE chat_id=:chat_id; ");
-
-    query.bindValue(":chat_id", chat_id);
-
-    if (!query.exec()) {
-        std::cerr << query.lastError().text().toStdString() << '\n';
-        throw std::runtime_error("get_channel_requests failed due to query.exec");
-    }
-
-    std::vector<std::string> participants;
-    while (query.next()) {
-        participants.push_back(get_status_info(query.value("user_id").toULongLong()).username_);
-    }
-
-    return participants;
+    return get_channel_requests(chat_id);
 }
 
 bool LinkDovePSQLDataBase::delete_channel(unsigned long long channel_id) {
     QSqlQuery query(data_base_);
 
     // Удаляем все текстовые сообщения
-    query.prepare(" DELETE FROM CHANNELS "
-                  " WHERE ID=:id; ");
+    query.prepare(" DELETE FROM Broadchat "
+                  " WHERE id=:id; ");
 
     query.bindValue(":id", channel_id);
 
@@ -1340,11 +1342,11 @@ bool LinkDovePSQLDataBase::delete_channel(unsigned long long channel_id) {
 
 bool LinkDovePSQLDataBase::quit_channel(unsigned long long user_id, unsigned long long channel_id) {
     QSqlQuery query(data_base_);
-    query.prepare(" DELETE FROM CHANNEL_PARTICIPANTS "
-                  " WHERE participant_id=:participant_id AND channel_id=:channel_id; " );
+    query.prepare(" DELETE FROM BroadchatParticipant "
+                  " WHERE broad_chat=:broad_chat AND participant=:participant; " );
 
-    query.bindValue(":participant_id", user_id);
-    query.bindValue(":channel_id", channel_id);
+    query.bindValue(":participant", user_id);
+    query.bindValue(":broad_chat", channel_id);
 
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString() << '\n';
@@ -1357,51 +1359,30 @@ bool LinkDovePSQLDataBase::quit_channel(unsigned long long user_id, unsigned lon
 
 bool LinkDovePSQLDataBase::add_chat(const ChatInfo &chat_info) {
     QSqlQuery query(data_base_);
-    query.prepare(" INSERT INTO CHATS "
-                  " (owner_id, name, is_private) "
-                  " VALUES (:owner_id, :name, :private); ");
 
-    query.bindValue(":owner_id", chat_info.owner_id_);
-    query.bindValue(":name", chat_info.name_.c_str());
-    query.bindValue(":private", chat_info.is_private_);
+    query.prepare("CALL add_broadchat(:owner, :chat_name, 'chat', :is_private);");
 
-    if (data_base_.transaction()) {
-        if (!query.exec()) {
-            std::cerr << query.lastError().text().toStdString() << '\n';
-            return false;
-        } else {
-            // если вставка была успешна, то row affected > 0, иначе row affected == 0 (false).
-            if (query.numRowsAffected()) {
-                try {
-                    ChatInfo updated_chat_info = get_chat(chat_info.name_);
-                    if (add_participant_to_chat(updated_chat_info.owner_id_, updated_chat_info.id_)) {
-                        if (!data_base_.commit()) {
-                            std::cerr << "Failed to commit adding new chat.\n";
-                            return false;
-                        } else {
-                            return true;
-                        }
-                    } else {
-                        return false;
-                    }
-                } catch (std::runtime_error &ex) {
-                    std::cerr << ex.what() << '\n';
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        }
-    } else {
-        std::cerr << "Failed to start transaction during adding new chat.\n";
+    query.bindValue(":owner", chat_info.owner_id_);
+    query.bindValue(":chat_name", chat_info.name_.c_str());
+    query.bindValue(":is_private", chat_info.is_private_);
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString() << '\n';
         return false;
+    } else {
+        // если вставка была успешна, то row affected > 0, иначе row affected == 0 (false).
+        if (query.numRowsAffected()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
 
 ChatInfo LinkDovePSQLDataBase::get_chat(const std::string &chat_name) {
     QSqlQuery query(data_base_);
-    query.prepare(" SELECT * FROM CHATS "
-                  " WHERE name=:name; ");
+    query.prepare(" SELECT * FROM Broadchat "
+                  " WHERE name=:name AND type='chat'; ");
 
     query.bindValue(":name", chat_name.c_str());
     if (!query.exec()) {
@@ -1417,8 +1398,8 @@ ChatInfo LinkDovePSQLDataBase::get_chat(const std::string &chat_name) {
 
 ChatInfo LinkDovePSQLDataBase::get_chat(unsigned long long id) {
     QSqlQuery query(data_base_);
-    query.prepare(" SELECT * FROM CHATS "
-                  " WHERE ID=:id; ");
+    query.prepare(" SELECT * FROM Broadchat "
+                  " WHERE id=:id AND type='chat'; ");
 
     query.bindValue(":id", id);
     if (!query.exec()) {
@@ -1433,48 +1414,17 @@ ChatInfo LinkDovePSQLDataBase::get_chat(unsigned long long id) {
 }
 
 bool LinkDovePSQLDataBase::add_participant_to_chat(unsigned long long participant_id, unsigned long long chat_id) {
-    QSqlQuery query(data_base_);
-    query.prepare(" INSERT INTO CHAT_PARTICIPANTS "
-                  " (chat_id, participant_id) "
-                  " VALUES (:chat_id, :participant_id); ");
-
-    query.bindValue(":chat_id", chat_id);
-    query.bindValue(":participant_id", participant_id);
-
-    if (!query.exec()) {
-        std::cerr << query.lastError().text().toStdString();
-        return false;
-    } else {
-        // если вставка была успешна, то row affected > 0, иначе row affected == 0 (false).
-        return query.numRowsAffected();
-    }
+    return add_participant_to_channel(participant_id, chat_id);
 }
 
 bool LinkDovePSQLDataBase::is_chat_participant(unsigned long long participant_id, unsigned long long chat_id) {
-    QSqlQuery query(data_base_);
-    query.prepare(" SELECT * FROM CHAT_PARTICIPANTS "
-                  " WHERE "
-                  " chat_id=:chat_id AND participant_id=:participant_id; ");
-
-    query.bindValue(":chat_id", chat_id);
-    query.bindValue(":participant_id", participant_id);
-
-    if (!query.exec()) {
-        std::cerr << query.lastError().text().toStdString();
-        throw std::runtime_error("is_chat_participant failed due to query.exec");
-    } else {
-        if (query.next()) {
-            return true;
-        } else {
-            return false;
-        }
-    }
+    return is_channel_participant(participant_id, chat_id);
 }
 
 std::vector<ChatInfo> LinkDovePSQLDataBase::get_chats(unsigned long long id) {
     QSqlQuery query(data_base_);
-    query.prepare(" SELECT * FROM CHAT_PARTICIPANTS "
-                  " WHERE participant_id=:id; ");
+    query.prepare(" SELECT * FROM Broadchat "
+                  " WHERE participant_id=:id AND type='chat");
 
     query.bindValue(":id", id);
 
@@ -1485,7 +1435,7 @@ std::vector<ChatInfo> LinkDovePSQLDataBase::get_chats(unsigned long long id) {
 
     std::vector<ChatInfo> chats;
     while (query.next()) {
-        chats.push_back(get_chat(query.value("chat_id").toULongLong()));
+        chats.push_back(get_chat(query.value("id").toULongLong()));
     }
 
     return chats;
@@ -1494,8 +1444,8 @@ std::vector<ChatInfo> LinkDovePSQLDataBase::get_chats(unsigned long long id) {
 bool LinkDovePSQLDataBase::delete_chat(unsigned long long chat_id) {
     QSqlQuery query(data_base_);
 
-    query.prepare(" DELETE FROM CHATS "
-                  " WHERE ID=:id; ");
+    query.prepare(" DELETE FROM Broadchat "
+                  " WHERE id=:id; ");
 
     query.bindValue(":id", chat_id);
     if (!query.exec()) {
@@ -1508,21 +1458,51 @@ bool LinkDovePSQLDataBase::delete_chat(unsigned long long chat_id) {
 }
 
 bool LinkDovePSQLDataBase::quit_chat(unsigned long long user_id, unsigned long long chat_id) {
-    QSqlQuery query(data_base_);
-    query.prepare(" DELETE FROM CHAT_PARTICIPANTS "
-                  " WHERE participant_id=:participant_id AND chat_id=:chat_id; " );
-
-    query.bindValue(":participant_id", user_id);
-    query.bindValue(":chat_id", chat_id);
-
-    if (!query.exec()) {
-        std::cerr << query.lastError().text().toStdString() << '\n';
-        return false;
-    } else {
-        // если удаление было успешным, то row affected > 0, иначе row affected == 0 (false).
-        return query.numRowsAffected();
-    }
+    return quit_channel(user_id, chat_id);
 }
+
+/*
+    if (data_base_.transaction()) {
+        query.prepare("CALL add_channel_message(:broad_chat, :content_type, :info);");
+
+        query.bindValue(":broad_chat", static_cast<const ChannelMessage&>(msg).get_channel_id());
+        //query.bindValue(":sender", static_cast<const ChannelMessage&>(msg).get_channel_id()); TO DO FIX
+
+        switch (msg.get_msg_content()->get_msg_content_type()) {
+            case TEXT_MSG_TYPE: {
+                query.bindValue(":content_type", "text");
+                break;
+            }
+            case IMAGE_MSG_TYPE: {
+                query.bindValue(":content_type", "image");
+                break;
+            }
+            case AUDIO_MSG_TYPE: {
+                query.bindValue(":content_type", "audio");
+                break;
+            }
+        }
+
+        query.bindValue(":info",  msg.get_msg_content()->get_raw_data());
+
+
+        if (!query.exec()) {
+            std::cerr << query.lastError().text().toStdString() << '\n';
+            return false;
+        }
+
+        if (!data_base_.commit()) {
+            std::cerr << "Failed to commit adding new channel message.\n";
+            return false;
+        }
+    } else {
+        std::cerr << "Failed to start transaction during adding new channel message.\n";
+        return false;
+    }
+
+    query.exec(" COMMIT; ");
+    return true;
+*/
 
 bool LinkDovePSQLDataBase::add_chat_message(const IMessage& msg) {
     QSqlQuery query(data_base_);
@@ -1531,187 +1511,49 @@ bool LinkDovePSQLDataBase::add_chat_message(const IMessage& msg) {
     // используем мьютекс для того, чтобы во время транзакции не было модификации данных
     std::unique_lock<std::mutex> unique_mtx(modify_mutex);
 
-    // используем транзакцию, чтобы в случае ошибки добавления сообщения данные в БД были
-    // в согласованном состоянии
-    if (data_base_.transaction()) {
-        query.prepare(" INSERT INTO CHAT_MESSAGES "
-                      " (chat_id, send_datetime, owner_id) "
-                      " VALUES (:chat_id, NOW(), :owner_id); ");
+    query.prepare("CALL add_chat_message(:broad_chat, :sender, :content_type, :info);");
 
-        query.bindValue(":chat_id", static_cast<const GroupMessage&>(msg).get_group_id());
-        query.bindValue(":owner_id", static_cast<const GroupMessage&>(msg).get_owner_id());
+    query.bindValue(":broad_chat", static_cast<const GroupMessage&>(msg).get_group_id());
+    query.bindValue(":sender", static_cast<const GroupMessage&>(msg).get_owner_id());
 
-        if (!query.exec()) {
-            std::cerr << query.lastError().text().toStdString() << '\n';
-            return false;
+    switch (msg.get_msg_content()->get_msg_content_type()) {
+        case TEXT_MSG_TYPE: {
+            query.bindValue(":content_type", "text");
+            break;
         }
-
-        query.prepare("SELECT * FROM CHAT_MESSAGES "
-                      "WHERE "
-                      " chat_id=:chat_id AND content_id=0; ");
-        query.bindValue(":chat_id", static_cast<const GroupMessage&>(msg).get_group_id());
-
-        if (!query.exec()) {
-            std::cerr << query.lastError().text().toStdString() << '\n';
-            return false;
-        } else {
-            if (!query.next()) {
-                std::cerr << "Failed to add chat message due to incorrect inserting in CHAT_MESSAGES.";
-                return false;
-            } else {
-                msg_id = query.value("ID").toULongLong();
-            }
+        case IMAGE_MSG_TYPE: {
+            query.bindValue(":content_type", "image");
+            break;
         }
-
-
-        std::string content_enum;
-        unsigned long long content_id = 0;
-        switch (msg.get_msg_content()->get_msg_content_type()) {
-            case TEXT_MSG_TYPE: {
-                query.prepare(" INSERT INTO CHAT_TEXT_MESSAGE_CONTENTS "
-                              " (msg_id, text_data) "
-                              " VALUES (:msg_id, :text_data); ");
-                query.bindValue(":msg_id", msg_id);
-                query.bindValue(":text_data", msg.get_msg_content()->get_raw_data());
-
-                if (!query.exec()) {
-                    std::cerr << query.lastError().text().toStdString() << '\n';
-                    return false;
-                }
-
-                query.prepare(" SELECT * FROM CHAT_TEXT_MESSAGE_CONTENTS "
-                              " WHERE msg_id = :msg_id; ");
-                query.bindValue(":msg_id", msg_id);
-
-                if (!query.exec()) {
-                    std::cerr << query.lastError().text().toStdString() << '\n';
-                    return false;
-                } else {
-                    if (!query.next()) {
-                        return false;
-                    } else {
-                        content_id = query.value("ID").toULongLong();
-                    }
-                }
-
-                content_enum = "text";
-                break;
-            }
-            case IMAGE_MSG_TYPE: {
-                query.prepare(" INSERT INTO CHAT_IMAGE_MESSAGE_CONTENTS "
-                              " (msg_id, image_path) "
-                              " VALUES (:msg_id, :image_path); ");
-                query.bindValue(":msg_id", msg_id);
-                query.bindValue(":image_path", msg.get_msg_content()->get_raw_data());
-
-                // ПОВТОР КОДА!!!
-                if (!query.exec()) {
-                    std::cerr << query.lastError().text().toStdString() << '\n';
-                    return false;
-                }
-
-                query.prepare(" SELECT * FROM CHAT_IMAGE_MESSAGE_CONTENTS "
-                              " WHERE msg_id = :msg_id; ");
-                query.bindValue(":msg_id", msg_id);
-
-                if (!query.exec()) {
-                    std::cerr << query.lastError().text().toStdString() << '\n';
-                    return false;
-                } else {
-                    if (!query.next()) {
-                        return false;
-                    } else {
-                        content_id = query.value("ID").toULongLong();
-                    }
-                }
-
-                content_enum = "image";
-                break;
-            }
-            case AUDIO_MSG_TYPE: {
-                query.prepare(" INSERT INTO CHAT_AUDIO_MESSAGE_CONTENTS "
-                              " (msg_id, audio_path) "
-                              " VALUES (:msg_id, :audio_path); ");
-                query.bindValue(":msg_id", msg_id);
-                query.bindValue(":audio_path", msg.get_msg_content()->get_raw_data());
-
-                // ПОВТОР КОДА!!!
-                if (!query.exec()) {
-                    std::cerr << query.lastError().text().toStdString() << '\n';
-                    return false;
-                }
-
-                query.prepare(" SELECT * FROM CHAT_AUDIO_MESSAGE_CONTENTS "
-                              " WHERE msg_id = :msg_id; ");
-                query.bindValue(":msg_id", msg_id);
-
-                if (!query.exec()) {
-                    std::cerr << query.lastError().text().toStdString() << '\n';
-                    return false;
-                } else {
-                    if (!query.next()) {
-                        return false;
-                    } else {
-                        content_id = query.value("ID").toULongLong();
-                    }
-                }
-
-                content_enum = "audio";
-                break;
-            }
+        case AUDIO_MSG_TYPE: {
+            query.bindValue(":content_type", "audio");
+            break;
         }
-
-        query.prepare(" UPDATE CHAT_MESSAGES "
-                      " SET content_id   = :content_id,"
-                      "     content_type = :content_type "
-                      " WHERE ID = :msg_id; ");
-
-        query.bindValue(":content_id", content_id);
-        query.bindValue(":content_type", content_enum.c_str());
-        query.bindValue(":msg_id", msg_id);
-
-        if (!query.exec()) {
-            std::cerr << query.lastError().text().toStdString() << '\n';
-            return false;
-        }
-
-        if (!data_base_.commit()) {
-            std::cerr << "Failed to commit adding new chat message.\n";
-            return false;
-        }
-    } else {
-        std::cerr << "Failed to start transaction during adding new chat message.\n";
-        return false;
     }
 
-    query.exec(" COMMIT; ");
-    return true;
-}
-
-bool LinkDovePSQLDataBase::delete_chat_message(const IMessage& msg) {
-    QSqlQuery query(data_base_);
-
-    query.prepare(" DELETE FROM CHAT_MESSAGES "
-                  " WHERE ID=:id; ");
-
-    query.bindValue(":id", msg.get_id());
+    query.bindValue(":info",  msg.get_msg_content()->get_raw_data());
 
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString() << '\n';
         return false;
-    } else {
-        // если удаление было успешно, то row affected > 0, иначе row affected == 0 (false).
-        return query.numRowsAffected();
     }
+
+    return true;
 }
 
+bool LinkDovePSQLDataBase::delete_chat_message(const IMessage& msg) {
+    return delete_chnnl_message(msg);
+}
+
+// TODO FIX
 std::vector<std::shared_ptr<IMessage>> LinkDovePSQLDataBase::get_chat_messages(unsigned long long chat_id) {
     QSqlQuery query(data_base_);
 
-    query.prepare(" SELECT * FROM CHAT_MESSAGES "
-                  " WHERE chat_id=:chat_id; ");
+    query.prepare("SELECT * FROM BroadchatMessage "
+                  "WHERE broad_chat=:broad_chat "
+                  "ORDER BY time;  ");
 
-    query.bindValue(":chat_id", chat_id);
+    query.bindValue(":broad_chat", chat_id);
 
     if (!query.exec()) {
         std::cerr << query.lastError().text().toStdString() << '\n';
@@ -1726,59 +1568,29 @@ std::vector<std::shared_ptr<IMessage>> LinkDovePSQLDataBase::get_chat_messages(u
 
         std::vector<std::shared_ptr<IMessage>> messages;
         std::string msg_type;
-        unsigned long long chat_id = query.value("chat_id").toULongLong();
 
         do {
-            user_info = get_status_info(query.value("owner_id").toULongLong());
+            user_info = get_status_info(query.value("sender").toULongLong());
 
             std::shared_ptr<GroupMessage> message_ptr = std::make_shared<GroupMessage>();
-            message_ptr->set_id(query.value("ID").toULongLong());
-            message_ptr->set_send_datetime(query.value("send_datetime").toDateTime());
+            message_ptr->set_id(query.value("id").toULongLong());
+            message_ptr->set_send_datetime(query.value("time").toDateTime());
             message_ptr->set_group_id(chat_id);
-            message_ptr->set_owner_id(query.value("owner_id").toULongLong());
+            message_ptr->set_owner_id(query.value("sender").toULongLong());
             message_ptr->set_owner_name(user_info.username_);
 
             msg_type = query.value("content_type").toString().toStdString();
             if (msg_type == "text") {
-                content_query.prepare("SELECT * FROM CHAT_TEXT_MESSAGE_CONTENTS "
-                                      "WHERE msg_id=:msg_id; ");
-
-                content_query.bindValue(":msg_id", message_ptr->get_id());
-
-                if (!content_query.exec() || !content_query.next()) {
-                    std::cerr << content_query.lastError().text().toStdString() << '\n';
-                    continue;
-                }
-
                 std::shared_ptr<TextMessageContent> text_msg_content_ptr = std::make_shared<TextMessageContent>();
-                text_msg_content_ptr->set_text(content_query.value("text_data").toString().toStdString());
+                text_msg_content_ptr->set_text(content_query.value("info").toString().toStdString());
                 message_ptr->set_msg_content(text_msg_content_ptr);
-            //  ПОВТОР КОДА! УБРАТЬ!
             } else if (msg_type == "audio") {
-                content_query.prepare("SELECT * FROM CHAT_AUDIO_MESSAGE_CONTENTS "
-                                      "WHERE msg_id=:msg_id; ");
-                content_query.bindValue(":msg_id", message_ptr->get_id());
-
-                if (!content_query.exec() || !content_query.next()) {
-                    std::cerr << content_query.lastError().text().toStdString() << '\n';
-                    continue;
-                }
-
                 std::shared_ptr<AudioMessageContent> text_msg_content_ptr = std::make_shared<AudioMessageContent>();
-                text_msg_content_ptr->set_audio_path(content_query.value("audio_path").toString().toStdString());
+                text_msg_content_ptr->set_audio_path(content_query.value("info").toString().toStdString());
                 message_ptr->set_msg_content(text_msg_content_ptr);
             } else if (msg_type == "image") {
-                content_query.prepare("SELECT * FROM CHAT_IMAGE_MESSAGE_CONTENTS "
-                                      "WHERE msg_id=:msg_id; ");
-                content_query.bindValue(":msg_id", message_ptr->get_id());
-
-                if (!content_query.exec() || !content_query.next()) {
-                    std::cerr << content_query.lastError().text().toStdString() << '\n';
-                    continue;
-                }
-
                 std::shared_ptr<ImageMessageContent> text_msg_content_ptr = std::make_shared<ImageMessageContent>();
-                text_msg_content_ptr->set_image_path(content_query.value("image_path").toString().toStdString());
+                text_msg_content_ptr->set_image_path(content_query.value("info").toString().toStdString());
                 message_ptr->set_msg_content(text_msg_content_ptr);
             }
 
@@ -1790,24 +1602,7 @@ std::vector<std::shared_ptr<IMessage>> LinkDovePSQLDataBase::get_chat_messages(u
 }
 
 std::vector<std::string> LinkDovePSQLDataBase::get_chat_participants(unsigned long long group_id) {
-    QSqlQuery query(data_base_);
-
-    query.prepare(" SELECT participant_id FROM CHAT_PARTICIPANTS "
-                  " WHERE chat_id=:chat_id; ");
-
-    query.bindValue(":chat_id", group_id);
-
-    if (!query.exec()) {
-        std::cerr << query.lastError().text().toStdString() << '\n';
-        throw std::runtime_error("get_chat_participants failed due to query.exec");
-    }
-
-    std::vector<std::string> participants;
-    while (query.next()) {
-        participants.push_back(get_status_info(query.value("participant_id").toULongLong()).username_);
-    }
-
-    return participants;
+    return get_channel_participants(group_id);
 }
 
 StatusInfo LinkDovePSQLDataBase::get_status_info(const std::string &username) {
@@ -1834,10 +1629,12 @@ StatusInfo LinkDovePSQLDataBase::get_status_info(const std::string &username) {
 
 StatusInfo LinkDovePSQLDataBase::get_status_info(unsigned long long id) {
     QSqlQuery query(data_base_);
-    query.prepare("SELECT * FROM USERS "
-                  "WHERE "
-                  "ID = :id; ");
-
+    query.prepare("SELECT Cs.username, Cs.email, P.Status, P.avatar, P.birthday, Cr.name FROM Consumer Cs "
+                  "INNER JOIN Profile P "
+                  "ON P.consumer=Cs.id "
+                  "INNER JOIN Country Cr "
+                  "ON P.country = Cr.id "
+                  "WHERE Cs.id=:id;");
     query.bindValue(":id", id);
 
     if (!query.exec()) {
@@ -1854,8 +1651,8 @@ StatusInfo LinkDovePSQLDataBase::get_status_info(unsigned long long id) {
 namespace link_dove_database_details__ {
     ChannelInfo retrieve_channel_info(const QSqlQuery& query) {
         ChannelInfo channel_info;
-        channel_info.id_        = query.value("ID").toULongLong();
-        channel_info.owner_id_  = query.value("owner_id").toULongLong();
+        channel_info.id_        = query.value("id").toULongLong();
+        channel_info.owner_id_  = query.value("owner").toULongLong();
         channel_info.name_      = query.value("name").toString().toStdString();
         channel_info.is_private_ = query.value("is_private").toBool();
 
@@ -1864,8 +1661,8 @@ namespace link_dove_database_details__ {
 
     ChatInfo retrieve_chat_info(const QSqlQuery &query) {
         ChatInfo chat_info;
-        chat_info.id_        = query.value("ID").toULongLong();
-        chat_info.owner_id_  = query.value("owner_id").toULongLong();
+        chat_info.id_        = query.value("id").toULongLong();
+        chat_info.owner_id_  = query.value("owner").toULongLong();
         chat_info.name_      = query.value("name").toString().toStdString();
         chat_info.is_private_ = query.value("is_private").toBool();
 
@@ -1907,9 +1704,9 @@ namespace link_dove_database_details__ {
         Notification notification;
 
         do {
-            notification.id_ = query.value("ID").toInt();
-            notification.receiver_id_ = query.value("receiver_id").toInt();
-            notification.text_ = query.value("text").toString().toStdString();
+            notification.id_ = query.value("id").toInt();
+            notification.receiver_id_ = query.value("receiver").toInt();
+            notification.text_ = query.value("description").toString().toStdString();
 
             notifications.push_back(notification);
             --count;
@@ -1926,56 +1723,27 @@ namespace link_dove_database_details__ {
 
         std::vector<std::shared_ptr<IMessage>> messages;
         std::string msg_type;
-        unsigned long long sender_id = query.value("sender_id").toULongLong(),
-                           receiver_id = query.value("receiver_id").toULongLong();
-
+        unsigned long long sender_id = query.value("sender").toULongLong(),
+                           receiver_id = query.value("receiver").toULongLong();
 
         do {
             std::shared_ptr<IndividualMessage> message_ptr = std::make_shared<IndividualMessage>();
-            message_ptr->set_id(query.value("ID").toULongLong());
-            message_ptr->set_send_datetime(query.value("send_datetime").toDateTime());
+            message_ptr->set_id(query.value("id").toULongLong());
+            message_ptr->set_send_datetime(query.value("time").toDateTime());
             message_ptr->set_msg_edges(sender_id, receiver_id);
 
             msg_type = query.value("content_type").toString().toStdString();
             if (msg_type == "text") {
-                content_query.prepare("SELECT * FROM IND_TEXT_MESSAGE_CONTENTS "
-                                      "WHERE msg_id=:msg_id; ");
-
-                content_query.bindValue(":msg_id", message_ptr->get_id());
-
-                if (!content_query.exec() || !content_query.next()) {
-                    std::cerr << content_query.lastError().text().toStdString() << '\n';
-                    continue;
-                }
-
                 std::shared_ptr<TextMessageContent> text_msg_content_ptr = std::make_shared<TextMessageContent>();
-                text_msg_content_ptr->set_text(content_query.value("text_data").toString().toStdString());
+                text_msg_content_ptr->set_text(content_query.value("info").toString().toStdString());
                 message_ptr->set_msg_content(text_msg_content_ptr);
             } else if (msg_type == "audio") {
-                content_query.prepare("SELECT * FROM IND_AUDIO_MESSAGE_CONTENTS "
-                                      "WHERE msg_id=:msg_id; ");
-                content_query.bindValue(":msg_id", message_ptr->get_id());
-
-                if (!content_query.exec() || !content_query.next()) {
-                    std::cerr << content_query.lastError().text().toStdString() << '\n';
-                    continue;
-                }
-
                 std::shared_ptr<AudioMessageContent> text_msg_content_ptr = std::make_shared<AudioMessageContent>();
-                text_msg_content_ptr->set_audio_path(content_query.value("audio_path").toString().toStdString());
+                text_msg_content_ptr->set_audio_path(content_query.value("info").toString().toStdString());
                 message_ptr->set_msg_content(text_msg_content_ptr);
             } else if (msg_type == "image") {
-                content_query.prepare("SELECT * FROM IND_IMAGE_MESSAGE_CONTENTS "
-                                      "WHERE msg_id=:msg_id; ");
-                content_query.bindValue(":msg_id", message_ptr->get_id());
-
-                if (!content_query.exec() || !content_query.next()) {
-                    std::cerr << content_query.lastError().text().toStdString() << '\n';
-                    continue;
-                }
-
                 std::shared_ptr<ImageMessageContent> text_msg_content_ptr = std::make_shared<ImageMessageContent>();
-                text_msg_content_ptr->set_image_path(content_query.value("image_path").toString().toStdString());
+                text_msg_content_ptr->set_image_path(content_query.value("info").toString().toStdString());
                 message_ptr->set_msg_content(text_msg_content_ptr);
             }
 
@@ -1992,55 +1760,26 @@ namespace link_dove_database_details__ {
 
         std::vector<std::shared_ptr<IMessage>> messages;
         std::string msg_type;
-        unsigned long long channel_id = query.value("channel_id").toULongLong();
-
+        unsigned long long channel_id = query.value("id").toULongLong();
 
         do {
             std::shared_ptr<ChannelMessage> message_ptr = std::make_shared<ChannelMessage>();
-            message_ptr->set_id(query.value("ID").toULongLong());
-            message_ptr->set_send_datetime(query.value("send_datetime").toDateTime());
+            message_ptr->set_id(query.value("id").toULongLong());
+            message_ptr->set_send_datetime(query.value("time").toDateTime());
             message_ptr->set_channel_id(channel_id);
 
             msg_type = query.value("content_type").toString().toStdString();
             if (msg_type == "text") {
-                content_query.prepare("SELECT * FROM CHANNEL_TEXT_MESSAGE_CONTENTS "
-                                      "WHERE msg_id=:msg_id; ");
-
-                content_query.bindValue(":msg_id", message_ptr->get_id());
-
-                if (!content_query.exec() || !content_query.next()) {
-                    std::cerr << content_query.lastError().text().toStdString() << '\n';
-                    continue;
-                }
-
                 std::shared_ptr<TextMessageContent> text_msg_content_ptr = std::make_shared<TextMessageContent>();
-                text_msg_content_ptr->set_text(content_query.value("text_data").toString().toStdString());
+                text_msg_content_ptr->set_text(content_query.value("info").toString().toStdString());
                 message_ptr->set_msg_content(text_msg_content_ptr);
             } else if (msg_type == "audio") {
-                content_query.prepare("SELECT * FROM CHANNEL_AUDIO_MESSAGE_CONTENTS "
-                                      "WHERE msg_id=:msg_id; ");
-                content_query.bindValue(":msg_id", message_ptr->get_id());
-
-                if (!content_query.exec() || !content_query.next()) {
-                    std::cerr << content_query.lastError().text().toStdString() << '\n';
-                    continue;
-                }
-
                 std::shared_ptr<AudioMessageContent> text_msg_content_ptr = std::make_shared<AudioMessageContent>();
-                text_msg_content_ptr->set_audio_path(content_query.value("audio_path").toString().toStdString());
+                text_msg_content_ptr->set_audio_path(content_query.value("info").toString().toStdString());
                 message_ptr->set_msg_content(text_msg_content_ptr);
             } else if (msg_type == "image") {
-                content_query.prepare("SELECT * FROM CHANNEL_IMAGE_MESSAGE_CONTENTS "
-                                      "WHERE msg_id=:msg_id; ");
-                content_query.bindValue(":msg_id", message_ptr->get_id());
-
-                if (!content_query.exec() || !content_query.next()) {
-                    std::cerr << content_query.lastError().text().toStdString() << '\n';
-                    continue;
-                }
-
                 std::shared_ptr<ImageMessageContent> text_msg_content_ptr = std::make_shared<ImageMessageContent>();
-                text_msg_content_ptr->set_image_path(content_query.value("image_path").toString().toStdString());
+                text_msg_content_ptr->set_image_path(content_query.value("info").toString().toStdString());
                 message_ptr->set_msg_content(text_msg_content_ptr);
             }
 

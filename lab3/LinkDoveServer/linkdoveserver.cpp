@@ -237,6 +237,7 @@ void LinkDoveServer::handle_register_request(ConnectionIterator iterator) {
         user_info.status_info_.serialize(answer);
         answer << END_OF_REQUEST;
     } else {
+        std::cerr << "handle_register_request_failed\n";
         answer << REGISTER_FAILED << "\n" << END_OF_REQUEST;
     }
 
