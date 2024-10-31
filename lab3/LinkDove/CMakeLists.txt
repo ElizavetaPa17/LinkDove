@@ -6,15 +6,15 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-list(APPEND CMAKE_MODULE_PATH "/home/elizaveta/Documents/qtmultimedia/build/lib/x86_64-linux-gnu/cmake")
+#list(APPEND CMAKE_MODULE_PATH "/home/elizaveta/Documents/qtmultimedia/build/lib/x86_64-linux-gnu/cmake")
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt6 REQUIRED COMPONENTS Sql)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
-find_package(Qt6 REQUIRED COMPONENTS Multimedia)
+#find_package(Qt6 REQUIRED COMPONENTS Multimedia)
 
 set(PROJECT_SOURCES
         main.cpp
@@ -102,7 +102,7 @@ else()
     endif()
 endif()
 
-target_link_libraries(LinkDove PRIVATE Qt6::Sql Qt6::Multimedia)
+target_link_libraries(LinkDove PRIVATE Qt6::Sql)
 target_link_libraries(LinkDove PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
                                common_library)
 

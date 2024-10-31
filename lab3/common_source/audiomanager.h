@@ -1,11 +1,11 @@
 #ifndef AUDIOMANAGER_H
 #define AUDIOMANAGER_H
 
-#include <QMediaRecorder>
+/*#include <QMediaRecorder>
 #include <QAudioInput>
 #include <QAudioOutput>
 #include <QMediaCaptureSession>
-#include <QMediaPlayer>
+#include <QMediaPlayer>*/
 #include <QObject>
 
 class AudioManager : public QObject
@@ -56,11 +56,11 @@ signals:
     void playing_stopped();
 
 private:
-    QMediaCaptureSession session_;
+    /*QMediaCaptureSession session_;
     QAudioInput audio_input_;
     QAudioOutput audio_output_;
     QMediaRecorder recorder_;
-    QMediaPlayer player_;
+    QMediaPlayer player_;*/
 
     /**
      * <p> Настраивает работу с аудио. </p>

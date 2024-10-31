@@ -45,6 +45,7 @@ void Client::async_register(const UserInfo& user_info) {
 void Client::async_send_complaint(const std::string& text) {
     Complaint complaint;
     complaint.sender_id_ = status_info_.id_;
+    std::cerr << "sender_id: " << complaint.sender_id_ << '\n';
     complaint.text_ = text;
 
     connection_.out_stream_ << SEND_COMPLAINT_REQUEST << '\n';
@@ -72,7 +73,9 @@ void Client::async_get_complaints() {
 void Client::async_update_user(StatusInfo& status_info) {
     // Идентификатор пользователя известен только классу Client
     // Поэтому status_info не является константным, т.к. нам необходимо установить поле идентификатора.
-    updated_status_info_ = status_info;
+    updated_status_info_.username_ = status_info.username_;
+    updated_status_info_.email_ = status_info.email_;
+    updated_status_info_.text_status_ = status_info.text_status_;
     updated_status_info_.id_ = status_info_.id_;
 
     connection_.out_stream_ << UPDATE_USER_REQUEST << '\n';

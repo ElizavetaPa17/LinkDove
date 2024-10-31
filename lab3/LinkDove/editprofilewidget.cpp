@@ -53,7 +53,6 @@ void EditProfileWidget::slotEditFinished() {
 
     status_info_.username_    = ui->usernameEdit->text().toStdString();
     status_info_.email_       = ui->emailEdit->text().toStdString();
-    status_info_.birthday_    = QDate::fromString(ui->birthdayLabel->text());
     status_info_.text_status_ = ui->textEdit->toPlainText().toStdString();
 
     ClientSingleton::get_client()->async_update_user(status_info_);

@@ -210,6 +210,8 @@ void LinkDoveServer::handle_login_request(ConnectionIterator iterator) {
 
             iterator->out_stream_ << LOGIN_SUCCESS << "\n";
             status_info.serialize(iterator->out_stream_);
+
+            std::cerr << "user login: " << status_info.id_;
         } catch (std::runtime_error &error) {
             std::cerr << "Failed to login user: " << error.what() << '\n';
             iterator->out_stream_ << LOGIN_FAILED << "\n";

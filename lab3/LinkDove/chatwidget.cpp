@@ -4,9 +4,9 @@
 #include <iostream>
 #include <QSpacerItem>
 #include <QFileDialog>
-#include <QtMultimedia>
+/*#include <QtMultimedia>
 #include <QAudioFormat>
-#include <QAudio>
+#include <QAudio>*/
 
 #include "infodialog.h"
 #include "agreedialog.h"
