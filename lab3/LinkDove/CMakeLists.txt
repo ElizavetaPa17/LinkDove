@@ -38,7 +38,7 @@ add_custom_target(ind-images-directory ALL
     COMMAND ${CMAKE_COMMAND} -E make_directory ./media/ind_images)
 # Создаем директорию, в которой будут хранится картинки из групп
 add_custom_target(group-images-directory ALL
-    COMMAND ${CMAKE_COMMAND} -E make_directory ./media/group_images)
+    COMMAND ${CMAKE_COMMAND} -E make_directory ./media/chat_images)
 # Создаем директорию, в которой будут хранится картинки из каналов
 add_custom_target(channel-images-directory ALL
     COMMAND ${CMAKE_COMMAND} -E make_directory ./media/channel_images)

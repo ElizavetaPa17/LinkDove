@@ -717,7 +717,7 @@ void LinkDoveServer::handle_add_private_channel_participant_request(ConnectionIt
         StatusInfo user_info;
         user_info = data_base_.get_status_info(username);
 
-        if (data_base_.remove_request_channel(user_info.id_, channel_id) && data_base_.add_participant_to_channel(user_info.id_, channel_id)) {
+        if (data_base_.add_participant_to_channel(user_info.id_, channel_id) && data_base_.remove_request_channel(user_info.id_, channel_id)) {
             answer << ADD_PARTICIPANT_TO_PRIVATE_CHANNEL_SUCCESS << "\n" << END_OF_REQUEST;
         } else {
             answer << ADD_PARTICIPANT_TO_PRIVATE_CHANNEL_FAILED << "\n" << END_OF_REQUEST;
@@ -785,7 +785,7 @@ void LinkDoveServer::handle_add_private_chat_participant_request(ConnectionItera
         StatusInfo user_info;
         user_info = data_base_.get_status_info(username);
 
-        if (data_base_.remove_request_chat(user_info.id_, chat_id) && data_base_.add_participant_to_chat(user_info.id_, chat_id)) {
+        if (data_base_.add_participant_to_chat(user_info.id_, chat_id) && data_base_.remove_request_chat(user_info.id_, chat_id)) {
             answer << ADD_PARTICIPANT_TO_PRIVATE_CHAT_SUCCESS << "\n" << END_OF_REQUEST;
         } else {
             answer << ADD_PARTICIPANT_TO_PRIVATE_CHAT_FAILED << "\n" << END_OF_REQUEST;
