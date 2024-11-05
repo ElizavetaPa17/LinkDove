@@ -465,6 +465,14 @@ void Client::async_delete_msg(const IMessage &msg) {
     write_to_server();
 }
 
+void Client::async_delete_account() {
+    connection_.out_stream_ << DEL_ACCOUNT_REQUEST << '\n';
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, status_info_.id_);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    write_to_server();
+}
+
 StatusInfo Client::get_status_info() {
     return status_info_;
 }
@@ -670,6 +678,9 @@ void Client::setup_response_tree() {
 
     response_tree_[REMOVE_REQUEST_CHAT_SUCCESS] = [this] () { emit remove_request_chat_result(REMOVE_REQUEST_CHAT_SUCCESS_ANSWER); };
     response_tree_[REMOVE_REQUEST_CHAT_FAILED]  = [this] () { emit remove_request_chat_result(REMOVE_REQUEST_CHAT_FAILED_ANSWER); };
+
+    response_tree_[DEL_ACCOUNT_SUCCESS] = [this] () { emit delete_account_result(DEL_ACCOUNT_SUCCESS_ANSWER); };
+    response_tree_[DEL_ACCOUNT_FAILED]  = [this] () { emit delete_account_result(DEL_ACCOUNT_FAILED_ANSWER); };
 }
 
 void Client::async_read() {

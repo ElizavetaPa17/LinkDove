@@ -187,6 +187,9 @@ enum ResponseTypes {
 
     DEL_CHAT_MSG_SUCCESS_ANSWER,
     DEL_CHAT_MSG_FAILED_ANSWER,
+
+    DEL_ACCOUNT_SUCCESS_ANSWER,
+    DEL_ACCOUNT_FAILED_ANSWER
 };
 
 enum MessageType {
@@ -634,3 +637,10 @@ extern const std::string DEL_CHANNEL_MSG_FAILED;
 extern const std::string DEL_CHAT_MSG_SUCCESS;
 // Ответ сервера на неудачное удаление сообщения в чате (группе)
 extern const std::string DEL_CHAT_MSG_FAILED;
+
+// Запрос на удаление аккаунта
+extern const std::string DEL_ACCOUNT_REQUEST;
+// Ответ сервера на успешное удаление аккаунта
+extern const std::string DEL_ACCOUNT_SUCCESS;
+// Ответ сервера на неудачное удаление аккаунта
+extern const std::string DEL_ACCOUNT_FAILED;

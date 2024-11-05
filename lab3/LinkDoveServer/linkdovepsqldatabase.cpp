@@ -133,7 +133,7 @@ bool LinkDovePSQLDataBase::setup_tables() {
                        "name varchar(64) NOT NULL UNIQUE,"
                        "type broadchat_type,"
                        "is_private bool DEFAULT(false),"
-                       "FOREIGN KEY (owner) REFERENCES Consumer(id)); ");
+                       "FOREIGN KEY (owner) REFERENCES Consumer(id) ON DELETE CASCADE); ");
 
     if (!is_ok) {
         std::cerr << "Failed to setup Broadchat table: " << query.lastError().text().toStdString() << '\n';
@@ -1467,6 +1467,21 @@ bool LinkDovePSQLDataBase::delete_chat(unsigned long long chat_id) {
 
 bool LinkDovePSQLDataBase::quit_chat(unsigned long long user_id, unsigned long long chat_id) {
     return quit_channel(user_id, chat_id);
+}
+
+bool LinkDovePSQLDataBase::delete_account(unsigned long long user_id) {
+    QSqlQuery query(data_base_);
+    query.prepare(" DELETE FROM Consumer "
+                  " WHERE id=:id; ");
+
+    query.bindValue(":id", user_id);
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString() << '\n';
+        return false;
+    } else {
+        // если удаление было успешным, то row affected > 0, иначе row affected == 0 (false).
+        return query.numRowsAffected();
+    }
 }
 
 bool LinkDovePSQLDataBase::add_chat_message(const IMessage& msg) {

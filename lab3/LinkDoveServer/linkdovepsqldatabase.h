@@ -416,6 +416,14 @@ public:
     bool quit_chat(unsigned long long user_id, unsigned long long chat_id) override;
 
     /**
+     * <p> Удаляет аккаунт пользователя. </p>
+     * @brief delete_account
+     * @param user_id - Идентификатор удаляемого пользователя.
+     * @return - В случае успеха возвращает true, иначе - false.
+     */
+    bool delete_account(unsigned long long user_id);
+
+    /**
      * <p> Добавляет сообщение в чат (группу). </p>
      * @brief add_chat_message
      * @param msg - Добавляемое сообщение.

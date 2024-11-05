@@ -30,6 +30,7 @@ void SettingWidget::setPrivilegedMode(bool flag) {
         ui->complaintButton->setText("Жалоба");
         ui->notifyButton->show();
         ui->banButton->hide();
+        ui->deleteAccountButton->show();
 
         disconnect(ui->complaintButton, &QPushButton::clicked, this, nullptr);
         connect(ui->complaintButton, &QPushButton::clicked,    this, &SettingWidget::slotDisplayComplaintDialog);
@@ -39,6 +40,7 @@ void SettingWidget::setPrivilegedMode(bool flag) {
         ui->complaintButton->setText("Жалобы");
         ui->notifyButton->hide();
         ui->banButton->show();
+        ui->deleteAccountButton->hide();
 
         disconnect(ui->complaintButton, &QPushButton::clicked, this, nullptr);
         connect(ui->complaintButton, &QPushButton::clicked, this, [] () { ClientSingleton::get_client()->async_get_complaints(); });
@@ -157,16 +159,27 @@ void SettingWidget::slotGetBannedInterlocutorsResult(int result, std::vector<std
     }
 }
 
+void SettingWidget::slotDeleteAccount(int result) {
+    if (result == DEL_ACCOUNT_SUCCESS_ANSWER) {
+        slotQuitAccount();
+    } else {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Что-то пошло не так при попытке удалить аккаунт.");
+        dialog_ptr->exec();
+    }
+}
+
 void SettingWidget::setupConnections() {
     connect(ui->quitButton,       &QPushButton::clicked, this, &SettingWidget::slotQuitAccount);
     connect(ui->aboutButton,      &QPushButton::clicked, this, &SettingWidget::slotDisplayAboutDialog);
     connect(ui->banButton,        &QPushButton::clicked, this, &SettingWidget::slotDisplayBanDialog);
     connect(ui->notifyButton,     &QPushButton::clicked, this, [this] () { ClientSingleton::get_client()->async_get_notifications(); });
     connect(ui->confidenceButton, &QPushButton::clicked, this, [this] () { ClientSingleton::get_client()->async_get_banned_interlocutors(); });
+    connect(ui->deleteAccountButton, &QPushButton::clicked, this, [this] () { ClientSingleton::get_client()->async_delete_account(); });
 
     connect(ClientSingleton::get_client(), &Client::get_complaints_result,    this, &SettingWidget::slotDisplayComplaintList);
     connect(ClientSingleton::get_client(), &Client::send_complaint_result,    this, &SettingWidget::slotComplaintResult);
     connect(ClientSingleton::get_client(), &Client::get_notifications_result, this, &SettingWidget::slotGetNotificationsResult);
     connect(ClientSingleton::get_client(), &Client::ban_user_result,          this, &SettingWidget::slotHandleBanResult);
     connect(ClientSingleton::get_client(), &Client::get_banned_users,         this, &SettingWidget::slotGetBannedInterlocutorsResult);
+    connect(ClientSingleton::get_client(), &Client::delete_account_result,    this, &SettingWidget::slotDeleteAccount);
 }

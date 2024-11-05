@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>596</width>
-    <height>529</height>
+    <width>827</width>
+    <height>664</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -52,6 +52,7 @@
         <property name="font">
          <font>
           <pointsize>17</pointsize>
+          <weight>75</weight>
           <italic>false</italic>
           <bold>true</bold>
          </font>
@@ -95,6 +96,7 @@ QPushButton:hover {
          <font>
           <family>Ubuntu</family>
           <pointsize>17</pointsize>
+          <weight>75</weight>
           <italic>false</italic>
           <bold>true</bold>
          </font>
@@ -137,6 +139,7 @@ QPushButton:hover {
         <property name="font">
          <font>
           <pointsize>17</pointsize>
+          <weight>75</weight>
           <italic>false</italic>
           <bold>true</bold>
          </font>
@@ -176,6 +179,7 @@ QPushButton:hover {
         <property name="font">
          <font>
           <pointsize>17</pointsize>
+          <weight>75</weight>
           <bold>true</bold>
          </font>
         </property>
@@ -220,6 +224,7 @@ QPushButton:hover {
         <property name="font">
          <font>
           <pointsize>17</pointsize>
+          <weight>75</weight>
           <italic>false</italic>
           <bold>true</bold>
          </font>
@@ -246,17 +251,49 @@ QPushButton:hover {
        </widget>
       </item>
       <item>
-       <spacer name="verticalSpacer_3">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
+       <widget class="QPushButton" name="deleteAccountButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
-        <property name="sizeHint" stdset="0">
+        <property name="minimumSize">
          <size>
-          <width>20</width>
-          <height>40</height>
+          <width>0</width>
+          <height>70</height>
          </size>
         </property>
-       </spacer>
+        <property name="font">
+         <font>
+          <pointsize>17</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>ClosedHandCursor</cursorShape>
+        </property>
+        <property name="mouseTracking">
+         <bool>true</bool>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton {
+	background-color: rgb(245, 245, 245);
+	color: rgb(60, 45, 50);
+	border: 5px solid rgb(60, 45, 50);
+	border-radius: 20;
+}
+
+QPushButton:hover {
+	background-color: rgb(60, 45, 50);
+	color: rgb(245, 245, 245);
+}</string>
+        </property>
+        <property name="text">
+         <string>Удалить аккаунт</string>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QPushButton" name="quitButton">
@@ -275,6 +312,7 @@ QPushButton:hover {
         <property name="font">
          <font>
           <pointsize>17</pointsize>
+          <weight>75</weight>
           <italic>false</italic>
           <bold>true</bold>
          </font>
@@ -299,6 +337,19 @@ QPushButton:hover {
          <string>Выйти из аккаунта</string>
         </property>
        </widget>
+      </item>
+      <item>
+       <spacer name="verticalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </widget>

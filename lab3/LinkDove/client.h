@@ -389,6 +389,12 @@ public:
     void async_delete_msg(const IMessage &msg);
 
     /**
+     * <p> Отправляет запрос на удаление аккаунта. </p>
+     * @brief async_delete_account
+     */
+    void async_delete_account();
+
+    /**
      * <p> Возвращает информацию о пользователе. </p>
      * @brief get_status_info
      * @return - Структура, содержащая информацию о пользователе.
@@ -753,6 +759,13 @@ signals:
      * @param result
      */
     void remove_request_chat_result(int result);
+
+    /**
+     * <p> Генерирует сигнал после получения результата удаления аккаунта. </p>
+     * @brief delete_account_result
+     * @param result
+     */
+    void delete_account_result(int result);
 
 private:
     std::shared_ptr<asio::io_context> io_context_ptr_;

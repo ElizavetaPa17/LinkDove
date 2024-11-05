@@ -459,6 +459,13 @@ private:
      */
     void handle_delete_msg(ConnectionIterator iterator);
 
+    /**
+     * <p> Обрабатывает запрос на удаление аккаунта. </p>
+     * @brief handle_delete_account
+     * @param iterator -  Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_delete_account(ConnectionIterator iterator);
+
     /** <p> Запускает в отдельном потоке контекст для обработки асинхронных функций. </p>
      * @brief run_context
      */

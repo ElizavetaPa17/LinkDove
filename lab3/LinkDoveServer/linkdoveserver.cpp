@@ -90,6 +90,7 @@ void LinkDoveServer::setup_connection_tree() {
     handle_tree_[GET_NOTIFICATIONS_REQUEST]          = &LinkDoveServer::handle_get_notifications;
     handle_tree_[DEL_NOTIFICATION_REQUEST]           = &LinkDoveServer::handle_del_notification;
     handle_tree_[DEL_MSG_REQUEST]                    = &LinkDoveServer::handle_delete_msg;
+    handle_tree_[DEL_ACCOUNT_REQUEST]                = &LinkDoveServer::handle_delete_account;
 }
 
 void LinkDoveServer::start_async_accept() {
@@ -1268,6 +1269,21 @@ void LinkDoveServer::handle_delete_msg(ConnectionIterator iterator) {
 
             break;
         }
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_delete_account(ConnectionIterator iterator) {
+    unsigned long long id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+    std::stringstream answer;
+    if (data_base_.delete_account(id)) {
+        answer << DEL_ACCOUNT_SUCCESS << "\n" << END_OF_REQUEST;
+    } else {
+        answer << DEL_ACCOUNT_FAILED << "\n" << END_OF_REQUEST;
     }
 
     iterator->out_stream_ << answer.str();

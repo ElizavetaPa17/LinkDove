@@ -108,6 +108,13 @@ private slots:
      */
     void slotGetBannedInterlocutorsResult(int result, std::vector<std::string> interlocutors);
 
+    /**
+     * <p> Слот, обрабатывающий результат удаления аккаунта. </p>
+     * @brief slotDeleteAccount
+     * @param result
+     */
+    void slotDeleteAccount(int result);
+
 private:
     Ui::SettingWidget *ui;
     ComplaintsListDialog complaint_dialog_;
