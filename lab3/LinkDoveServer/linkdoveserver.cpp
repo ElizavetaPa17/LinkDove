@@ -91,6 +91,7 @@ void LinkDoveServer::setup_connection_tree() {
     handle_tree_[DEL_NOTIFICATION_REQUEST]           = &LinkDoveServer::handle_del_notification;
     handle_tree_[DEL_MSG_REQUEST]                    = &LinkDoveServer::handle_delete_msg;
     handle_tree_[DEL_ACCOUNT_REQUEST]                = &LinkDoveServer::handle_delete_account;
+    handle_tree_[GET_BROADCAST_REQUEST]              = &LinkDoveServer::handle_get_broadcast_notifications;
 }
 
 void LinkDoveServer::start_async_accept() {
@@ -1284,6 +1285,25 @@ void LinkDoveServer::handle_delete_account(ConnectionIterator iterator) {
         answer << DEL_ACCOUNT_SUCCESS << "\n" << END_OF_REQUEST;
     } else {
         answer << DEL_ACCOUNT_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_get_broadcast_notifications(ConnectionIterator iterator) {
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    try {
+        std::vector<std::string> notifications = data_base_.get_broadcast_notifications();
+
+        answer << GET_BROADCAST_SUCCESS << "\n";
+        UtilitySerializator::serialize(answer, notifications);
+        answer << END_OF_REQUEST;
+    } catch (std::runtime_error &ex) {
+        std::cerr << ex.what() << '\n';
+        answer << GET_BROADCAST_FAILED << "\n" << END_OF_REQUEST;
     }
 
     iterator->out_stream_ << answer.str();

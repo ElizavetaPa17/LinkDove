@@ -226,3 +226,11 @@ const std::string DEL_CHAT_MSG_FAILED     = "DEL_CHAT_MSG_FAILED";
 const std::string DEL_ACCOUNT_REQUEST = "DEL_ACC";
 const std::string DEL_ACCOUNT_SUCCESS = "DEL_ACC_SUCCESS";
 const std::string DEL_ACCOUNT_FAILED  = "DEL_ACC_FAILED";
+
+const std::string GET_BROADCAST_REQUEST  = "GET_BC";
+const std::string GET_BROADCAST_SUCCESS  = "GET_BC_SUCCESS";
+const std::string GET_BROADCAST_FAILED   = "GET_BC_FAILED";
+
+const std::string SEND_BROADCAST_REQUEST = "SEND_BC";;
+const std::string SEND_BROADCAST_SUCCESS = "SEND_BC_SUCCESS";;
+const std::string SEND_BROADCAST_FAILED  = "SEND_BC_FAILED";

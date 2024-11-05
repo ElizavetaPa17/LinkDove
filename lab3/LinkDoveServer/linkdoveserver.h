@@ -466,6 +466,13 @@ private:
      */
     void handle_delete_account(ConnectionIterator iterator);
 
+    /**
+     * <p> Обрабатывает запрос на получение широковещательных уведомлений. </p>
+     * @brief handle_get_broadcast_notifications
+     * @param iterator -  Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_get_broadcast_notifications(ConnectionIterator iterator);
+
     /** <p> Запускает в отдельном потоке контекст для обработки асинхронных функций. </p>
      * @brief run_context
      */

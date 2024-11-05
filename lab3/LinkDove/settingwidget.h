@@ -115,6 +115,8 @@ private slots:
      */
     void slotDeleteAccount(int result);
 
+    void slotGetBroadcastResult(int result, std::vector<std::string> notifications);
+
 private:
     Ui::SettingWidget *ui;
     ComplaintsListDialog complaint_dialog_;

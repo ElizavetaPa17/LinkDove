@@ -189,7 +189,13 @@ enum ResponseTypes {
     DEL_CHAT_MSG_FAILED_ANSWER,
 
     DEL_ACCOUNT_SUCCESS_ANSWER,
-    DEL_ACCOUNT_FAILED_ANSWER
+    DEL_ACCOUNT_FAILED_ANSWER,
+
+    GET_BROADCAST_SUCCESS_ANSWER,
+    GET_BROADCAST_FAILED_ANSWER,
+
+    SEND_BROADCAST_SUCCESS_ANSWER,
+    SEND_BROADCAST_FAILED_ANSWER
 };
 
 enum MessageType {
@@ -644,3 +650,17 @@ extern const std::string DEL_ACCOUNT_REQUEST;
 extern const std::string DEL_ACCOUNT_SUCCESS;
 // Ответ сервера на неудачное удаление аккаунта
 extern const std::string DEL_ACCOUNT_FAILED;
+
+// Запрос на получение широковещательного сообщения
+extern const std::string GET_BROADCAST_REQUEST;
+// Ответ сервера на успешное получение широковещательного сообщения
+extern const std::string GET_BROADCAST_SUCCESS;
+// Ответ сервера на неудачное получение широковещательного сообщения
+extern const std::string GET_BROADCAST_FAILED;
+
+// Запрос на отправку широковещательного сообщения
+extern const std::string SEND_BROADCAST_REQUEST;
+// Ответ сервера на успешную отправку широковещательного сообщения
+extern const std::string SEND_BROADCAST_SUCCESS;
+// Ответ сервера на неудачную отправку широковещательного сообщения
+extern const std::string SEND_BROADCAST_FAILED;

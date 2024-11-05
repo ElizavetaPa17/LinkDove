@@ -18,6 +18,7 @@
 #include "constants.h"
 #include "notification.h"
 #include "imessage.h"
+#include "BroadcastNotification.h"
 
 namespace asio = boost::asio;
 using tcp = asio::ip::tcp;
@@ -395,6 +396,12 @@ public:
     void async_delete_account();
 
     /**
+     * <p> Отправляет запрос на получение широковещательных уведомлений. </p>
+     * @brief async_get_broadcast_notifications
+     */
+    void async_get_broadcast_notifications();
+
+    /**
      * <p> Возвращает информацию о пользователе. </p>
      * @brief get_status_info
      * @return - Структура, содержащая информацию о пользователе.
@@ -735,37 +742,44 @@ signals:
     /**
      * <p> Генерирует сигнал после получения результата добавления пользователя в приватный канал. </p>
      * @brief add_private_channel_participant_result
-     * @param result
+     * @param result - Параметр, содержащий результат запроса.
      */
     void add_private_channel_participant_result(int result);
 
     /**
      * <p> Генерирует сигнал после получения результата удаления запроса вступления в приватный канал. </p>
      * @brief remove_request_channel_result
-     * @param result
+     * @param result - Параметр, содержащий результат запроса.
      */
     void remove_request_channel_result(int result);
 
     /**
      * <p> Генерирует сигнал после получения результата добавления пользователя в приватный чат. </p>
      * @brief add_private_chat_participant_result
-     * @param result
+     * @param result - Параметр, содержащий результат запроса.
      */
     void add_private_chat_participant_result(int result);
 
     /**
      * <p> Генерирует сигнал после получения результата удаления запроса вступления в приватный чат. </p>
      * @brief remove_request_chat_result
-     * @param result
+     * @param result - Параметр, содержащий результат запроса.
      */
     void remove_request_chat_result(int result);
 
     /**
      * <p> Генерирует сигнал после получения результата удаления аккаунта. </p>
      * @brief delete_account_result
-     * @param result
+     * @param result - Параметр, содержащий результат запроса.
      */
     void delete_account_result(int result);
+
+    /**
+     * <p> Генерирует сигнал после получения результата получения широковещательных сообщений. </p>
+     * @brief get_broadcast_notifications_result
+     * @param result - Параметр, содержащий результат запроса.
+     */
+    void get_broadcast_notifications_result(int result, std::vector<std::string> notifications);
 
 private:
     std::shared_ptr<asio::io_context> io_context_ptr_;

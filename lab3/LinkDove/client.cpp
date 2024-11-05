@@ -473,6 +473,13 @@ void Client::async_delete_account() {
     write_to_server();
 }
 
+void Client::async_get_broadcast_notifications() {
+    connection_.out_stream_ << GET_BROADCAST_REQUEST << '\n';
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    write_to_server();
+}
+
 StatusInfo Client::get_status_info() {
     return status_info_;
 }
@@ -667,7 +674,7 @@ void Client::setup_response_tree() {
     response_tree_[DEL_CHAT_MSG_SUCCESS] = [this] () { emit delete_msg_result(DEL_CHAT_MSG_SUCCESS_ANSWER); };
     response_tree_[DEL_CHAT_MSG_FAILED]  = [this] () { emit delete_msg_result(DEL_CHAT_MSG_FAILED_ANSWER); };
 
-    response_tree_[ADD_PARTICIPANT_TO_PRIVATE_CHANNEL_SUCCESS] = [this] () { std::cerr << "emit\n"; emit add_private_channel_participant_result(ADD_PARTICIPANT_TO_PRIVATE_CHANNEL_SUCCESS_ANSWER); };
+    response_tree_[ADD_PARTICIPANT_TO_PRIVATE_CHANNEL_SUCCESS] = [this] () { emit add_private_channel_participant_result(ADD_PARTICIPANT_TO_PRIVATE_CHANNEL_SUCCESS_ANSWER); };
     response_tree_[ADD_PARTICIPANT_TO_PRIVATE_CHANNEL_FAILED]  = [this] () { emit add_private_channel_participant_result(ADD_PARTICIPANT_TO_PRIVATE_CHANNEL_FAILED_ANSWER); };
 
     response_tree_[REMOVE_REQUEST_CHANNEL_SUCCESS] = [this] () { emit remove_request_channel_result(REMOVE_REQUEST_CHANNEL_SUCCESS_ANSWER); };
@@ -681,6 +688,10 @@ void Client::setup_response_tree() {
 
     response_tree_[DEL_ACCOUNT_SUCCESS] = [this] () { emit delete_account_result(DEL_ACCOUNT_SUCCESS_ANSWER); };
     response_tree_[DEL_ACCOUNT_FAILED]  = [this] () { emit delete_account_result(DEL_ACCOUNT_FAILED_ANSWER); };
+
+    response_tree_[GET_BROADCAST_SUCCESS] = [this] () { std::cerr << "slefols\n"; std::vector<std::string> notifications = UtilitySerializator::deserialize_vec_string(connection_.in_stream_).second;
+                                                        emit get_broadcast_notifications_result(GET_BROADCAST_SUCCESS_ANSWER, notifications); };
+    response_tree_[GET_BROADCAST_FAILED]  = [this] () { emit get_broadcast_notifications_result(GET_BROADCAST_FAILED_ANSWER, std::vector<std::string>()); };
 }
 
 void Client::async_read() {

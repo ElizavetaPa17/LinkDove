@@ -440,6 +440,13 @@ public:
     bool delete_chat_message(const IMessage& msg) override;
 
     /**
+     * <p> Извлекает список широковещательных сообщений</p>
+     * @brief get_broadcast_notifications
+     * @return
+     */
+    std::vector<std::string> get_broadcast_notifications();
+
+    /**
      * <p> Извлекает сообщения чата из БД. </p>
      * @brief get_chat_messages
      * @param chat_id - Идентификатор чата, из которого извлекаются сообщения.

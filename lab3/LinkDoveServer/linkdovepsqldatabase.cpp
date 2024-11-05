@@ -68,6 +68,9 @@ bool LinkDovePSQLDataBase::setup_tables() {
     /*query.exec("CALL add_user('admin', 'admin', 'bz718nqf45', '2000-01-01', 1)");
     std::cerr << query.lastError().text().toStdString() << '\n';*/
 
+    /*query.exec("DELETE FROM BroadcastNotification");
+    query.exec("INSERT INTO BroadcastNotification (description) VALUES ('Скоро обновление'), ('Осторожно, мошенники!'); ");*/
+
     bool is_ok = query.exec("DO $$ BEGIN "
                             "CREATE TYPE action_type AS ENUM('register', 'login', 'logout', 'edit profile', 'banned', 'unbanned');"
                             "EXCEPTION "
@@ -1511,7 +1514,6 @@ bool LinkDovePSQLDataBase::add_chat_message(const IMessage& msg) {
     }
 
     str_query = str_query.arg(msg.get_msg_content()->get_raw_data());
-    std::cerr << str_query.toStdString() << '\n';
 
     if (!query.exec(str_query)) {
         std::cerr << query.lastError().text().toStdString() << '\n';
@@ -1523,6 +1525,23 @@ bool LinkDovePSQLDataBase::add_chat_message(const IMessage& msg) {
 
 bool LinkDovePSQLDataBase::delete_chat_message(const IMessage& msg) {
     return delete_chnnl_message(msg);
+}
+
+std::vector<std::string> LinkDovePSQLDataBase::get_broadcast_notifications() {
+    QSqlQuery query(data_base_);
+    query.prepare("SELECT description FROM BroadcastNotification ORDER BY time");
+
+    if (!query.exec()) {
+        std::cerr << query.lastError().text().toStdString() << '\n';
+        throw std::runtime_error("get_chats failed due to query.exec");
+    } else {
+        std::vector<std::string> descriptions;
+        while (query.next()) {
+            descriptions.push_back(query.value("description").toString().toStdString());
+        }
+
+        return descriptions;
+    }
 }
 
 // TODO FIX
