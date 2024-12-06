@@ -480,6 +480,22 @@ void Client::async_get_broadcast_notifications() {
     write_to_server();
 }
 
+void Client::async_get_actions(std::string user_name) {
+    connection_.out_stream_ << GET_ACTIONS_REQUEST << '\n';
+    UtilitySerializator::serialize(connection_.out_stream_, user_name);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    write_to_server();
+}
+
+void Client::async_quit_account() {
+    connection_.out_stream_ << QUIT_ACC_REQUEST << '\n';
+    UtilitySerializator::serialize_fundamental<unsigned long long>(connection_.out_stream_, status_info_.id_);
+    connection_.out_stream_ << END_OF_REQUEST;
+
+    write_to_server();
+}
+
 StatusInfo Client::get_status_info() {
     return status_info_;
 }
@@ -689,9 +705,14 @@ void Client::setup_response_tree() {
     response_tree_[DEL_ACCOUNT_SUCCESS] = [this] () { emit delete_account_result(DEL_ACCOUNT_SUCCESS_ANSWER); };
     response_tree_[DEL_ACCOUNT_FAILED]  = [this] () { emit delete_account_result(DEL_ACCOUNT_FAILED_ANSWER); };
 
-    response_tree_[GET_BROADCAST_SUCCESS] = [this] () { std::cerr << "slefols\n"; std::vector<std::string> notifications = UtilitySerializator::deserialize_vec_string(connection_.in_stream_).second;
+    response_tree_[GET_BROADCAST_SUCCESS] = [this] () { std::vector<std::string> notifications = UtilitySerializator::deserialize_vec_string(connection_.in_stream_).second;
                                                         emit get_broadcast_notifications_result(GET_BROADCAST_SUCCESS_ANSWER, notifications); };
     response_tree_[GET_BROADCAST_FAILED]  = [this] () { emit get_broadcast_notifications_result(GET_BROADCAST_FAILED_ANSWER, std::vector<std::string>()); };
+
+    response_tree_[GET_ACTIONS_SUCCESS] = [this] () { std::vector<Action> actions = UtilitySerializator::deserialize_action_vec(connection_.in_stream_).second;
+                                                      emit get_user_actions(GET_ACTIONS_SUCCESS_ANSWER, actions); };
+    response_tree_[GET_ACTIONS_FAILED]  = [this] () { emit get_user_actions(GET_ACTIONS_FAILED_ANSWER, std::vector<Action>()); };
+    response_tree_[QUIT_ACC_RESPONSE]  = [this] () { std::cerr << "quit account\n"; /* nothing to do*/ };
 }
 
 void Client::async_read() {

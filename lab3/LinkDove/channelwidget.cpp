@@ -164,7 +164,7 @@ void ChannelWidget::slotChooseImage() {
 
 void ChannelWidget::slotRecordAudio() {
     if (is_recording_) {
-        ui->microphoneButton->setIcon(QIcon(":/recources/../resources/microphone_icon.png"));
+        //ui->microphoneButton->setIcon(QIcon(":/recources/../resources/microphone_icon.png"));
         is_recording_ = false;
 
         AudioManagerSingleton::get_manager()->stop_recording();
@@ -175,7 +175,7 @@ void ChannelWidget::slotRecordAudio() {
         send_msg_type_ = AUDIO_MSG_TYPE;
 
     } else {
-        ui->microphoneButton->setIcon(QIcon(":/recources/../resources/record_icon.png"));
+        //ui->microphoneButton->setIcon(QIcon(":/recources/../resources/record_icon.png"));
         is_recording_ = true;
 
         audio_file_ = audio_dir_ + QtUtility::get_random_string(20);
@@ -300,7 +300,7 @@ void ChannelWidget::slotGetChannelRequestResult(int result, std::vector<std::str
 void ChannelWidget::setupConnection() {
     connect(ui->messageEdit,       &QLineEdit::returnPressed, this, &ChannelWidget::slotSendMessage);
     connect(ui->sendButton,        &QPushButton::clicked,     this, &ChannelWidget::slotSendMessage);
-    connect(ui->microphoneButton,  &QPushButton::clicked,     this, &ChannelWidget::slotRecordAudio);
+    //connect(ui->microphoneButton,  &QPushButton::clicked,     this, &ChannelWidget::slotRecordAudio);
     connect(ui->cameraButton,      &QPushButton::clicked,     this, &ChannelWidget::slotChooseImage);
 
     connect(ClientSingleton::get_client(), &Client::send_msg_result,                   this, &ChannelWidget::slotHandleSendMessage);

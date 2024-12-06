@@ -4,6 +4,7 @@
 #include <QtSql/QSqlDatabase>
 
 #include "LinkDoveDatabase.h"
+#include "action.h"
 
 class LinkDovePSQLDataBase : public LinkDoveLDatabase
 {
@@ -461,6 +462,21 @@ public:
      * @return - Список участников чата (группы).
      */
     std::vector<std::string> get_chat_participants(unsigned long long group_id) override;
+
+    /**
+     * <p> Возвращает список действий пользователя. </p>
+     * @brief get_user_actions
+     * @param id - Идентификатор пользователя.
+     * @return - Вектор действий
+     */
+    std::vector<Action> get_user_actions(std::string user_name);
+
+    /**
+     * <p> Логирует действие выхода пользователя из аккаута. </p>
+     * @brief quit_account
+     * @param id - Идентификатор пользователя.
+     */
+    void quit_account(unsigned long long id);
 
     /**
      * <p> Возвращает информацию о пользователе, который соответствует никнейму. </p>

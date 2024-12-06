@@ -29,6 +29,7 @@ set(LIB_FILES
     individualmessage.h individualmessage.cpp
     imessagecontent.h imessagecontent.cpp
     textmessagecontent.h textmessagecontent.cpp
+    action.h action.cpp
 )
 
 add_library(common_library ${LIB_FILES}

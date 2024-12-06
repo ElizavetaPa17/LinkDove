@@ -195,7 +195,10 @@ enum ResponseTypes {
     GET_BROADCAST_FAILED_ANSWER,
 
     SEND_BROADCAST_SUCCESS_ANSWER,
-    SEND_BROADCAST_FAILED_ANSWER
+    SEND_BROADCAST_FAILED_ANSWER,
+
+    GET_ACTIONS_SUCCESS_ANSWER,
+    GET_ACTIONS_FAILED_ANSWER,
 };
 
 enum MessageType {
@@ -664,3 +667,14 @@ extern const std::string SEND_BROADCAST_REQUEST;
 extern const std::string SEND_BROADCAST_SUCCESS;
 // Ответ сервера на неудачную отправку широковещательного сообщения
 extern const std::string SEND_BROADCAST_FAILED;
+
+// Запрос на получение действий пользователя
+extern const std::string GET_ACTIONS_REQUEST;
+// Ответ сервера на успешное получение действий пользователя
+extern const std::string GET_ACTIONS_SUCCESS;
+// Ответ сервера на неудачное получение действий пользователя
+extern const std::string GET_ACTIONS_FAILED;
+
+// Запрос на выход из аккаунта
+extern const std::string QUIT_ACC_REQUEST;
+extern const std::string QUIT_ACC_RESPONSE;

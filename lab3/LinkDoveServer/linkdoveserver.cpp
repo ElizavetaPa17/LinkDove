@@ -92,6 +92,8 @@ void LinkDoveServer::setup_connection_tree() {
     handle_tree_[DEL_MSG_REQUEST]                    = &LinkDoveServer::handle_delete_msg;
     handle_tree_[DEL_ACCOUNT_REQUEST]                = &LinkDoveServer::handle_delete_account;
     handle_tree_[GET_BROADCAST_REQUEST]              = &LinkDoveServer::handle_get_broadcast_notifications;
+    handle_tree_[GET_ACTIONS_REQUEST]                = &LinkDoveServer::handle_get_actions;
+    handle_tree_[QUIT_ACC_REQUEST]                   = &LinkDoveServer::handle_quit_account;
 }
 
 void LinkDoveServer::start_async_accept() {
@@ -1305,6 +1307,41 @@ void LinkDoveServer::handle_get_broadcast_notifications(ConnectionIterator itera
         std::cerr << ex.what() << '\n';
         answer << GET_BROADCAST_FAILED << "\n" << END_OF_REQUEST;
     }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_get_actions(ConnectionIterator iterator) {
+    std::string user_name = UtilitySerializator::deserialize_string(iterator->in_stream_).second;
+    remove_delimeter(iterator);
+
+    std::stringstream answer;
+    try {
+        std::vector<Action> actions = data_base_.get_user_actions(user_name);
+
+        answer << GET_ACTIONS_SUCCESS << "\n";
+        UtilitySerializator::serialize(answer, actions);
+        answer << END_OF_REQUEST;
+    } catch (std::runtime_error &ex) {
+        std::cerr << ex.what() << '\n';
+        answer << GET_ACTIONS_FAILED << "\n" << END_OF_REQUEST;
+    }
+
+    iterator->out_stream_ << answer.str();
+    async_write(iterator);
+}
+
+void LinkDoveServer::handle_quit_account(ConnectionIterator iterator) {
+    unsigned long long id = UtilitySerializator::deserialize_fundamental<unsigned long long>(iterator->in_stream_).second;
+
+    remove_delimeter(iterator);
+    data_base_.quit_account(id);
+
+    std::cerr << "account\n";
+
+    std::stringstream answer;
+    answer << QUIT_ACC_RESPONSE << "\n" << END_OF_REQUEST;
 
     iterator->out_stream_ << answer.str();
     async_write(iterator);

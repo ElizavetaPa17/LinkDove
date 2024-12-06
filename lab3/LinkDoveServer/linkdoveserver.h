@@ -473,6 +473,20 @@ private:
      */
     void handle_get_broadcast_notifications(ConnectionIterator iterator);
 
+    /**
+     * <p> Обрабатывает запрос на получение действий пользователя. </p>
+     * @brief handle_get_actions
+     * @param iterator -  Итератор на сокет, запрос которого обрабатывается.
+     */
+    void handle_get_actions(ConnectionIterator iterator);
+
+    /**
+     * <p> Обрабатывает уведомление о том, что пользователь вышел из аккаунта. </p>
+     * @brief handle_quit_account
+     * @param iterator
+     */
+    void handle_quit_account(ConnectionIterator iterator);
+
     /** <p> Запускает в отдельном потоке контекст для обработки асинхронных функций. </p>
      * @brief run_context
      */

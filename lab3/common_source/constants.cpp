@@ -222,7 +222,6 @@ const std::string DEL_CHANNEL_MSG_FAILED  = "DEL_CHNNL_MSG_FAILED";
 const std::string DEL_CHAT_MSG_SUCCESS    = "DEL_CHAT_MSG_SUCCESS";
 const std::string DEL_CHAT_MSG_FAILED     = "DEL_CHAT_MSG_FAILED";
 
-
 const std::string DEL_ACCOUNT_REQUEST = "DEL_ACC";
 const std::string DEL_ACCOUNT_SUCCESS = "DEL_ACC_SUCCESS";
 const std::string DEL_ACCOUNT_FAILED  = "DEL_ACC_FAILED";
@@ -234,3 +233,10 @@ const std::string GET_BROADCAST_FAILED   = "GET_BC_FAILED";
 const std::string SEND_BROADCAST_REQUEST = "SEND_BC";;
 const std::string SEND_BROADCAST_SUCCESS = "SEND_BC_SUCCESS";;
 const std::string SEND_BROADCAST_FAILED  = "SEND_BC_FAILED";
+
+const std::string GET_ACTIONS_REQUEST = "GET_ACTS";
+const std::string GET_ACTIONS_SUCCESS = "GET_ACTS_SUCCESS";
+const std::string GET_ACTIONS_FAILED  = "GET_ACTS_FAILED";
+
+const std::string QUIT_ACC_REQUEST = "QUIT_ACC";
+const std::string QUIT_ACC_RESPONSE = "QUIT_ACC_RESP";

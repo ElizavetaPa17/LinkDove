@@ -421,7 +421,6 @@ bool LinkDovePSQLDataBase::setup_tables() {
         return false;
     }
 
-    query.exec("DROP PROCEDURE ban_user");
     is_ok = query.exec("CREATE OR REPLACE PROCEDURE ban_user(username varchar(40), is_banned_val boolean) "
                        "LANGUAGE SQL "
                        "AS $$ "
@@ -609,7 +608,17 @@ bool LinkDovePSQLDataBase::login_user(const LoginInfo& info) {
         return false;
     } else {
         if (query.next() && query.value("PassedAuthentification").toBool()) {
-            return true;
+
+            StatusInfo status_info = get_status_info(info.username_);
+            QString str_query = QString("CALL add_action(\'%1\', 'login')")
+                        .arg(status_info.id_);
+
+            if (!query.exec(str_query)) {
+                std::cerr << query.lastError().text().toStdString() << '\n';
+                return false;
+            } else {
+                return true;
+            }
         } else {
             return false;
         }
@@ -641,7 +650,15 @@ bool LinkDovePSQLDataBase::update_user(const StatusInfo& status_info) {
         std::cerr  << query.lastError().text().toStdString() << '\n';
         return false;
     } else {
-        return true;
+        str_query = QString("CALL add_action(\'%1\', 'edit profile')")
+                    .arg(status_info.id_);
+
+        if (!query.exec(str_query)) {
+            std::cerr << query.lastError().text().toStdString() << '\n';
+            return false;
+        } else {
+            return true;
+        }
     }
 }
 
@@ -656,7 +673,23 @@ bool LinkDovePSQLDataBase::ban_user(const std::string &username, bool is_ban) {
         std::cerr << query.lastError().text().toStdString() << '\n';
         return false;
     } else {
-        return true;
+        StatusInfo status_info = get_status_info(username);
+
+        if (is_ban) {
+            StatusInfo status_info = get_status_info(username);
+            str_query = QString("CALL add_action(\'%1\', 'banned')")
+                        .arg(status_info.id_);
+        } else {
+            str_query = QString("CALL add_action(\'%1\', 'unbanned')")
+                        .arg(status_info.id_);
+        }
+
+        if (!query.exec(str_query)) {
+            std::cerr << query.lastError().text().toStdString() << '\n';
+            return false;
+        } else {
+            return true;
+        }
     }
 }
 
@@ -1601,6 +1634,42 @@ std::vector<std::shared_ptr<IMessage>> LinkDovePSQLDataBase::get_chat_messages(u
 
 std::vector<std::string> LinkDovePSQLDataBase::get_chat_participants(unsigned long long group_id) {
     return get_channel_participants(group_id);
+}
+
+std::vector<Action> LinkDovePSQLDataBase::get_user_actions(std::string username) {
+    StatusInfo status_inf = get_status_info(username);
+
+    QSqlQuery query(data_base_);
+    query.prepare("SELECT * FROM Action "
+                  "WHERE consumer=:id "
+                  "ORDER BY time");
+
+    query.bindValue(":id", status_inf.id_);
+
+    if (!query.exec()) {
+        throw std::runtime_error(query.lastError().text().toStdString());
+    } else {
+        std::vector<Action> actions;
+        Action action;
+
+        while (query.next()) {
+            action.time_ = query.value("time").toDateTime();
+            action.description_ = query.value("type").toString().toStdString();
+            actions.push_back(action);
+        }
+
+        return actions;
+    }
+}
+
+void LinkDovePSQLDataBase::quit_account(unsigned long long id) {
+    QSqlQuery query(data_base_);
+    QString str_query = QString("CALL add_action(\'%1\', 'logout')")
+                        .arg(id);
+
+    if (!query.exec(str_query)) {
+        std::cerr << query.lastError().text().toStdString() << '\n';
+    }
 }
 
 StatusInfo LinkDovePSQLDataBase::get_status_info(const std::string &username) {

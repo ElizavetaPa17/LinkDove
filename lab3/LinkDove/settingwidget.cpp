@@ -7,6 +7,7 @@
 #include "clientsingleton.h"
 #include "bandialog.h"
 #include "listlabeldialog.h"
+#include <actionsdialog.h>
 
 SettingWidget::SettingWidget(QWidget *parent) :
     QWidget(parent),
@@ -31,6 +32,7 @@ void SettingWidget::setPrivilegedMode(bool flag) {
         ui->notifyButton->show();
         ui->banButton->hide();
         ui->deleteAccountButton->show();
+        ui->statisticsButton->hide();
 
         disconnect(ui->complaintButton, &QPushButton::clicked, this, nullptr);
         connect(ui->complaintButton, &QPushButton::clicked,    this, &SettingWidget::slotDisplayComplaintDialog);
@@ -41,6 +43,7 @@ void SettingWidget::setPrivilegedMode(bool flag) {
         ui->notifyButton->hide();
         ui->banButton->show();
         ui->deleteAccountButton->hide();
+        ui->statisticsButton->show();
 
         disconnect(ui->complaintButton, &QPushButton::clicked, this, nullptr);
         connect(ui->complaintButton, &QPushButton::clicked, this, [] () { ClientSingleton::get_client()->async_get_complaints(); });
@@ -168,13 +171,19 @@ void SettingWidget::slotDeleteAccount(int result) {
     }
 }
 
+void SettingWidget::slotGetStatistics() {
+    std::unique_ptr<TypeStringDialog> dialog_ptr = std::make_unique<TypeStringDialog>(nullptr, "Введите никнейм пользователя: ");
+    if (dialog_ptr->exec() == QDialog::Accepted) {
+        ClientSingleton::get_client()->async_get_actions(dialog_ptr->getString());
+    }
+}
+
 void SettingWidget::slotGetBroadcastResult(int result, std::vector<std::string> notifications) {
     if (result == GET_BROADCAST_SUCCESS_ANSWER) {
         if (notifications.size() == 0) {
             std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Список широковещательных уведомлений пуст.");
             dialog_ptr->exec();
         } else {
-            std::cerr << notifications[0] << '\n';
             std::unique_ptr<ListLabelDialog> dialog_ptr = std::make_unique<ListLabelDialog>(nullptr, notifications);
             dialog_ptr->exec();
         }
@@ -184,14 +193,31 @@ void SettingWidget::slotGetBroadcastResult(int result, std::vector<std::string> 
     }
 }
 
+void SettingWidget::slotGetStatisticsResult(int result, std::vector<Action> actions) {
+    if (result == GET_ACTIONS_SUCCESS_ANSWER) {
+        if (actions.size() == 0) {
+            std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Список действий пользователя пуст.");
+            dialog_ptr->exec();
+        } else {
+            std::unique_ptr<ActionsDialog> dialog_ptr = std::make_unique<ActionsDialog>(nullptr, actions);
+            dialog_ptr->exec();
+        }
+    } else {
+        std::unique_ptr<InfoDialog> dialog_ptr = std::make_unique<InfoDialog>(nullptr, "Что-то пошло не так при попытке получить список действий пользователя.");
+        dialog_ptr->exec();
+    }
+}
+
 void SettingWidget::setupConnections() {
     connect(ui->quitButton,       &QPushButton::clicked, this, &SettingWidget::slotQuitAccount);
+    connect(ui->quitButton,       &QPushButton::clicked, this, [this] () { ClientSingleton::get_client()->async_quit_account(); });
     connect(ui->aboutButton,      &QPushButton::clicked, this, &SettingWidget::slotDisplayAboutDialog);
     connect(ui->banButton,        &QPushButton::clicked, this, &SettingWidget::slotDisplayBanDialog);
     connect(ui->notifyButton,     &QPushButton::clicked, this, [this] () { ClientSingleton::get_client()->async_get_notifications(); });
     connect(ui->confidenceButton, &QPushButton::clicked, this, [this] () { ClientSingleton::get_client()->async_get_banned_interlocutors(); });
     connect(ui->deleteAccountButton, &QPushButton::clicked, this, [this] () { ClientSingleton::get_client()->async_delete_account(); });
     connect(ui->broadcastNotificationButton, &QPushButton::clicked, this, [this] () { ClientSingleton::get_client()->async_get_broadcast_notifications(); });
+    connect(ui->statisticsButton, &QPushButton::clicked, this, &SettingWidget::slotGetStatistics);
 
     connect(ClientSingleton::get_client(), &Client::get_complaints_result,    this, &SettingWidget::slotDisplayComplaintList);
     connect(ClientSingleton::get_client(), &Client::send_complaint_result,    this, &SettingWidget::slotComplaintResult);
@@ -200,4 +226,5 @@ void SettingWidget::setupConnections() {
     connect(ClientSingleton::get_client(), &Client::get_banned_users,         this, &SettingWidget::slotGetBannedInterlocutorsResult);
     connect(ClientSingleton::get_client(), &Client::delete_account_result,    this, &SettingWidget::slotDeleteAccount);
     connect(ClientSingleton::get_client(), &Client::get_broadcast_notifications_result, this, &SettingWidget::slotGetBroadcastResult);
+    connect(ClientSingleton::get_client(), &Client::get_user_actions, this, &SettingWidget::slotGetStatisticsResult);
 }

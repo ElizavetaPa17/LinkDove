@@ -9,6 +9,7 @@
 #include <QLayout>
 
 #include "complaint.h"
+#include "action.h"
 #include "imessage.h"
 #include "StatusInfo.h"
 #include "channelinfo.h"
@@ -74,12 +75,29 @@ public:
     static size_t serialize(std::ostream &os, const std::vector<Complaint>& value);
 
     /**
+     * <p> Сериализует вектор действий в поток. </p>
+     * @brief serialize
+     * @param os - Поток, в который осуществляется сериализация.
+     * @param value - Сериализуемый вектор действий.
+     * @return - Размер сериализованных данных.
+     */
+    static size_t serialize(std::ostream &os, const std::vector<Action>& value);
+
+    /**
      * <p> Десериализует вектор жалоб из потока. </p>
      * @brief deserialize_compl_vec
      * @param is - Поток, из которого осуществляется десериализация.
      * @return - Пара - <размер десериализованных данных, десериализованный вектор жалоб>.
      */
     static std::pair<size_t, std::vector<Complaint>> deserialize_compl_vec(std::istream& is);
+
+    /**
+     * <p> Десериализует вектор действий из потока. </p>
+     * @brief deserialize_compl_vec
+     * @param is - Поток, из которого осуществляется десериализация.
+     * @return - Пара - <размер десериализованных данных, десериализованный вектор действий>.
+     */
+    static std::pair<size_t, std::vector<Action>> deserialize_action_vec(std::istream& is);
 
     /**
      * <p> Сериализует вектор уведомлений в поток. </p>

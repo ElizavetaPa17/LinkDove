@@ -19,6 +19,7 @@
 #include "notification.h"
 #include "imessage.h"
 #include "BroadcastNotification.h"
+#include "action.h"
 
 namespace asio = boost::asio;
 using tcp = asio::ip::tcp;
@@ -402,6 +403,19 @@ public:
     void async_get_broadcast_notifications();
 
     /**
+     * <p> Отправляет запрос на получение действий пользователя. </p>
+     * @brief async_get_actions
+     * @param user_name - Никнейм пользователя
+     */
+    void async_get_actions(std::string user_name);
+
+    /**
+     * <p> Отправляет уведомление о том, что пользователь вышел из аккаунта. </p>
+     * @brief async_quit_account
+     */
+    void async_quit_account();
+
+    /**
      * <p> Возвращает информацию о пользователе. </p>
      * @brief get_status_info
      * @return - Структура, содержащая информацию о пользователе.
@@ -780,6 +794,14 @@ signals:
      * @param result - Параметр, содержащий результат запроса.
      */
     void get_broadcast_notifications_result(int result, std::vector<std::string> notifications);
+
+    /**
+     * <p> Генерирует сигнал после получения результата получения действий..</p>
+     * @brief get_user_actions
+     * @param result  - Параметр, содержащий результат запроса.
+     * @param actions - Вектор, содержащий действия.
+     */
+    void get_user_actions(int result, std::vector<Action> notifications);
 
 private:
     std::shared_ptr<asio::io_context> io_context_ptr_;

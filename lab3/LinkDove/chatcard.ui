@@ -30,6 +30,7 @@
 	background-color: rgb(32, 30, 30);
 	border: 3px solid rgb(245, 245, 245);
 	border-radius: 20px;
+	color: white;
 }
 
 QWidget:hover {
@@ -54,6 +55,7 @@ QWidget:hover {
      <property name="font">
       <font>
        <pointsize>17</pointsize>
+       <weight>75</weight>
        <bold>true</bold>
       </font>
      </property>
@@ -63,6 +65,7 @@ QWidget:hover {
      <property name="styleSheet">
       <string notr="true">QLabel {
 	border-radius: 20px;
+	color:white;
 }</string>
      </property>
      <property name="text">

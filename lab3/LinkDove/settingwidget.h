@@ -6,6 +6,7 @@
 #include "complaintslistdialog.h"
 #include "notificationlistdialog.h"
 #include "notification.h"
+#include "action.h"
 
 namespace Ui {
 class SettingWidget;
@@ -115,7 +116,27 @@ private slots:
      */
     void slotDeleteAccount(int result);
 
+    /**
+     * <p> Слот, обрабатывающий событие нажатия на кнопку получения статистики. </p>
+     * @brief slotGetStatistics
+     */
+    void slotGetStatistics();
+
+    /**
+     * <p> Слот, обрабатывающий результат получения широковещательных уведомлений. </p>
+     * @brief slotGetBroadcastResult
+     * @param result - Парметр, содержащий результат запроса.
+     * @param notifications - Список никнеймов широковещательных уведомлений.
+     */
     void slotGetBroadcastResult(int result, std::vector<std::string> notifications);
+
+    /**
+     * <p> Слот, обрабатывающий результат получения статистики. </p>
+     * @brief slotGetStatisticsResult
+     * @param result - Парметр, содержащий результат запроса.
+     * @param notifications - Список действий пользователя
+     */
+    void slotGetStatisticsResult(int result, std::vector<Action> actions);
 
 private:
     Ui::SettingWidget *ui;

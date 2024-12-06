@@ -124,6 +124,7 @@
      <property name="font">
       <font>
        <pointsize>17</pointsize>
+       <weight>75</weight>
        <bold>true</bold>
       </font>
      </property>
@@ -133,6 +134,7 @@
      <property name="styleSheet">
       <string notr="true">QLabel {
 	background-color: #3b527b;;
+	color:white;
 }</string>
      </property>
      <property name="text">
@@ -171,12 +173,14 @@
        <property name="font">
         <font>
          <pointsize>17</pointsize>
+         <weight>75</weight>
          <bold>true</bold>
         </font>
        </property>
        <property name="styleSheet">
         <string notr="true">QLabel {
 	background-color: #3b527b;;
+	color:white;
 }</string>
        </property>
        <property name="text">

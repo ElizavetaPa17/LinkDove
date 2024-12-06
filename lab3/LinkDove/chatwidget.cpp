@@ -112,7 +112,7 @@ void ChatWidget::slotChooseImage() {
 }
 
 void ChatWidget::slotRecordAudio() {    
-    if (is_recording_) {
+    /*if (is_recording_) {
         ui->microphoneButton->setIcon(QIcon(":/recources/../resources/microphone_icon.png"));
         is_recording_ = false;
 
@@ -130,7 +130,7 @@ void ChatWidget::slotRecordAudio() {
 
         audio_file_ = audio_dir_ + QtUtility::get_random_string(20);
         AudioManagerSingleton::get_manager()->start_recording(audio_file_);
-    }
+    }*/
 }
 
 void ChatWidget::slotDisplayInterlocutorProfile() {
@@ -197,7 +197,7 @@ void ChatWidget::setupConnection() {
     connect(ui->messageEdit,       &QLineEdit::returnPressed, this, &ChatWidget::slotSendMessage);
     connect(ui->sendButton,        &QPushButton::clicked,     this, &ChatWidget::slotSendMessage);
     connect(ui->cameraButton,      &QPushButton::clicked,     this, &ChatWidget::slotChooseImage);
-    connect(ui->microphoneButton,  &QPushButton::clicked,     this, &ChatWidget::slotRecordAudio);
+    //connect(ui->microphoneButton,  &QPushButton::clicked,     this, &ChatWidget::slotRecordAudio);
     connect(ui->banButton,         &QPushButton::clicked,     this, &ChatWidget::slotBanUser);
     connect(ui->infoLabel,         &ClickableLabel::clicked,  this, &ChatWidget::slotDisplayInterlocutorProfile);
 
